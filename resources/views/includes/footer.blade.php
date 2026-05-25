@@ -34,21 +34,21 @@
    
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-$(document).ready(function () {
+      $(document).ready(function () {
+ 
+          $('.menu-link').click(function () {
 
-    $('.menu-link').click(function () {
+              $('.menu-link').removeClass('active');
 
-        $('.menu-link').removeClass('active');
+              $(this).addClass('active');
 
-        $(this).addClass('active');
+              let pageUrl = $(this).data('page');
 
-        let pageUrl = $(this).data('page');
+              $('#main-content').load(pageUrl);
 
-        $('#main-content').load(pageUrl);
+          });
 
-    });
-
-});
+      });
 </script>
     <!--end::Script-->
   </body>
