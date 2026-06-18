@@ -113,6 +113,17 @@ return [
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
+         'essl' => [
+            'driver' => 'sqlsrv',
+            'host' => env('ESSL_DB_HOST'),
+            'port' => env('ESSL_DB_PORT', '1433'),
+            'database' => env('ESSL_DB_DATABASE'),
+            'username' => env('ESSL_DB_USERNAME'),
+            'password' => env('ESSL_DB_PASSWORD'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+        ],
 
     ],
 

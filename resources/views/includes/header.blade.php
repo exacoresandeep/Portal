@@ -9,6 +9,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- AdminLTE CSS -->
     <link rel="stylesheet" href="{{ asset('css/adminlte.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <!-- OverlayScrollbars -->
@@ -175,18 +177,18 @@
             <!--begin::User Menu Dropdown-->
             <li class="nav-item dropdown user-menu">
               <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                <img
-                  src="./assets/img/user2-160x160.jpg"
-                  class="user-image rounded-circle shadow"
-                  alt="User Image"
-                />
+               <img
+                src="{{ session('user_photo') ? asset('storage/employees/photos/' . session('user_photo')) : asset('assets/img/user.png') }}"
+                class="user-image rounded-circle shadow"
+                alt="User Image"
+            />
                 <span class="d-none d-md-inline">{{ session('user_name') }}</span>
               </a>
               <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                 <!--begin::User Image-->
                 <li class="user-header">
                   <img
-                    src="./assets/img/user2-160x160.jpg"
+                    src="{{ session('user_photo') ? asset('storage/employees/photos/' . session('user_photo')) : asset('assets/img/user.png') }}"
                     class="rounded-circle shadow"
                     alt="User Image"
                   />
@@ -201,7 +203,8 @@
                 <!--begin::Menu Footer-->
                 <li class="user-footer d-flex align-items-center w-100">
 
-                  <a href="#" class="btn btn-outline-secondary">
+                  <a href="#" class="btn btn-outline-secondary"  data-bs-toggle="modal"
+   data-bs-target="#profileModal">
                       Profile
                   </a>
 
@@ -224,3 +227,366 @@
         <!--end::Container-->
       </nav>
       <!--end::Header-->
+
+
+  <!-- Modal for Profile -->
+  <!-- Profile Modal -->
+  <div class="modal fade"
+      id="profileModal"
+      tabindex="-1"
+      aria-hidden="true">
+
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+
+          <div class="modal-content border-0 rounded-4">
+
+              <!-- Header -->
+              <div class="modal-header border-0">
+
+                  <div class="d-flex align-items-center gap-3">
+
+                      <img
+                        src="{{ session('user_photo') ? asset('storage/employees/photos/' . session('user_photo')) : asset('assets/img/user.png') }}"
+                          class="rounded-circle"
+                          width="70"
+                          height="70">
+                      <div>
+
+                          <h5 class="fw-bold mb-1">
+                              John Smsith
+                          </h5>
+
+                          <div class="text-muted small">
+                              UI-UX Designer
+                          </div>
+
+                          <div class="text-muted small">
+                              E2406
+                          </div>
+
+                      </div>
+
+                  </div>
+
+                  <button type="button"
+                          class="btn-close"
+                          data-bs-dismiss="modal"></button>
+
+              </div>
+
+              <div class="modal-body">
+
+                  <hr>
+
+                  <!-- Tabs -->
+                  <ul class="nav nav-pills mb-4 gap-2"
+                      id="profileTabs"
+                      role="tablist">
+
+                      <li class="nav-item">
+                          <button class="nav-link active"
+                                  data-bs-toggle="pill"
+                                  data-bs-target="#profileInfo">
+
+                              Profile Information
+
+                          </button>
+                      </li>
+
+                      <li class="nav-item">
+                          <button class="nav-link"
+                                  data-bs-toggle="pill"
+                                  data-bs-target="#officialInfo">
+
+                              Official Information
+
+                          </button>
+                      </li>
+
+                      <li class="nav-item">
+                          <button class="nav-link"
+                                  data-bs-toggle="pill"
+                                  data-bs-target="#identityInfo">
+
+                              Identity Information
+
+                          </button>
+                      </li>
+
+                      <li class="nav-item">
+                          <button class="nav-link"
+                                  data-bs-toggle="pill"
+                                  data-bs-target="#educationInfo">
+
+                              Educational Information
+
+                          </button>
+                      </li>
+
+                      <li class="nav-item">
+                          <button class="nav-link"
+                                  data-bs-toggle="pill"
+                                  data-bs-target="#bankInfo">
+
+                              Banking Details
+
+                          </button>
+                      </li>
+
+                      <li class="nav-item">
+                          <button class="nav-link"
+                                  data-bs-toggle="pill"
+                                  data-bs-target="#documentInfo">
+
+                              Document Management
+
+                          </button>
+                      </li>
+
+                  </ul>
+
+                  <!-- Tab Content -->
+                  <div class="tab-content">
+
+                      <!-- Profile Information -->
+                      <div class="tab-pane fade show active"
+                          id="profileInfo">
+
+                          <h6 class="fw-semibold mb-4">
+                              Profile Information
+                          </h6>
+
+                          <div class="row gy-4">
+
+                              <div class="col-md-6">
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Personal Email
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          john.smith@gmail.com
+                                      </div>
+                                  </div>
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Phone
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          9087654321
+                                      </div>
+                                  </div>
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Gender
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          Male
+                                      </div>
+                                  </div>
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Blood Group
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          AB+ve
+                                      </div>
+                                  </div>
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Nationality
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          Indian
+                                      </div>
+                                  </div>
+
+                              </div>
+
+                              <div class="col-md-6">
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Date of Birth
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          18-07-1999
+                                      </div>
+                                  </div>
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Emergency Phone
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          8097654432
+                                      </div>
+                                  </div>
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Marital Status
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          Unmarried
+                                      </div>
+                                  </div>
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Father/Mother Name
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          Abhin Das
+                                      </div>
+                                  </div>
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Address
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          Flat No. 3B, Galaxy Apartments,
+                                          MG Road, Thrissur, Kerala - 680001
+                                      </div>
+                                  </div>
+
+                              </div>
+
+                          </div>
+
+                      </div>
+
+                      <!-- Official Information -->
+                      <div class="tab-pane fade"
+                          id="officialInfo">
+
+                          <h6 class="fw-semibold mb-4">
+                              Official Information
+                          </h6>
+
+                          <div class="row">
+
+                              <div class="col-md-6">
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Employee ID
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          E2406
+                                      </div>
+                                  </div>
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Department
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          Digital
+                                      </div>
+                                  </div>
+
+                              </div>
+
+                              <div class="col-md-6">
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Designation
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          UI-UX Designer
+                                      </div>
+                                  </div>
+
+                                  <div class="mb-3">
+                                      <small class="text-muted d-block">
+                                          Joining Date
+                                      </small>
+
+                                      <div class="fw-medium">
+                                          17-03-2025
+                                      </div>
+                                  </div>
+
+                              </div>
+
+                          </div>
+
+                      </div>
+
+                      <!-- Identity -->
+                      <div class="tab-pane fade"
+                          id="identityInfo">
+
+                          <h6 class="fw-semibold mb-4">
+                              Identity Information
+                          </h6>
+
+                          <p>PAN, Aadhaar, Passport details here.</p>
+
+                      </div>
+
+                      <!-- Education -->
+                      <div class="tab-pane fade"
+                          id="educationInfo">
+
+                          <h6 class="fw-semibold mb-4">
+                              Educational Information
+                          </h6>
+
+                          <p>Education details here.</p>
+
+                      </div>
+
+                      <!-- Bank -->
+                      <div class="tab-pane fade"
+                          id="bankInfo">
+
+                          <h6 class="fw-semibold mb-4">
+                              Banking Details
+                          </h6>
+
+                          <p>Bank details here.</p>
+
+                      </div>
+
+                      <!-- Documents -->
+                      <div class="tab-pane fade"
+                          id="documentInfo">
+
+                          <h6 class="fw-semibold mb-4">
+                              Document Management
+                          </h6>
+
+                          <p>Uploaded documents here.</p>
+
+                      </div>
+
+                  </div>
+
+              </div>
+
+          </div>
+
+      </div>
+
+  </div>

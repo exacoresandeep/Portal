@@ -1,4 +1,4 @@
 <div class="p-3">
-    <h1>Dashboard</h1>
+    <h2>Dashboard</h2>
     <p>Welcome Dashboard</p>
 </div>

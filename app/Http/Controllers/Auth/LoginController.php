@@ -27,12 +27,14 @@ class LoginController extends Controller
             
             // session is automatically created by Laravel
             $request->session()->regenerate();
-            
+           
             // ✅ You can store extra session data if needed
             session([
                 'user_name' => Auth::user()->name,
-                'designation' => Auth::user()->designation,
-                'user_email' => Auth::user()->email
+                'designation' => Auth::user()->designation->name,
+                'user_email' => Auth::user()->email,
+                'user_photo' => Auth::user()->photo,
+                'department' => Auth::user()->department,
                 ]);
                 
                 // return redirect()->route('dashboard');

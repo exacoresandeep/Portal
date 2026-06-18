@@ -1,0 +1,38 @@
+/* Space between filter/search and table */
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_length {
+    margin-bottom: 15px !important;
+}
+
+/* Remove all borders */
+.data-table,
+.data-table th,
+.data-table td {
+    border: none !important;
+}
+
+/* Remove DataTable bottom border */
+table.dataTable.no-footer {
+    border-bottom: none !important;
+}
+
+/* White table header */
+.data-table thead th {
+    background: #ffffff !important;
+    font-weight: 600;
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+}
+
+/* Striped rows */
+.data-table tbody tr:nth-child(odd) {
+    background-color: #f8f9fa;
+}
+
+/* Hover effect */
+.data-table tbody tr:hover {
+    background-color: #eef3ff !important;
+}
+.custom-modal{
+      max-width: 80%;
+}

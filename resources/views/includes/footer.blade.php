@@ -31,8 +31,16 @@
     <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
     <script src="./js/adminlte.js"></script>
     <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
-   
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- jQuery -->
+      <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+      <!-- DataTables CSS -->
+      <link rel="stylesheet"
+            href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+      <!-- DataTables JS -->
+      <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
       $(document).ready(function () {
  
@@ -44,9 +52,49 @@
 
               let pageUrl = $(this).data('page');
 
+               localStorage.setItem('activeMenu', pageUrl);
+
+              // Load page
               $('#main-content').load(pageUrl);
 
           });
+
+
+          // Reload last opened menu after refresh
+          let activeMenu = localStorage.getItem('activeMenu');
+
+          if (activeMenu) {
+
+              $('#main-content').load(activeMenu);
+
+              $('.menu-link').each(function () {
+
+                  if ($(this).data('page') == activeMenu) {
+
+                      $('.menu-link').removeClass('active');
+                      $('.nav-item').removeClass('menu-open');
+
+                      $(this).addClass('active');
+
+                      // Open parent menu
+                      $(this).closest('.nav-treeview')
+                            .closest('.nav-item')
+                            .addClass('menu-open');
+
+                      $(this).closest('.nav-treeview')
+                            .prev('.nav-link')
+                            .addClass('active');
+
+                  }
+
+              });
+
+          } else {
+
+              // Default page
+              $('.menu-link').first().addClass('active');
+
+          }
 
       });
 </script>
