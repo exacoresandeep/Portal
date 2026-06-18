@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/f9ke00jjn0j/public_html/eep.exacore.co.in
+    - /bin/cp -R * $DEPLOYPATH
