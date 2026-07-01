@@ -89,13 +89,13 @@ class TrainingPhaseController extends Controller
                 return '
                     <button
                         class="btn btn-info btn-sm viewBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         View
                     </button>
 
                     <button
                         class="btn btn-warning btn-sm editBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         Edit
                     </button>
                 ';
@@ -110,8 +110,7 @@ class TrainingPhaseController extends Controller
                     $query->where(function ($q) use ($search) {
 
                         $q->where('phase_name', 'like', "%{$search}%")
-                        ->orWhere('focus', 'like', "%{$search}%");
-
+                            ->orWhere('focus', 'like', "%{$search}%");
                     });
                 }
             })
@@ -124,23 +123,22 @@ class TrainingPhaseController extends Controller
     public function update(
         Request $request,
         $id
-    )
-    {
+    ) {
         $phase = TrainingPhase::findOrFail($id);
 
         $phase->update([
 
             'department_id' =>
-                $request->department_id,
+            $request->department_id,
 
             'phase_name' =>
-                $request->phase_name,
+            $request->phase_name,
 
             'focus' =>
-                $request->focus,
+            $request->focus,
 
             'topics' =>
-                $request->topics
+            $request->topics
 
         ]);
 
@@ -158,13 +156,13 @@ class TrainingPhaseController extends Controller
 
         return view(
             'pages.training-phases.traineemangement',
-            compact('departments',"trainers","trainees")
+            compact('departments', "trainers", "trainees")
         );
     }
 
     public function assignList(Request $request)
     {
-        $data = TrainingPhaseAssign::with(['trainee','trainer'])
+        $data = TrainingPhaseAssign::with(['trainee', 'trainer'])
             ->select(
                 'trainee_id',
                 'trainer_id',
@@ -186,12 +184,12 @@ class TrainingPhaseController extends Controller
                     END as hr_status
                 ")
             )
-            ->groupBy('trainee_id','trainer_id');
+            ->groupBy('trainee_id', 'trainer_id');
 
         if ($request->department_id) {
 
             $data->whereHas('trainee', function ($q) use ($request) {
-                $q->where('department_id',$request->department_id);
+                $q->where('department_id', $request->department_id);
             });
         }
 
@@ -203,7 +201,7 @@ class TrainingPhaseController extends Controller
 
             ->addColumn('trainer', fn($row) => $row->trainer->name ?? '-')
 
-            ->editColumn('status', function($row){
+            ->editColumn('status', function ($row) {
 
                 return $row->status == 'completed'
                     ? '<span class="badge bg-success">Completed</span>'
@@ -215,46 +213,45 @@ class TrainingPhaseController extends Controller
                     ->format('d-m-Y');
             })
 
-            ->editColumn('hr_status', function($row){
+            ->editColumn('hr_status', function ($row) {
 
                 return $row->hr_status == 'completed'
                     ? '<span class="badge bg-success">Completed</span>'
                     : '<span class="badge bg-warning">Pending</span>';
             })
 
-            ->addColumn('action', function($row){
+            ->addColumn('action', function ($row) {
 
                 return '
                     <button class="btn btn-sm btn-info viewBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         View
                     </button>
 
                     <button class="btn btn-sm btn-danger deleteBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         Delete
                     </button>
                 ';
             })
             ->filter(function ($query) {
 
-                    $search = request('search')['value'] ?? null;
+                $search = request('search')['value'] ?? null;
 
-                    if ($search) {
+                if ($search) {
 
-                        $query->where(function ($q) use ($search) {
+                    $query->where(function ($q) use ($search) {
 
-                            $q->whereHas('trainee', function ($sub) use ($search) {
-                                $sub->where('name', 'like', "%{$search}%");
-                            })
+                        $q->whereHas('trainee', function ($sub) use ($search) {
+                            $sub->where('name', 'like', "%{$search}%");
+                        })
 
                             ->orWhereHas('trainer', function ($sub) use ($search) {
                                 $sub->where('name', 'like', "%{$search}%");
                             });
-
-                        });
-                    }
-                })
+                    });
+                }
+            })
             ->rawColumns([
                 'status',
                 'hr_status',
@@ -265,44 +262,44 @@ class TrainingPhaseController extends Controller
     }
 
     public function viewAssignment($id)
-{
-    $assignment = TrainingPhaseAssign::findOrFail($id);
+    {
+        $assignment = TrainingPhaseAssign::findOrFail($id);
 
-    $data = DB::table('training_phase_assigns as tpa')
-        ->join('training_phases as tp', 'tp.id', '=', 'tpa.training_phase_id')
-        ->join('employees as trainee', 'trainee.id', '=', 'tpa.trainee_id')
-        ->join('employees as trainer', 'trainer.id', '=', 'tpa.trainer_id')
-        ->select(
-            'tpa.id',
-            'tp.phase_name as phase_name',
-            'tpa.status',
-            'tpa.hr_status',
-            'tpa.hr_remark',
-            DB::raw("DATE_FORMAT(tpa.assigned_date, '%d-%m-%Y') as assigned_date"),
-            'trainee.name as trainee_name',
-            'trainer.name as trainer_name'
-        )
-        ->where('tpa.trainee_id', $assignment->trainee_id)
-        ->where('tpa.trainer_id', $assignment->trainer_id)
-        ->get();
+        $data = DB::table('training_phase_assigns as tpa')
+            ->join('training_phases as tp', 'tp.id', '=', 'tpa.training_phase_id')
+            ->join('employees as trainee', 'trainee.id', '=', 'tpa.trainee_id')
+            ->join('employees as trainer', 'trainer.id', '=', 'tpa.trainer_id')
+            ->select(
+                'tpa.id',
+                'tp.phase_name as phase_name',
+                'tpa.status',
+                'tpa.hr_status',
+                'tpa.hr_remark',
+                DB::raw("DATE_FORMAT(tpa.assigned_date, '%d-%m-%Y') as assigned_date"),
+                'trainee.name as trainee_name',
+                'trainer.name as trainer_name'
+            )
+            ->where('tpa.trainee_id', $assignment->trainee_id)
+            ->where('tpa.trainer_id', $assignment->trainer_id)
+            ->get();
 
-    return response()->json($data);
-}
-public function phaseHrReview(Request $request, $id)
-{
-    DB::table('training_phase_assigns')
-        ->where('id', $id)
-        ->update([
-            'hr_status' => $request->hr_status,
-            'hr_remark' => $request->hr_remark,
-            'updated_at' => now()
+        return response()->json($data);
+    }
+    public function phaseHrReview(Request $request, $id)
+    {
+        DB::table('training_phase_assigns')
+            ->where('id', $id)
+            ->update([
+                'hr_status' => $request->hr_status,
+                'hr_remark' => $request->hr_remark,
+                'updated_at' => now()
+            ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Phase HR review updated successfully'
         ]);
-
-    return response()->json([
-        'status' => true,
-        'message' => 'Phase HR review updated successfully'
-    ]);
-}
+    }
     public function deleteAssignment($id)
     {
         $assignment = TrainingPhaseAssign::findOrFail($id);
@@ -311,11 +308,11 @@ public function phaseHrReview(Request $request, $id)
             'trainee_id',
             $assignment->trainee_id
         )
-        ->where(
-            'trainer_id',
-            $assignment->trainer_id
-        )
-        ->delete();
+            ->where(
+                'trainer_id',
+                $assignment->trainer_id
+            )
+            ->delete();
 
         return response()->json([
             'status' => true,
@@ -336,7 +333,13 @@ public function phaseHrReview(Request $request, $id)
             'department_id',
             $trainee->department_id
         )->get();
+        if ($phases->isEmpty()) {
 
+            return response()->json([
+                'status' => false,
+                'message' => 'No training phases found for the selected employee department.'
+            ], 404);
+        }
         foreach ($phases as $phase) {
 
             TrainingPhaseAssign::firstOrCreate(
@@ -362,12 +365,11 @@ public function phaseHrReview(Request $request, $id)
     public function report()
     {
         $departments = Department::where('status', 'active')->get();
-        $employees = Employee::where('status', 'active')->get();
+        $employees = Employee::where('status', '1')->get();
 
         return view(
             'pages.training-phases.report',
-            compact('departments',"employees")
+            compact('departments', "employees")
         );
     }
-    
 }

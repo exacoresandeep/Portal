@@ -45,7 +45,7 @@ class LeaveController extends Controller
         if ($request->filled('manager_status')) {
             $query->where('manager_status', $request->manager_status);
         }
-        $query->where('leave_type',"!=", "WFH");
+        $query->where('leave_type', "!=", "WFH");
         return datatables()
             ->of($query)
 
@@ -152,7 +152,7 @@ class LeaveController extends Controller
                         "DATE_FORMAT(from_date,'%d-%m-%Y') LIKE ?",
                         ["%{$keyword}%"]
                     )
-                    ->orWhereDate('from_date', $keyword);
+                        ->orWhereDate('from_date', $keyword);
                 });
             })
 
@@ -165,7 +165,7 @@ class LeaveController extends Controller
                         "DATE_FORMAT(to_date,'%d-%m-%Y') LIKE ?",
                         ["%{$keyword}%"]
                     )
-                    ->orWhereDate('to_date', $keyword);
+                        ->orWhereDate('to_date', $keyword);
                 });
             })
 
@@ -178,15 +178,15 @@ class LeaveController extends Controller
                         "DATE_FORMAT(created_at,'%d-%m-%Y') LIKE ?",
                         ["%{$keyword}%"]
                     )
-                    ->orWhereDate('created_at', $keyword);
+                        ->orWhereDate('created_at', $keyword);
                 });
             })
 
-            ->rawColumns(['attachment','manager_status', 'action'])
+            ->rawColumns(['attachment', 'manager_status', 'action'])
 
             ->make(true);
     }
-   
+
     public function store(Request $request)
     {
         $request->validate([
@@ -268,10 +268,12 @@ class LeaveController extends Controller
     public function wfh()
     {
         $designations = Designation::where('status', 'active')->get();
-        return view('pages.leave.wfh',
-                compact(
-                    'designations'
-                ));
+        return view(
+            'pages.leave.wfh',
+            compact(
+                'designations'
+            )
+        );
     }
 
     public function wfhList(Request $request)
@@ -295,7 +297,6 @@ class LeaveController extends Controller
             $query->whereHas('employee', function ($q) use ($request) {
 
                 $q->where('designation_id', $request->filter_designation);
-
             });
         }
         if ($request->filled('manager_status')) {
@@ -386,7 +387,7 @@ class LeaveController extends Controller
                         "DATE_FORMAT(from_date,'%d-%m-%Y') LIKE ?",
                         ["%{$keyword}%"]
                     )
-                    ->orWhereDate('from_date', $keyword);
+                        ->orWhereDate('from_date', $keyword);
                 });
             })
 
@@ -399,7 +400,7 @@ class LeaveController extends Controller
                         "DATE_FORMAT(to_date,'%d-%m-%Y') LIKE ?",
                         ["%{$keyword}%"]
                     )
-                    ->orWhereDate('to_date', $keyword);
+                        ->orWhereDate('to_date', $keyword);
                 });
             })
 
@@ -412,7 +413,7 @@ class LeaveController extends Controller
                         "DATE_FORMAT(created_at,'%d-%m-%Y') LIKE ?",
                         ["%{$keyword}%"]
                     )
-                    ->orWhereDate('created_at', $keyword);
+                        ->orWhereDate('created_at', $keyword);
                 });
             })
             ->filterColumn('designation', function ($query, $keyword) {
@@ -423,11 +424,11 @@ class LeaveController extends Controller
             ->filterColumn('manager_status', function ($query, $keyword) {
                 $query->where('manager_status', 'like', "%{$keyword}%");
             })
-            ->rawColumns(['manager_status','action'])
+            ->rawColumns(['manager_status', 'action'])
 
             ->make(true);
     }
-   
+
     public function wfhStore(Request $request)
     {
         $request->validate([
@@ -507,10 +508,12 @@ class LeaveController extends Controller
     public function leavecount()
     {
         $departments = Department::where('status', 'active')->get();
-        return view('pages.leave.leavecount',
-                compact(
-                    'departments'
-                ));
+        return view(
+            'pages.leave.leavecount',
+            compact(
+                'departments'
+            )
+        );
     }
 
     public function leavecountList(Request $request)
@@ -526,7 +529,6 @@ class LeaveController extends Controller
             $query->whereHas('employee', function ($q) use ($request) {
 
                 $q->where('department_id', $request->department_id);
-
             });
         }
 
@@ -645,5 +647,4 @@ class LeaveController extends Controller
             'leave-count-report.xlsx'
         );
     }
-   
 }

@@ -12,6 +12,9 @@ use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\EmployeeOffboardController;
 use App\Http\Controllers\TrainingPhaseController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\TaskController;
 
 // Handle login
 Route::get('/', function () { return view('auth.login'); })->name('login');
@@ -20,13 +23,13 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::view('/sample-page', 'pages.samplepage')->name('samplepage');
 // Dashboard (protected)
-Route::get('/dashboard', function () { return view("dashboard");})->name('dashboard')->middleware('auth');
+Route::get('/dashboard', function () { return view("dashboard");})->name('dashboard')->middleware('auth')->middleware('department.access:dashboard');
 Route::view('/dashboard-content', 'pages.dashboard-content')->name('dashboard.content');
 
 // Route::view('/employee-directory', 'pages.employee-directory')->name('employee-directory');
 // Route::view('/onboard-employee', 'pages.onboard-employee')->name('onboard-employee');
 //employee
-Route::get('/employees',[EmployeeController::class, 'index'])->name('employees.index');
+Route::get('/employees',[EmployeeController::class, 'index'])->name('employees.index')->middleware('department.access:employees');
 Route::get('/employee-list',[EmployeeController::class, 'employeeList'])->name('employees.list');
 Route::get('/employees/export',[EmployeeController::class, 'exportEmployees'])->name('employees.export');
 
@@ -43,25 +46,47 @@ Route::get('/employees-by-department',[EmployeeController::class,'employeesByDep
 
 Route::prefix('attendance')->group(function () {
 
-    Route::get('/capture', [AttendanceController::class, 'capture'])
-        ->name('attendance.capture');
-
-    Route::get('/schedule', [AttendanceController::class, 'schedule'])
-        ->name('attendance.schedule');
-
-    Route::get('/tracking', [AttendanceController::class, 'tracking'])
-        ->name('attendance.tracking');
-
+    Route::get('/capture', [AttendanceController::class, 'capture'])->name('attendance.capture');
+    Route::get('/captureList', [AttendanceController::class, 'captureList'])->name('attendance.captureList');
+    Route::get('/attendancecaptureExport', [AttendanceController::class, 'captureExport'])->name('attendancecapture.export');
+    
+    
+        
+    Route::get('/tracking', [AttendanceController::class, 'tracking'])->name('attendance.tracking');
+    Route::get('attendance-tracking-list',[AttendanceController::class, 'trackingList'])->name('attendance.tracking.list');
+    Route::get('attendance-tracking-export',[AttendanceController::class, 'trackingExport'])->name('attendance.tracking.export');
+    
     Route::get('/regularization', [AttendanceController::class, 'regularization'])
-        ->name('attendance.regularization');
+    ->name('attendance.regularization');
+    Route::get('/regularizationList', [AttendanceController::class, 'regularizationList'])->name('attendance.regularization.list');
+    Route::get('attendance-regularization-export',[AttendanceController::class, 'regularizationExport'])->name('attendance.regularization.export');
+    Route::get('regularization/{id}',[AttendanceController::class,'getRegularization']);
+    Route::post(
+        'regularization/approve',
+        [AttendanceController::class, 'approveRegularization']
+    )->name('regularization.approve');
 
-    Route::get('/summary', [AttendanceController::class, 'summary'])
-        ->name('attendance.summary');
-
+    Route::post(
+        'regularization/reject/{id}',
+        [AttendanceController::class, 'rejectRegularization'])->name('regularization.reject');
+    
+    
+    Route::get('/summary', [AttendanceController::class, 'summary'])->name('attendance.summary');
+    Route::get('/summaryList', [AttendanceController::class, 'summaryList'])->name('attendance.summary.list');
+    Route::get('attendance-summary-export',[AttendanceController::class, 'summaryExport'])->name('attendance.summaryExport');
+    Route::get('punch-details/{employee}/{date}',[AttendanceController::class, 'punchDetails'])->name('attendance.punch.details');
     Route::get('/reports', [AttendanceController::class, 'reports'])
         ->name('attendance.reports');
 
 });
+
+Route::get('/schedule', [CalendarController::class, 'schedule'])->name('calender.schedule');
+Route::get('/calendar/list', [CalendarController::class, 'list'])->name('calendar.list');
+Route::get('/calendar/{id}',[CalendarController::class,'show'])->name('calendar.show');
+Route::post('/calendar/store',[CalendarController::class,'store'])->name('calendar.store');
+Route::get('/calendar/edit/{id}',[CalendarController::class,'edit']);
+Route::post('/calendar/update/{id}',[CalendarController::class,'update']);
+Route::delete('/calendar/delete/{id}',[CalendarController::class,'destroy']);
 
 Route::get('/leave-requests', [LeaveController::class, 'index'])->name('leave.index');
 Route::get('/leave-requests/list', [LeaveController::class, 'leaveList'])->name('leave.list');
@@ -133,7 +158,7 @@ Route::post('/project-store',[ProjectController::class,'store'])->name('project.
 Route::get('/project-view/{id}',[ProjectController::class,'view'])->name('project.view');
 Route::get('/project-edit/{id}',[ProjectController::class,'edit'])->name('project.edit');
 Route::post('/project-update/{id}',[ProjectController::class,'update'])->name('project.update');
-Route::delete('/project-delete/{id}',[ProjectController::class,'delete'])->name('project.delete');
+Route::delete('/project/delete/{id}',[ProjectController::class, 'delete'])->name('project.delete');
 Route::get('/project-export',[ProjectController::class,'export'])->name('project.export');
 
 Route::prefix('offboard')->group(function () {
@@ -165,6 +190,39 @@ Route::post('/training/phase-hr-review/{id}', [TrainingPhaseController::class, '
 Route::delete('/training/delete/{id}',[TrainingPhaseController::class,'deleteAssignment'])->name('training.assign.delete');
 Route::get('/training-report',[TrainingPhaseController::class, 'report'])->name('training.report.index');
 
+
+
+Route::prefix('payroll')->name('payroll.')->group(function () {
+    Route::get('/', [PayrollController::class, 'index'])->name('index');
+    Route::get('/list', [PayrollController::class, 'list'])->name('list');
+    Route::post('/import', [PayrollController::class, 'import'])->name('import');
+    Route::get('/view/{id}', [PayrollController::class, 'view'])->name('view');
+    Route::get('/edit/{id}', [PayrollController::class, 'edit'])->name('edit');
+    Route::post('/update/{id}', [PayrollController::class, 'update'])->name('update');
+    Route::delete('/delete/{id}', [PayrollController::class, 'delete'])->name('delete');
+    Route::get('/template/download', [PayrollController::class, 'downloadTemplate'])
+    ->name('template.download');
+});
+
+Route::prefix('tasks')->group(function(){
+    Route::get('/utilization',[TaskController::class,'utilization'])->name('tasks.utilization.index');
+    Route::get('/utilizationList', [TaskController::class, 'utilizationList'])
+        ->name('tasks.resource-utilization.list');    
+    Route::get('/',[TaskController::class,'allocation'])->name('tasks.allocation');
+    Route::get('/project-modules/{id}',[TaskController::class, 'projectModules'])->name('tasks.project.modules');
+    Route::get('/project-team-members/{project}',[TaskController::class, 'projectTeamMembers']);
+    Route::get('/list',[TaskController::class,'list'])->name('tasks.list');
+    Route::post('/store',[TaskController::class,'store'])->name('tasks.store');
+    Route::get('/edit/{id}',[TaskController::class,'edit']);
+    Route::get('/view/{id}',[TaskController::class,'view']);
+    Route::delete('/delete/{id}',[TaskController::class,'delete']);
+    Route::get('/export',[TaskController::class,'export'])->name('tasks.export');
+    Route::get('/my-tasks',[TaskController::class,'myTask'])->name('tasks.mytask');
+    Route::get('/view-my-task/{id}',[TaskController::class,'viewMyTask']);
+    Route::get('/my-task-list',[TaskController::class,'myTaskList'])->name('tasks.mytask.list');
+    Route::post('/update', [TaskController::class, 'saveTaskUpdate'])->name('tasks.update');
+    Route::post('/task-progress-update',[TaskController::class,'updateProgress'])->name('task.progress.update');
+});
 use Illuminate\Support\Facades\DB;
 
 Route::get('/test-essl', function () {

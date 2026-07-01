@@ -120,9 +120,13 @@ return [
             'database' => env('ESSL_DB_DATABASE'),
             'username' => env('ESSL_DB_USERNAME'),
             'password' => env('ESSL_DB_PASSWORD'),
+
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
+
+            'encrypt' => 'no',
+            'trust_server_certificate' => true,
         ],
 
     ],

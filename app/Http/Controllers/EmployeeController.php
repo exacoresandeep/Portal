@@ -12,71 +12,67 @@ use App\Models\Designation;
 use App\Exports\EmployeeExport;
 use App\Exports\OnboardEmployeeExport;
 use Maatwebsite\Excel\Facades\Excel;
+
 class EmployeeController extends Controller
 {
 
-     // Employee List Page
+    // Employee List Page
     public function index()
     {
         $jobTypes = JobType::where('status', 'active')->get();
         $departments = Department::where('status', 'active')->get();
         $designations = Designation::where('status', 'active')->get();
 
-            return view(
-                'pages.employee-list',
-                compact(
-                    'jobTypes',
-                    'departments',
-                    'designations'
-                )
-            );
+        return view(
+            'pages.employee-list',
+            compact(
+                'jobTypes',
+                'departments',
+                'designations'
+            )
+        );
     }
-        
+
     // DataTable Ajax
     public function employeeList(Request $request)
     {
-        
+
         if ($request->ajax()) {
-            
+
             $employees = Employee::with([
-                    'reportingManager',
-                    'designation',
-                    'department'
-                ])
+                'reportingManager',
+                'designation',
+                'department'
+            ])
 
                 ->when($request->status != '', function ($query) use ($request) {
 
                     $query->where('status', $request->status);
-
                 })
 
                 ->when($request->job_type != '', function ($query) use ($request) {
 
                     $query->where('job_type', $request->job_type);
-
                 })
 
                 ->when($request->department_id != '', function ($query) use ($request) {
 
                     $query->where('department_id', $request->department_id);
-
                 })
 
                 ->when($request->designation_id != '', function ($query) use ($request) {
                     $query->where('designation_id', $request->designation_id);
-
                 })
-                ->where("onboard_status","Completed")
+                ->where("onboard_status", "Completed")
                 ->latest();
-            
+
             return DataTables::of($employees)
-            
-            ->addIndexColumn()
-            
-            ->addColumn('employee_name', function ($row) {
-                
-                return $row->name;
-                
+
+                ->addIndexColumn()
+
+                ->addColumn('employee_name', function ($row) {
+
+                    return $row->name;
                 })
 
                 ->addColumn('status_badge', function ($row) {
@@ -86,28 +82,23 @@ class EmployeeController extends Controller
                         return '<span class="badge text-bg-success">
                                     Active
                                 </span>';
-
                     } else {
 
                         return '<span class="badge text-bg-danger">
                         In Active
                         </span>';
-                        
                     }
-                    
                 })
-                
+
                 ->addColumn('reporting_manager', function ($row) {
 
                     return $row->reportingManager->name ?? '-';
-
-                    })
+                })
 
                 ->addColumn('designation_name', function ($row) {
 
                     return $row->designation->name ?? '-';
-
-                })    
+                })
                 ->addColumn('action', function ($row) {
 
                     $editUrl = route('employees.edit', $row->id);
@@ -116,12 +107,12 @@ class EmployeeController extends Controller
 
                     <div class="d-flex gap-1">
                     <button type="button"
-                    class="btn btn-sm btn-primary" onClick="viewEmployee('.$row->id.')">
+                    class="btn btn-sm btn-primary" onClick="viewEmployee(' . $row->id . ')">
                     
                     View
 
                     </button>
-                    <a href="'.$editUrl.'"
+                    <a href="' . $editUrl . '"
                     class="btn btn-sm btn-warning text-white">
                     
                     Edit
@@ -131,19 +122,16 @@ class EmployeeController extends Controller
                         </div>
                         
                         ';
-                        
-                        })
+                })
 
-                        ->rawColumns([
+                ->rawColumns([
                     'status_badge',
                     'onboard_badge',
                     'action'
                 ])
 
                 ->make(true);
-                
         }
-
     }
 
     public function exportEmployees(Request $request)
@@ -171,59 +159,54 @@ class EmployeeController extends Controller
         $jobTypes = JobType::where('status', 'active')->get();
         $departments = Department::where('status', 'active')->get();
         $designations = Designation::where('status', 'active')->get();
-        $managers = Employee::where('status', 'active')->get();
-            return view(
-                'pages.onboard-list',
-                compact(
-                    'jobTypes',
-                    'departments',
-                    'designations',
-                    'managers'
+        $managers = Employee::where('status', '1')->get();
+        return view(
+            'pages.onboard-list',
+            compact(
+                'jobTypes',
+                'departments',
+                'designations',
+                'managers'
 
-                )
-            );
+            )
+        );
     }
-   
+
     public function employeeOnboardList(Request $request)
     {
         if ($request->ajax()) {
 
             $employees = Employee::with([
-                    'reportingManager',
-                    'designation',
-                    'department'
-                ])
+                'reportingManager',
+                'designation',
+                'department'
+            ])
 
                 ->when($request->status != '', function ($query) use ($request) {
 
                     $query->where('status', $request->status);
-
                 })
 
                 ->when($request->onboard_status != '', function ($query) use ($request) {
 
                     $query->where('onboard_status', $request->onboard_status);
-
                 })
 
                 ->when($request->job_type != '', function ($query) use ($request) {
 
                     $query->where('job_type', $request->job_type);
-
                 })
 
                 ->when($request->department_id != '', function ($query) use ($request) {
 
                     $query->where('department_id', $request->department_id);
-
                 })
 
                 ->when($request->designation_id != '', function ($query) use ($request) {
 
                     $query->where('designation_id', $request->designation_id);
-
                 })
-                ->where("onboard_status","!=","Completed")
+                ->where("onboard_status", "!=", "Completed")
                 ->latest();
 
             return DataTables::of($employees)
@@ -233,19 +216,16 @@ class EmployeeController extends Controller
                 ->addColumn('employee_name', function ($row) {
 
                     return $row->name;
-
                 })
 
                 ->addColumn('designation_name', function ($row) {
 
                     return $row->designation->name ?? '-';
-
                 })
 
                 ->addColumn('reporting_manager', function ($row) {
 
                     return $row->reportingManager->name ?? '-';
-
                 })
 
                 ->addColumn('status_badge', function ($row) {
@@ -255,15 +235,12 @@ class EmployeeController extends Controller
                         return '<span class="badge text-bg-success">
                                     Active
                                 </span>';
-
                     } else {
 
                         return '<span class="badge text-bg-danger">
                                     Inactive
                                 </span>';
-
                     }
-
                 })
 
                 ->addColumn('onboard_badge', function ($row) {
@@ -273,21 +250,17 @@ class EmployeeController extends Controller
                         return '<span class="badge text-bg-warning">
                                     Pending
                                 </span>';
-
                     } elseif ($row->onboard_status == 'Completed') {
 
                         return '<span class="badge text-bg-success">
                                     Completed
                                 </span>';
-
                     } else {
 
                         return '<span class="badge text-bg-primary">
                                     Profile Created
                                 </span>';
-
                     }
-
                 })
 
                 ->addColumn('action', function ($row) {
@@ -300,7 +273,7 @@ class EmployeeController extends Controller
 
                             <button type="button"
                                     class="btn btn-sm btn-primary viewEmployee"
-                                    data-id="'.$row->id.'"
+                                    data-id="' . $row->id . '"
                                     data-bs-toggle="modal"
                                     data-bs-target="#viewEmployeeModal">
 
@@ -310,7 +283,7 @@ class EmployeeController extends Controller
 
                             <button type="button"
                                     class="btn btn-sm btn-warning text-white editEmployee"
-                                    data-id="'.$row->id.'"
+                                    data-id="' . $row->id . '"
                                     data-bs-toggle="modal"
                                     data-bs-target="#addEmployeeModal">
 
@@ -321,7 +294,6 @@ class EmployeeController extends Controller
                         </div>
 
                     ';
-
                 })
 
                 ->rawColumns([
@@ -341,9 +313,9 @@ class EmployeeController extends Controller
             'department',
             'reportingManager'
         ])->findOrFail($id);
-         $employee->photo_url = $employee->photo
-        ? asset('storage/employees/photos/' . $employee->photo)
-        : asset('assets/img/user.png');
+        $employee->photo_url = $employee->photo
+            ? asset('storage/employees/photos/' . $employee->photo)
+            : asset('assets/img/user.png');
         return response()->json($employee);
     }
 
@@ -424,10 +396,10 @@ class EmployeeController extends Controller
 
         $managers = Employee::where('id', '!=', $id)->get();
 
-        return view('pages.employee-edit',
+        return view(
+            'pages.employee-edit',
             compact('employee', 'managers')
         );
-
     }
     // Update Employee
     public function update(Request $request, $id)
@@ -448,6 +420,8 @@ class EmployeeController extends Controller
             'name' => $request->name,
 
             'email' => $request->email,
+
+            'emp_id' => $request->emp_id,
 
             'dob' => $request->dob,
 
@@ -481,13 +455,11 @@ class EmployeeController extends Controller
                 'password' => Hash::make($request->password)
 
             ]);
-
         }
 
         return redirect()
-                ->route('employees.index')
-                ->with('success', 'Employee updated successfully');
-
+            ->route('employees.index')
+            ->with('success', 'Employee updated successfully');
     }
     // Delete Employee
     public function destroy($id)
@@ -496,9 +468,8 @@ class EmployeeController extends Controller
         Employee::findOrFail($id)->delete();
 
         return redirect()
-                ->back()
-                ->with('success', 'Employee deleted successfully');
-
+            ->back()
+            ->with('success', 'Employee deleted successfully');
     }
 
     public function employeesByDepartment(Request $request)
@@ -507,21 +478,21 @@ class EmployeeController extends Controller
             'department_id',
             $request->department_id
         )
-        ->select('id','name')
-        ->get();
+            ->select('id', 'name')
+            ->get();
     }
 
     public function getActiveEmployees()
     {
         $employees = Employee::with([
-                'department',
-                'designation',
-                'reportingManager'
-            ])
+            'department',
+            'designation',
+            'reportingManager'
+        ])
             ->where('status', 1)
             ->orderBy('name')
             ->get();
-       
+
         return response()->json($employees);
     }
 }

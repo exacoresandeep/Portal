@@ -13,4 +13,7 @@ class Department extends Model
         'status'
 
     ];
+    protected $casts = [
+        'access_pages' => 'array',
+    ];
 }

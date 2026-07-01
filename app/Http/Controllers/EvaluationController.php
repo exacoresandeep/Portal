@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\EvaluationForm;
 use App\Models\EvaluationQuestion;
 use App\Models\Department;
@@ -20,36 +21,36 @@ class EvaluationController extends Controller
     public function index()
     {
         return view('pages.evaluation.forms');
-    }   
+    }
 
     public function list()
     {
         $data = EvaluationForm::with('questions');
         return DataTables::of($data)
             ->addIndexColumn()
-            ->addColumn('total_marks', function($row){
+            ->addColumn('total_marks', function ($row) {
                 return $row->questions->sum('marks');
             })
-            ->addColumn('total_questions', function($row){
+            ->addColumn('total_questions', function ($row) {
                 return $row->questions->count();
             })
-            ->addColumn('action', function($row){
+            ->addColumn('action', function ($row) {
                 return '
                     <button
                         class="btn btn-primary btn-sm viewBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         View
                     </button>
 
                     <button
                         class="btn btn-warning btn-sm editBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         Edit
                     </button>
 
                     <button
                         class="btn btn-danger btn-sm deleteBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         Delete
                     </button>
                 ';
@@ -80,7 +81,6 @@ class EvaluationController extends Controller
                 )->delete();
 
                 $message = 'Evaluation Form Updated Successfully';
-
             } else {
 
                 $form = EvaluationForm::create([
@@ -138,7 +138,6 @@ class EvaluationController extends Controller
                 'message' => $message
 
             ]);
-
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -157,8 +156,8 @@ class EvaluationController extends Controller
         EvaluationForm::findOrFail($request->id)
             ->delete();
         return response()->json([
-            'status'=>true,
-            'message'=>'Deleted successfully'
+            'status' => true,
+            'message' => 'Deleted successfully'
         ]);
     }
     public function getForm($id)
@@ -183,15 +182,16 @@ class EvaluationController extends Controller
         $departments = Department::where('status', 'active')->get();
         $evaluation_forms = EvaluationForm::where('status', 'active')->get();
 
-            return view('pages.evaluation.schedule',
-                compact(
-                    'departments',
-                    'evaluation_forms',)
-            );
-
+        return view(
+            'pages.evaluation.schedule',
+            compact(
+                'departments',
+                'evaluation_forms',
+            )
+        );
     }
 
-    
+
 
     public function assignEvaluationForm(Request $request)
     {
@@ -231,7 +231,7 @@ class EvaluationController extends Controller
             $employees = Employee::where(
                 'department_id',
                 $request->department
-            )->where("status","1")->get();
+            )->where("status", "1")->get();
 
             $assignments = [];
 
@@ -258,7 +258,6 @@ class EvaluationController extends Controller
                 'status'  => true,
                 'message' => 'Evaluation form assigned successfully.'
             ]);
-
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -290,7 +289,7 @@ class EvaluationController extends Controller
             $query->where('department_id', $request->department_id);
         }
 
-        
+
 
         return DataTables::of($query)
 
@@ -304,10 +303,9 @@ class EvaluationController extends Controller
                 return $row->department->name ?? '-';
             })
 
-           ->addColumn('total_score', function ($row) {
+            ->addColumn('total_score', function ($row) {
 
                 return $row->form->questions_sum_marks ?? 0;
-
             })
 
             ->addColumn('end_date', function ($row) {
@@ -315,7 +313,6 @@ class EvaluationController extends Controller
                 return $row->end_date
                     ? date('d-m-Y', strtotime($row->end_date))
                     : '-';
-
             })
 
             ->addColumn('action', function ($row) {
@@ -323,16 +320,15 @@ class EvaluationController extends Controller
                 return '
                     <button
                         class="btn btn-sm btn-info viewBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         View
                     </button>
                     <button
                         class="btn btn-sm btn-danger deleteBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         Delete
                     </button>
                 ';
-
             })
             ->filter(function ($query) use ($request) {
 
@@ -341,20 +337,20 @@ class EvaluationController extends Controller
                     $query->where(function ($q) use ($search) {
 
                         $q->where('year', 'like', "%{$search}%")
-                        ->orWhere('quarter', 'like', "%{$search}%")
+                            ->orWhere('quarter', 'like', "%{$search}%")
 
-                        ->orWhereHas('form', function ($form) use ($search) {
-                            $form->where('name', 'like', "%{$search}%");
-                        })
+                            ->orWhereHas('form', function ($form) use ($search) {
+                                $form->where('name', 'like', "%{$search}%");
+                            })
 
-                        ->orWhereHas('department', function ($dept) use ($search) {
-                            $dept->where('name', 'like', "%{$search}%");
-                        })
+                            ->orWhereHas('department', function ($dept) use ($search) {
+                                $dept->where('name', 'like', "%{$search}%");
+                            })
 
-                        ->orWhereRaw(
-                            "DATE_FORMAT(end_date,'%d-%m-%Y') LIKE ?",
-                            ["%{$search}%"]
-                        );
+                            ->orWhereRaw(
+                                "DATE_FORMAT(end_date,'%d-%m-%Y') LIKE ?",
+                                ["%{$search}%"]
+                            );
                     });
                 }
             })
@@ -380,12 +376,12 @@ class EvaluationController extends Controller
             'evaluation_form_id',
             $schedule->evaluation_form_id
         )
-        ->where('year', $schedule->year)
-        ->where('quarter', $schedule->quarter)
-        ->whereHas('employee', function ($q) use ($schedule) {
-            $q->where('department_id', $schedule->department_id);
-        })
-        ->delete();
+            ->where('year', $schedule->year)
+            ->where('quarter', $schedule->quarter)
+            ->whereHas('employee', function ($q) use ($schedule) {
+                $q->where('department_id', $schedule->department_id);
+            })
+            ->delete();
 
         $schedule->delete();
 
@@ -399,11 +395,13 @@ class EvaluationController extends Controller
         $departments = Department::where('status', 'active')->get();
         $evaluation_forms = EvaluationForm::where('status', 'active')->get();
 
-            return view('pages.evaluation.report',
-                compact(
-                    'departments',
-                    'evaluation_forms',)
-            );
+        return view(
+            'pages.evaluation.report',
+            compact(
+                'departments',
+                'evaluation_forms',
+            )
+        );
     }
     public function evaluationReportList(Request $request)
     {
@@ -428,7 +426,6 @@ class EvaluationController extends Controller
                     'department_id',
                     $request->department_id
                 );
-
             });
         }
 
@@ -447,7 +444,7 @@ class EvaluationController extends Controller
                 : $query->whereNull('submitted_date');
         }
 
-        
+
         return DataTables::of($query)
 
             ->addIndexColumn()
@@ -455,25 +452,21 @@ class EvaluationController extends Controller
             ->addColumn('employee_name', function ($row) {
 
                 return $row->employee->name ?? '-';
-
             })
 
             ->addColumn('employee_code', function ($row) {
 
                 return $row->employee->emp_id ?? '-';
-
             })
 
             ->addColumn('form_name', function ($row) {
 
                 return $row->form->name ?? '-';
-
             })
 
             ->addColumn('department_name', function ($row) {
 
                 return $row->employee->department->name ?? '-';
-
             })
 
             ->addColumn('submitted_date', function ($row) {
@@ -481,7 +474,6 @@ class EvaluationController extends Controller
                 return $row->submitted_date
                     ? date('d-m-Y', strtotime($row->submitted_date))
                     : '-';
-
             })
             ->addColumn('employee_score', function ($row) {
 
@@ -495,7 +487,7 @@ class EvaluationController extends Controller
                     ? $row->form->questions()->sum('marks')
                     : 0;
 
-                return $obtainedMarks.'/'.$totalMarks;
+                return $obtainedMarks . '/' . $totalMarks;
             })
             ->addColumn('assessment_score', function ($row) {
 
@@ -509,13 +501,12 @@ class EvaluationController extends Controller
                     ? $row->form->questions()->sum('marks')
                     : 0;
 
-                return $assessmentMarks.'/'.$totalMarks;
+                return $assessmentMarks . '/' . $totalMarks;
             })
 
             ->addColumn('performance_review', function ($row) {
 
                 return $row->review ?? 'Pending';
-
             })
 
             ->addColumn('submission_status', function ($row) {
@@ -535,18 +526,18 @@ class EvaluationController extends Controller
             ->addColumn('action', function ($row) {
                 if (!empty($row->submitted_date)) {
 
-                return '
+                    return '
                     <button
                         class="btn btn-sm btn-primary viewBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         View
                     </button>
                 ';
-                }else{
-                   return '
+                } else {
+                    return '
                     <button
                         class="btn btn-sm btn-secondary" disabled
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         View
                     </button>
                 ';
@@ -559,41 +550,38 @@ class EvaluationController extends Controller
                     $query->where(function ($q) use ($search) {
 
                         $q->where('year', 'like', "%{$search}%")
-                        ->orWhere('quarter', 'like', "%{$search}%")
+                            ->orWhere('quarter', 'like', "%{$search}%")
 
-                        ->orWhereHas('form', function ($f) use ($search) {
+                            ->orWhereHas('form', function ($f) use ($search) {
 
                                 $f->where(
                                     'name',
                                     'like',
                                     "%{$search}%"
                                 );
+                            })
 
-                        })
-
-                        ->orWhereHas('employee.department', function ($d) use ($search) {
+                            ->orWhereHas('employee.department', function ($d) use ($search) {
 
                                 $d->where(
                                     'name',
                                     'like',
                                     "%{$search}%"
                                 );
-
-                        });
-
+                            });
                     });
                 }
-
             })
 
-            ->rawColumns([ 'submission_status','action',"assessment_score"])
+            ->rawColumns(['submission_status', 'action', "assessment_score"])
 
             ->make(true);
     }
     public function evaluationReportView($id)
     {
         $report = EvaluationAssign::with([
-            'employee.department','employee.designation',
+            'employee.department',
+            'employee.designation',
             'form.questions'
         ])->findOrFail($id);
 
@@ -601,7 +589,7 @@ class EvaluationController extends Controller
             ? date('d-m-Y', strtotime($report->employee->joining_date))
             : '-';
 
-            $report->formatted_submitted_date = $report->submitted_date
+        $report->formatted_submitted_date = $report->submitted_date
             ? date('d-m-Y', strtotime($report->submitted_date))
             : '-';
 
@@ -649,7 +637,7 @@ class EvaluationController extends Controller
             'status' => true,
 
             'message' =>
-                'Evaluation review saved successfully.'
+            'Evaluation review saved successfully.'
 
         ]);
     }
@@ -659,103 +647,102 @@ class EvaluationController extends Controller
         $departments = Department::where('status', 1)->get();
 
         return view('pages.evaluation.pip', compact('departments'));
-    } 
+    }
     public function pipList(Request $request)
     {
-       
 
-            $year = $request->year;
-            $department = $request->department;
 
-            $employees = Employee::with('department')
-                ->when($department, function ($q) use ($department) {
-                    $q->where('department_id', $department);
-                })
-                ->whereHas('evaluationForms', function ($q) use ($year) {
-                    if ($year) {
+        $year = $request->year;
+        $department = $request->department;
+
+        $employees = Employee::with('department')
+            ->when($department, function ($q) use ($department) {
+                $q->where('department_id', $department);
+            })
+            ->whereHas('evaluationForms', function ($q) use ($year) {
+                if ($year) {
+                    $q->where('year', $year);
+                }
+
+                $q->where('review', 'Under Performing');
+            });
+
+        return DataTables::of($employees)
+
+            ->addIndexColumn()
+
+            ->addColumn('employee_id', function ($row) {
+                return $row->emp_id;
+            })
+
+            ->addColumn('employee_name', function ($row) {
+                return $row->name;
+            })
+
+            ->addColumn('department', function ($row) {
+                return $row->department->name ?? '-';
+            })
+
+            ->addColumn('year', function ($row) use ($year) {
+                return $year;
+            })
+
+            ->addColumn('review_details', function ($row) use ($year) {
+
+                $reviews = EvaluationAssign::where('employee_id', $row->id)
+                    ->when($year, function ($q) use ($year) {
                         $q->where('year', $year);
+                    })
+                    ->get();
+
+                $html = '';
+
+                foreach ($reviews as $review) {
+
+                    $badge = 'secondary';
+
+                    if ($review->review == 'Outstanding') {
+                        $badge = 'success';
+                    } elseif ($review->review == 'Developing') {
+                        $badge = 'warning';
+                    } elseif ($review->review == 'Under Performing') {
+                        $badge = 'danger';
                     }
 
-                    $q->where('review', 'Under Performing');
-                });
-
-            return DataTables::of($employees)
-
-                ->addIndexColumn()
-
-                ->addColumn('employee_id', function ($row) {
-                    return $row->emp_id;
-                })
-
-                ->addColumn('employee_name', function ($row) {
-                    return $row->name;
-                })
-
-                ->addColumn('department', function ($row) {
-                    return $row->department->name ?? '-';
-                })
-
-                ->addColumn('year', function ($row) use ($year) {
-                    return $year;
-                })
-
-                ->addColumn('review_details', function ($row) use ($year) {
-
-                    $reviews = EvaluationAssign::where('employee_id', $row->id)
-                        ->when($year, function ($q) use ($year) {
-                            $q->where('year', $year);
-                        })
-                        ->get();
-
-                    $html = '';
-
-                    foreach ($reviews as $review) {
-
-                        $badge = 'secondary';
-
-                        if ($review->review == 'Outstanding') {
-                            $badge = 'success';
-                        } elseif ($review->review == 'Developing') {
-                            $badge = 'warning';
-                        } elseif ($review->review == 'Under Performing') {
-                            $badge = 'danger';
-                        }
-
-                        $html .= '<div class="mb-1">
-                                    <strong>'.$review->quarter.'</strong> :
-                                    <span class="badge bg-'.$badge.'">
-                                        '.$review->review.'
+                    $html .= '<div class="mb-1">
+                                    <strong>' . $review->quarter . '</strong> :
+                                    <span class="badge bg-' . $badge . '">
+                                        ' . $review->review . '
                                     </span>
                                 </div>';
-                    }
+                }
 
-                    return $html;
-                })
+                return $html;
+            })
 
-                ->addColumn('action', function ($row) {
+            ->addColumn('action', function ($row) {
 
-                    return '
+                return '
                        -
                     ';
-                })
-                // ->filterColumn('employee_name', function ($query, $keyword) {
-                //         $query->whereHas('employee', function ($q) use ($keyword) {
-                //             $q->where('name', 'like', "%{$keyword}%");
-                //         });
-                //     })
+            })
+            // ->filterColumn('employee_name', function ($query, $keyword) {
+            //         $query->whereHas('employee', function ($q) use ($keyword) {
+            //             $q->where('name', 'like', "%{$keyword}%");
+            //         });
+            //     })
 
-                //     // Employee ID Search
-                //     ->filterColumn('employee_id', function ($query, $keyword) {
-                //         $query->whereHas('employee', function ($q) use ($keyword) {
-                //             $q->where('emp_id', 'like', "%{$keyword}%");
-                //         });
-                //     })    
-                ->rawColumns([
-                    'review_details',
-                    'action'
-                ])
+            //     // Employee ID Search
+            //     ->filterColumn('employee_id', function ($query, $keyword) {
+            //         $query->whereHas('employee', function ($q) use ($keyword) {
+            //             $q->where('emp_id', 'like', "%{$keyword}%");
+            //         });
+            //     })    
+            ->rawColumns([
+                'review_details',
+                'action'
+            ])
 
-                ->make(true);
-        
+            ->make(true);
     }
 }

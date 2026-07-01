@@ -35,8 +35,8 @@ class LoginController extends Controller
                 'user_email' => Auth::user()->email,
                 'user_photo' => Auth::user()->photo,
                 'department' => Auth::user()->department,
-                ]);
-                
+                'department_id' => Auth::user()->department_id,
+                ]);    
                 // return redirect()->route('dashboard');
             return redirect()->route('dashboard');
         }

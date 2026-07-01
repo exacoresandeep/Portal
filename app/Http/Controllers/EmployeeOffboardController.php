@@ -21,14 +21,14 @@ class EmployeeOffboardController extends Controller
         $departments = Department::where('status', 'active')->get();
         $designations = Designation::where('status', 'active')->get();
 
-            return view(
-                'pages.offboard.index',
-                compact(
-                    'jobTypes',
-                    'departments',
-                    'designations'
-                )
-            );
+        return view(
+            'pages.offboard.index',
+            compact(
+                'jobTypes',
+                'departments',
+                'designations'
+            )
+        );
     }
 
     public function list(Request $request)
@@ -42,13 +42,11 @@ class EmployeeOffboardController extends Controller
                 ->when($request->hr_process != '', function ($query) use ($request) {
 
                     $query->where('hr_process', $request->hr_process);
-
                 })
 
                 ->when($request->emp_process != '', function ($query) use ($request) {
 
                     $query->where('emp_process', $request->emp_process);
-
                 })
 
                 ->when($request->job_type != '', function ($query) use ($request) {
@@ -56,9 +54,7 @@ class EmployeeOffboardController extends Controller
                     $query->whereHas('employee', function ($q) use ($request) {
 
                         $q->where('job_type', $request->job_type);
-
                     });
-
                 })
 
                 ->when($request->department_id != '', function ($query) use ($request) {
@@ -66,9 +62,7 @@ class EmployeeOffboardController extends Controller
                     $query->whereHas('employee', function ($q) use ($request) {
 
                         $q->where('department_id', $request->department_id);
-
                     });
-
                 })
 
                 ->when($request->designation_id != '', function ($query) use ($request) {
@@ -76,11 +70,9 @@ class EmployeeOffboardController extends Controller
                     $query->whereHas('employee', function ($q) use ($request) {
 
                         $q->where('designation_id', $request->designation_id);
-
                     });
-
                 })
-               
+
                 ->latest();
 
             return DataTables::of($employees)
@@ -108,9 +100,9 @@ class EmployeeOffboardController extends Controller
                 })
 
                 ->addColumn('joining_date', function ($row) {
-                   return $row->employee->joining_date
-                       ? date('d-m-Y', strtotime($row->employee->joining_date))
-                       : '-';
+                    return $row->employee->joining_date
+                        ? date('d-m-Y', strtotime($row->employee->joining_date))
+                        : '-';
                 })
 
                 ->addColumn('leaving_date', function ($row) {
@@ -121,7 +113,7 @@ class EmployeeOffboardController extends Controller
 
                 ->addColumn('submission_status', function ($row) {
 
-                    if($row->emp_process == 'completed'){
+                    if ($row->emp_process == 'completed') {
                         return '<span class="badge bg-success">Completed</span>';
                     }
 
@@ -130,7 +122,7 @@ class EmployeeOffboardController extends Controller
 
                 ->addColumn('hr_process_status', function ($row) {
 
-                    if($row->hr_process == 'completed'){
+                    if ($row->hr_process == 'completed') {
                         return '<span class="badge bg-success">Completed</span>';
                     }
 
@@ -143,32 +135,28 @@ class EmployeeOffboardController extends Controller
                         <div class="btn-group">
 
                              <button class="btn btn-sm btn-info viewBtn"
-                                    data-id="'.$row->id.'"
-                                    data-emp-process="'.$row->emp_process.'">
+                                    data-id="' . $row->id . '"
+                                    data-emp-process="' . $row->emp_process . '">
                                 View
                             </button>
 
                         </div>
                     ';
                 })
-                 ->filterColumn('employee_name', function($query, $keyword) {
+                ->filterColumn('employee_name', function ($query, $keyword) {
 
-                    $query->whereHas('employee', function($q) use ($keyword) {
+                    $query->whereHas('employee', function ($q) use ($keyword) {
 
                         $q->where('name', 'like', "%{$keyword}%");
-
                     });
-
                 })
 
-                ->filterColumn('employee_id', function($query, $keyword) {
+                ->filterColumn('employee_id', function ($query, $keyword) {
 
-                    $query->whereHas('employee', function($q) use ($keyword) {
+                    $query->whereHas('employee', function ($q) use ($keyword) {
 
                         $q->where('emp_id', 'like', "%{$keyword}%");
-
                     });
-
                 })
                 ->rawColumns([
                     'submission_status',
@@ -178,7 +166,6 @@ class EmployeeOffboardController extends Controller
 
                 ->make(true);
         }
-        
     }
 
     public function add(Request $request)
@@ -221,11 +208,11 @@ class EmployeeOffboardController extends Controller
             'employee.reportingManager'
         ])->findOrFail($id);
         $offboard->employee->photo_url = $offboard->employee->photo
-        ? asset('storage/employees/photos/' . $offboard->employee->photo)
-        : asset('assets/img/user.png');
+            ? asset('storage/employees/photos/' . $offboard->employee->photo)
+            : asset('assets/img/user.png');
         $offboard->signature = $offboard->signature
-        ? asset('storage/employees/signature/' . $offboard->signature)
-        : asset('assets/img/user.png');
+            ? asset('storage/employees/signature/' . $offboard->signature)
+            : asset('assets/img/user.png');
         return response()->json($offboard);
     }
 

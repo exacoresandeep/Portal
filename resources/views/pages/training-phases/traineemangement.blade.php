@@ -22,7 +22,7 @@
         <div class="col-md-3">
             <select class="form-select" id="department_id">
 
-                <option selected>
+                <option value="" selected>
                     Select Department
                 </option>
 
@@ -515,20 +515,30 @@ $(document).ready(function () {
 
                 error: function (xhr) {
 
-                    let errors = '';
+                    let message = 'Something went wrong';
 
                     if (xhr.status === 422) {
+
+                        let errors = '';
 
                         $.each(xhr.responseJSON.errors, function (key, value) {
                             errors += value[0] + '<br>';
                         });
+
+                        message = errors;
+
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+
+                        message = xhr.responseJSON.message;
+
                     }
 
                     Swal.fire({
                         icon: 'error',
-                        title: 'Validation Error',
-                        html: errors || 'Something went wrong'
+                        title: 'Error',
+                        html: message
                     });
+
                 }
             });
 

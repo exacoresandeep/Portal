@@ -42,61 +42,104 @@
       <!-- DataTables JS -->
       <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
-      $(document).ready(function () {
- 
-          $('.menu-link').click(function () {
+$(document).ready(function () {
 
-              $('.menu-link').removeClass('active');
+    function loadPage(pageUrl) {
 
-              $(this).addClass('active');
+        if (!pageUrl) return;
 
-              let pageUrl = $(this).data('page');
+        localStorage.setItem('activeMenu', pageUrl);
 
-               localStorage.setItem('activeMenu', pageUrl);
+        $('#main-content').load(pageUrl);
+    }
 
-              // Load page
-              $('#main-content').load(pageUrl);
+    // Parent Menu Click
+    $(document).on(
+        'click',
+        '.nav-item.has-treeview > .nav-link',
+        function (e) {
 
-          });
+            e.preventDefault();
 
+            let parent = $(this).parent();
 
-          // Reload last opened menu after refresh
-          let activeMenu = localStorage.getItem('activeMenu');
+            let isOpen = parent.hasClass('menu-open');
 
-          if (activeMenu) {
+            // Close all menus
+            $('.nav-item.has-treeview')
+                .removeClass('menu-open');
 
-              $('#main-content').load(activeMenu);
+            $('.nav-item.has-treeview > .nav-link')
+                .removeClass('active');
 
-              $('.menu-link').each(function () {
+            // Open clicked menu only
+            if (!isOpen) {
 
-                  if ($(this).data('page') == activeMenu) {
+                parent.addClass('menu-open');
 
-                      $('.menu-link').removeClass('active');
-                      $('.nav-item').removeClass('menu-open');
+                $(this).addClass('active');
+            }
+        }
+    );
 
-                      $(this).addClass('active');
+    // Sub Menu Click
+    $(document).on(
+        'click',
+        '.menu-link',
+        function (e) {
 
-                      // Open parent menu
-                      $(this).closest('.nav-treeview')
-                            .closest('.nav-item')
-                            .addClass('menu-open');
+            e.preventDefault();
 
-                      $(this).closest('.nav-treeview')
-                            .prev('.nav-link')
-                            .addClass('active');
+            let pageUrl = $(this).data('page');
 
-                  }
+            // Remove submenu active only
+            $('.menu-link').removeClass('active');
 
-              });
+            $(this).addClass('active');
 
-          } else {
+            // Keep parent open
+            let parent = $(this)
+                .closest('.nav-item.has-treeview');
 
-              // Default page
-              $('.menu-link').first().addClass('active');
+            if (parent.length) {
 
-          }
+                $('.nav-item.has-treeview')
+                    .not(parent)
+                    .removeClass('menu-open');
 
-      });
+                $('.nav-item.has-treeview > .nav-link')
+                    .not(parent.children('.nav-link'))
+                    .removeClass('active');
+
+                parent.addClass('menu-open');
+
+                parent.children('.nav-link')
+                    .addClass('active');
+            }
+
+            loadPage(pageUrl);
+
+        }
+    );
+
+    // Restore last page
+    let activeMenu = localStorage.getItem('activeMenu');
+
+    if (activeMenu) {
+
+        loadPage(activeMenu);
+
+    } else {
+
+        let firstMenu = $('.menu-link').first();
+
+        if (firstMenu.length) {
+
+            loadPage(firstMenu.data('page'));
+        }
+    }
+
+});
 </script>
     <!--end::Script-->
   </body>

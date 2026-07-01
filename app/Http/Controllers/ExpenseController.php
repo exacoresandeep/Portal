@@ -9,7 +9,8 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ExpenseController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         return view('pages.expense.index');
     }
 
@@ -20,7 +21,7 @@ class ExpenseController extends Controller
             'employee.department'
         ]);
 
-        if($request->filled('year')){
+        if ($request->filled('year')) {
 
             $data->whereYear(
                 'created_at',
@@ -28,10 +29,10 @@ class ExpenseController extends Controller
             );
         }
 
-        if($request->filled('month')){
+        if ($request->filled('month')) {
 
             $month = Carbon::parse(
-                '1 '.$request->month
+                '1 ' . $request->month
             )->month;
 
             $data->whereMonth(
@@ -40,7 +41,7 @@ class ExpenseController extends Controller
             );
         }
 
-        if($request->filled('status')){
+        if ($request->filled('status')) {
 
             $data->where(
                 'status',
@@ -52,33 +53,33 @@ class ExpenseController extends Controller
 
             ->addIndexColumn()
 
-            ->addColumn('employee_name', function($row){
+            ->addColumn('employee_name', function ($row) {
                 return $row->employee->name ?? '';
             })
 
-            ->addColumn('employee_code', function($row){
+            ->addColumn('employee_code', function ($row) {
                 return $row->employee->emp_id ?? '';
             })
 
-            ->addColumn('department', function($row){
+            ->addColumn('department', function ($row) {
                 return $row->employee->department->name ?? '';
             })
 
-            ->editColumn('amount', function($row){
+            ->editColumn('amount', function ($row) {
                 return number_format(
                     $row->amount,
                     2
                 );
             })
 
-            ->editColumn('created_at', function($row){
+            ->editColumn('created_at', function ($row) {
                 return Carbon::parse(
                     $row->created_at
                 )->format('d-m-Y');
             })
 
-            
-             ->addColumn('document_link', function ($row) {
+
+            ->addColumn('document_link', function ($row) {
 
                 if (!$row->document) {
                     return '-';
@@ -97,20 +98,20 @@ class ExpenseController extends Controller
                 ';
             })
 
-            ->addColumn('action', function($row){
+            ->addColumn('action', function ($row) {
 
-                if($row->status == 'pending'){
+                if ($row->status == 'pending') {
 
                     return '
                         <button
                             class="btn btn-success btn-sm approveBtn"
-                            data-id="'.$row->id.'">
+                            data-id="' . $row->id . '">
                             Approve
                         </button>
 
                         <button
                             class="btn btn-danger btn-sm rejectBtn"
-                            data-id="'.$row->id.'">
+                            data-id="' . $row->id . '">
                             Reject
                         </button>
                     ';
@@ -118,19 +119,19 @@ class ExpenseController extends Controller
 
                 return '-';
             })
-            ->editColumn('status', function($row){
+            ->editColumn('status', function ($row) {
 
-                if($row->status == 'approved'){
+                if ($row->status == 'approved') {
                     return '<span class="badge bg-success">Approved</span>';
                 }
 
-                if($row->status == 'rejected'){
+                if ($row->status == 'rejected') {
                     return '<span class="badge bg-danger">Rejected</span>';
                 }
 
                 return '<span class="badge bg-warning">Pending</span>';
             })
-            ->rawColumns(['status','document_link','action'])
+            ->rawColumns(['status', 'document_link', 'action'])
 
             ->make(true);
     }
@@ -150,7 +151,7 @@ class ExpenseController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Expense '.$request->status.' successfully'
+            'message' => 'Expense ' . $request->status . ' successfully'
         ]);
     }
 }

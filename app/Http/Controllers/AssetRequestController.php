@@ -12,146 +12,145 @@ use Yajra\DataTables\Facades\DataTables;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+
 class AssetRequestController extends Controller
 {
-    public function requests(){
+    public function requests()
+    {
         $departments = Department::where('status', 'active')->get();
-        return view('pages.assets.request',compact('departments'));
+        return view('pages.assets.request', compact('departments'));
     }
     public function requestslist(Request $request)
     { //dd("awdw");
         $query = AssetRequest::with('department');
-        
+
         if ($request->filled('department_id')) {
-            
+
             $query->where(
                 'department_id',
                 $request->department_id
             );
-            }
-            
+        }
+
         if ($request->filled('request_status')) {
 
             $query->where(
                 'request_status',
                 $request->request_status
-                );
+            );
         }
         if ($request->filled('status')) {
-            
+
             $query->where(
                 'status',
                 $request->status
-                );
-                }
-                
-                return datatables()
-                ->of($query)
+            );
+        }
 
-                ->addIndexColumn()
+        return datatables()
+            ->of($query)
 
-                ->addColumn('department', function ($row) {
+            ->addIndexColumn()
 
-            return $row->department->name ?? '-';
-        })
+            ->addColumn('department', function ($row) {
 
-        ->editColumn('joining_date', function ($row) {
+                return $row->department->name ?? '-';
+            })
 
-            return Carbon::parse(
-                $row->joining_date
+            ->editColumn('joining_date', function ($row) {
+
+                return Carbon::parse(
+                    $row->joining_date
                 )->format('d-m-Y');
-                })
-                
-        ->editColumn('created_at', function ($row) {
-            
-            return Carbon::parse(
-                $row->created_at
-            )->format('d-m-Y');
+            })
+
+            ->editColumn('created_at', function ($row) {
+
+                return Carbon::parse(
+                    $row->created_at
+                )->format('d-m-Y');
             })
 
             ->addColumn('request_status', function ($row) {
-                
-            if ($row->request_status == 'Done') {
-                
-                return '<span class="badge bg-success">
+
+                if ($row->request_status == 'Done') {
+
+                    return '<span class="badge bg-success">
                 Completed
                 </span>';
                 }
-                
-            return '<span class="badge bg-warning text-dark">
+
+                return '<span class="badge bg-warning text-dark">
                         On Progress
                     </span>';
-        })
+            })
 
-        ->addColumn('status', function ($row) {
-            
-            if ($row->status == 'active') {
-                
-                return '<span class="badge bg-success">
+            ->addColumn('status', function ($row) {
+
+                if ($row->status == 'active') {
+
+                    return '<span class="badge bg-success">
                 Active
                         </span>';
-            }
+                }
 
-            return '<span class="badge bg-danger">
+                return '<span class="badge bg-danger">
                         Deleted
                     </span>';
-        })
+            })
 
-        ->addColumn('action', function ($row) {
-            if ($row->status == 'active') {
-            return '
+            ->addColumn('action', function ($row) {
+                if ($row->status == 'active') {
+                    return '
             <button
                     class="btn btn-danger btn-sm deleteAsset"
-                    data-id="'.$row->id.'">
+                    data-id="' . $row->id . '">
                     Delete
                 </button>
             ';
-             }
-        })
+                }
+            })
 
-        ->filterColumn('department', function ($query, $keyword) {
-            
-            $query->whereHas('department', function ($q) use ($keyword) {
-                
-                $q->where(
-                    'name',
+            ->filterColumn('department', function ($query, $keyword) {
+
+                $query->whereHas('department', function ($q) use ($keyword) {
+
+                    $q->where(
+                        'name',
+                        'like',
+                        "%{$keyword}%"
+                    );
+                });
+            })
+            ->filterColumn('request_status', function ($query, $keyword) {
+
+                $query->where(
+                    'request_status',
                     'like',
                     "%{$keyword}%"
-                    );
-            });
-        })
-        ->filterColumn('request_status', function ($query, $keyword) {
+                );
+            })
+            ->filterColumn('joining_date', function ($query, $keyword) {
 
-            $query->where(
+                $query->whereRaw(
+                    "DATE_FORMAT(joining_date, '%d-%m-%Y') LIKE ?",
+                    ["%{$keyword}%"]
+                );
+            })
+            ->filterColumn('created_at', function ($query, $keyword) {
+
+                $query->whereRaw(
+                    "DATE_FORMAT(created_at, '%d-%m-%Y') LIKE ?",
+                    ["%{$keyword}%"]
+                );
+            })
+
+            ->rawColumns([
                 'request_status',
-                'like',
-                "%{$keyword}%"
-            );
-
-        })
-        ->filterColumn('joining_date', function ($query, $keyword) {
-
-            $query->whereRaw(
-                "DATE_FORMAT(joining_date, '%d-%m-%Y') LIKE ?",
-                ["%{$keyword}%"]
-            );
-
-        })
-         ->filterColumn('created_at', function ($query, $keyword) {
-
-            $query->whereRaw(
-                "DATE_FORMAT(created_at, '%d-%m-%Y') LIKE ?",
-                ["%{$keyword}%"]
-            );
-
-        })
-        
-        ->rawColumns([
-            'request_status',
-            'status',
-            'action'
+                'status',
+                'action'
             ])
-            
+
             ->make(true);
     }
     public function delete(Request $request)
@@ -167,7 +166,8 @@ class AssetRequestController extends Controller
             'message' => 'Asset request deleted successfully.'
         ]);
     }
-    public function exportAssetRequests(Request $request){
+    public function exportAssetRequests(Request $request)
+    {
         $query = AssetRequest::with('department');
 
         if ($request->filled('department_id')) {
@@ -195,10 +195,10 @@ class AssetRequestController extends Controller
             'department_id' => 'required|exists:departments,id',
             'joining_date'  => 'required|date',
             'laptop_count'  => 'required|integer|min:1',
-            ]);
-            
-            AssetRequest::create([
-                
+        ]);
+
+        AssetRequest::create([
+
             'department_id'  => $request->department_id,
 
             'joining_date'   => $request->joining_date,
@@ -215,11 +215,13 @@ class AssetRequestController extends Controller
             'message' => 'Asset request submitted successfully.'
         ]);
     }
-    public function assigned(){
+    public function assigned()
+    {
         $departments = Department::where('status', 'active')->get();
-        return view('pages.assets.assigned',compact('departments'));
+        return view('pages.assets.assigned', compact('departments'));
     }
-    public function assignedlist(Request $request){
+    public function assignedlist(Request $request)
+    {
         $data = Asset::with('employee.department');
         if ($request->filled('department_id')) {
             $data->whereHas('employee', function ($q) use ($request) {
@@ -230,18 +232,18 @@ class AssetRequestController extends Controller
         return DataTables::of($data)
 
             ->addIndexColumn()
-                
-            ->addColumn('employee_code', function($row){
+
+            ->addColumn('employee_code', function ($row) {
 
                 return $row->employee->emp_id ?? '';
             })
 
-            ->addColumn('employee_name', function($row){
+            ->addColumn('employee_name', function ($row) {
 
                 return $row->employee->name ?? '';
             })
 
-            ->editColumn('created_at', function($row){
+            ->editColumn('created_at', function ($row) {
 
                 return $row->created_at
                     ? Carbon::parse(
@@ -250,22 +252,22 @@ class AssetRequestController extends Controller
                     : '';
             })
 
-            ->addColumn('action', function($row){
+            ->addColumn('action', function ($row) {
                 if ($row->status == 'active') {
-                return '
+                    return '
                     <button
                         class="btn btn-warning btn-sm editBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         Edit
                     </button>
                     <button
                         class="btn btn-danger btn-sm returnBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         Return
                     </button>
                     <button
                         class="btn btn-success btn-sm transferBtn"
-                        data-id="'.$row->id.'">
+                        data-id="' . $row->id . '">
                         Transfer
                     </button>
                 ';
@@ -273,12 +275,11 @@ class AssetRequestController extends Controller
             })
             ->filterColumn('created_at', function ($query, $keyword) {
 
-                    $query->whereRaw(
-                        "DATE_FORMAT(created_at, '%d-%m-%Y') LIKE ?",
-                        ["%{$keyword}%"]
-                    );
-
-                })
+                $query->whereRaw(
+                    "DATE_FORMAT(created_at, '%d-%m-%Y') LIKE ?",
+                    ["%{$keyword}%"]
+                );
+            })
             ->filterColumn('employee_name', function ($query, $keyword) {
                 $query->whereHas('employee', function ($q) use ($keyword) {
                     $q->where('name', 'like', "%{$keyword}%");
@@ -294,7 +295,6 @@ class AssetRequestController extends Controller
             ->rawColumns(['action'])
 
             ->make(true);
-        
     }
     public function assetDetails($id)
     {
@@ -309,28 +309,27 @@ class AssetRequestController extends Controller
             'asset_no'      => 'required'
         ]);
 
-        $duplicate = Asset::where('status','active')
-            ->when($request->id,function($q) use ($request){
-                $q->where('id','!=',$request->id);
+        $duplicate = Asset::where('status', 'active')
+            ->when($request->id, function ($q) use ($request) {
+                $q->where('id', '!=', $request->id);
             })
-            ->where(function($q) use ($request){
+            ->where(function ($q) use ($request) {
 
-                if($request->asset_no){
-                    $q->orWhere('asset_no',$request->asset_no);
+                if ($request->asset_no) {
+                    $q->orWhere('asset_no', $request->asset_no);
                 }
 
-                if($request->serial_no){
-                    $q->orWhere('serial_no',$request->serial_no);
+                if ($request->serial_no) {
+                    $q->orWhere('serial_no', $request->serial_no);
                 }
 
-                if($request->mouse_code){
-                    $q->orWhere('mouse_code',$request->mouse_code);
+                if ($request->mouse_code) {
+                    $q->orWhere('mouse_code', $request->mouse_code);
                 }
-
             })
             ->first();
 
-        if($duplicate){
+        if ($duplicate) {
 
             return response()->json([
                 'status' => false,
@@ -352,14 +351,13 @@ class AssetRequestController extends Controller
             'transfer_at'   => null,
         ];
 
-        if($request->id){
+        if ($request->id) {
 
-            Asset::where('id',$request->id)
+            Asset::where('id', $request->id)
                 ->update($data);
 
             $message = 'Asset updated successfully';
-
-        }else{
+        } else {
 
             Asset::create($data);
 
@@ -367,8 +365,8 @@ class AssetRequestController extends Controller
         }
 
         return response()->json([
-            'status'=>true,
-            'message'=>$message
+            'status' => true,
+            'message' => $message
         ]);
     }
     public function returnAsset(Request $request)
@@ -383,7 +381,7 @@ class AssetRequestController extends Controller
             'message' => 'Asset returned successfully'
         ]);
     }
-   
+
     public function export(Request $request)
     {
         $query = Asset::with('employee.department');
@@ -391,7 +389,7 @@ class AssetRequestController extends Controller
         if ($request->department_id) {
 
             $query->whereHas('employee', function ($q)
-                use ($request) {
+            use ($request) {
 
                 $q->where(
                     'department_id',
@@ -407,7 +405,7 @@ class AssetRequestController extends Controller
             'assigned-assets.xlsx'
         );
     }
-   
+
     public function transferAsset(Request $request)
     {
         DB::beginTransaction();
@@ -439,7 +437,6 @@ class AssetRequestController extends Controller
                 'status' => true,
                 'message' => 'Asset transferred successfully'
             ]);
-
         } catch (\Exception $e) {
 
             DB::rollBack();
