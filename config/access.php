@@ -6,7 +6,7 @@ return [
 
         1 => [
 
-            // 'dashboard',
+            'dashboard',
 
             'employee-management',
             'employee-onboard',
@@ -53,7 +53,7 @@ return [
         2 => [
 
             'dashboard',
-
+            
             'employee-management',
             'employee-onboard',
             'employees',
@@ -99,7 +99,7 @@ return [
         3 => [
 
             'dashboard',
-
+            'employees',
             'project-management',
             'all-projects',
             'tasks-allocation',
@@ -111,16 +111,50 @@ return [
         4 => [
 
             'dashboard',
+            'employees',
+        ],
+        5 => [
+
+            'dashboard',
+            'employees',
+        ],
+        6 => [
+
+            'dashboard',
+            'employees',
+
+        ],
+        7 => [
+
+            'dashboard',
+            'employees',
+
+        ],
+        8 => [
+
+            'dashboard',
+            'employees',
+
+        ],
+        9 => [
+
+            'dashboard',
+            'employees',
+            'time-attendance',
+            'attendance-regularization',
+            'attendance-summary',
 
         ],
         10 => [
 
             'dashboard',
+            'employees',
 
         ],
         11 => [
 
             'dashboard',
+            'employees',
 
         ],
 

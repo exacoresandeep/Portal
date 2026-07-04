@@ -260,9 +260,17 @@
 
     <div class="modal-dialog modal-xl">
 
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow-none rounded-0">
+            <div class="modal-header">
+                <h5 class="modal-title">View Details</h5>
 
-            <div id="viewModalContent"></div>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body" id="viewModalContent"></div>
 
         </div>
 
@@ -273,6 +281,15 @@
 <div class="modal fade" id="pdfModal">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
+             <div class="modal-header">
+                <h5 class="modal-title">Document Preview</h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
             <div class="modal-body">
                 <iframe id="pdfFrame"
                         width="100%"
@@ -572,15 +589,7 @@ function loadPendingView(data)
     // alert(1);
     let html = `
 
-        <div class="modal-header">
-
-            <h5>Employee OffBoard Details</h5>
-
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal"></button>
-
-        </div>
+       
 
         <div class="modal-body">
 
@@ -652,7 +661,7 @@ function loadStepperView(data)
 {
     let html = `
 
-            <div class="modal-content">
+            <div class="modal-content border-0 shadow-none rounded-0">
                 <div class="modal-body">
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <img src="${data.employee.photo_url ?? 'default-avatar.png'}"

@@ -52,20 +52,14 @@
 
                 <!-- Type -->
                 <div class="col-lg-2 col-md-3 col-sm-6">
-                    <label class="form-label">Type</label>
+                    <label class="form-label">Job Type</label>
 
-                    <select class="form-select" id="filter_job_type">
-
-                        <option value="">Select type</option>
-
-                        @foreach($jobTypes as $jobType)
-
-                            <option value="{{ $jobType->type }}">
-                                {{ $jobType->type }}
-                            </option>
-
-                        @endforeach
-
+                     <select class="form-select" id="filter_job_type">
+                        <option value="">Select Type</option>
+                        <option value="Permanent">Permanent</option>
+                        <option value="Temporary">Temporary</option>
+                        <option value="Trainee">Trainee</option>
+                        <option value="Contract">Contract</option>
                     </select>
                 </div>
 
@@ -238,7 +232,7 @@
 
                                 <select class="form-select" id="department_id">
 
-                                    <option selected>
+                                    <option value="" selected>
                                         Select Department
                                     </option>
 
@@ -256,23 +250,15 @@
                             <!-- Type -->
                             <div class="mb-3">
                                 <label class="form-label">
-                                    Type
+                                    Job Type
                                 </label>
 
                                 <select class="form-select" id="job_type">
-
-                                    <option selected>
-                                        Select Type
-                                    </option>
-
-                                    @foreach($jobTypes as $jobType)
-
-                                        <option value="{{ $jobType->type }}">
-                                            {{ $jobType->type }}
-                                        </option>
-
-                                    @endforeach
-
+                                    <option value="">Select Type</option>
+                                    <option value="Permanent">Permanent</option>
+                                    <option value="Temporary">Temporary</option>
+                                    <option value="Trainee">Trainee</option>
+                                    <option value="Contract">Contract</option>
                                 </select>
                             </div>
                              <div class="mb-3">
@@ -310,7 +296,7 @@
 
                                 <select class="form-select" id="designation_id">
 
-                                    <option selected>
+                                    <option value="" selected>
                                         Select Position
                                     </option>
 
@@ -333,7 +319,7 @@
 
                                 <select class="form-select" id="reporting_manager_id">
 
-                                    <option selected>
+                                    <option value="" selected>
                                         Select Reporting Manager
                                     </option>
 
@@ -553,7 +539,57 @@
 </div>
 
 <script>
+function verifyEmployee(id)
+{
+    Swal.fire({
+        title: 'Verify Employee?',
+        text: "This employee will be marked as verified.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Verify',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
 
+        if (result.isConfirmed) {
+
+            $.ajax({
+
+                url: '/employee/verify/' + id,
+
+                type: 'POST',
+
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+
+                success: function(response) {
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Verified',
+                        text: response.message
+                    });
+
+                    $('#employeeTable').DataTable().ajax.reload(null, false);
+
+                },
+
+                error: function(xhr) {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON?.message ?? 'Something went wrong.'
+                    });
+
+                }
+
+            });
+
+        }
+
+    });
+}
 $(document).ready(function () {
 
     // Export
@@ -844,9 +880,10 @@ $(document).ready(function () {
 
                     title: 'Success',
 
-                    text: response.message,
-
-                    timer: 2000,
+                    html: `
+                        ${response.message}<br><br>
+                        <strong>Password:</strong> ${response.password}
+                    `,
 
                     showConfirmButton: false
 
@@ -860,26 +897,31 @@ $(document).ready(function () {
 
             error: function (xhr) {
 
-                let errors = xhr.responseJSON.errors;
+                if (xhr.status === 422) {
 
-                let errorMsg = '';
+                    let errors = xhr.responseJSON.errors;
+                    let errorMsg = '';
 
-                $.each(errors, function (key, value) {
+                    $.each(errors, function (key, value) {
+                        errorMsg += value[0] + '<br>';
+                    });
 
-                    errorMsg += value[0] + '\n';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        html: errorMsg
+                    });
 
-                });
+                } else {
 
-                Swal.fire({
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong.'
+                    });
 
-                    icon: 'error',
-
-                    title: 'Validation Error',
-
-                    text: errorMsg
-
-                });
-
+                    console.log(xhr.responseText);
+                }
             }
 
         });
@@ -887,5 +929,51 @@ $(document).ready(function () {
     });
 
 });
+function removeEmployee(id) {
 
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This employee will be deleted permanently.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Delete',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+
+            $.ajax({
+                url: '/employee/delete/' + id,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: response.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    $('#employeeTable').DataTable().ajax.reload(null, false);
+                },
+                error: function () {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Unable to delete employee.'
+                    });
+                }
+            });
+
+        }
+
+    });
+}
 </script>

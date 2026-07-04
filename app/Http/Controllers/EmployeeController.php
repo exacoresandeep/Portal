@@ -12,6 +12,8 @@ use App\Models\Designation;
 use App\Exports\EmployeeExport;
 use App\Exports\OnboardEmployeeExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
@@ -33,6 +35,35 @@ class EmployeeController extends Controller
         );
     }
 
+    public function resetPassword($id)
+    {
+        $employee = Employee::find($id);
+
+        if (!$employee) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Employee not found.'
+            ], 404);
+        }
+
+        // First 3 letters of name
+        $namePart = ucfirst(strtolower(substr(trim($employee->name), 0, 3)));
+
+        // Last 3 digits of contact number
+        $phonePart = substr(preg_replace('/\D/', '', $employee->contact_no), -3);
+
+        // Password Format: San@210
+        $defaultPassword = $namePart . '@' . $phonePart;
+
+        $employee->password = Hash::make($defaultPassword);
+        $employee->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password has been reset successfully.',
+            'password' => $defaultPassword // Optional: Remove this in production if you don't want to expose it.
+        ]);
+    }
     // DataTable Ajax
     public function employeeList(Request $request)
     {
@@ -105,23 +136,35 @@ class EmployeeController extends Controller
 
                     return '
 
-                    <div class="d-flex gap-1">
-                    <button type="button"
-                    class="btn btn-sm btn-primary" onClick="viewEmployee(' . $row->id . ')">
-                    
-                    View
+<div class="d-flex gap-1">
 
-                    </button>
-                    <a href="' . $editUrl . '"
-                    class="btn btn-sm btn-warning text-white">
-                    
-                    Edit
-                    
-                            </a>
+    <button type="button"
+            class="btn btn-sm btn-primary"
+            onclick="viewEmployee('.$row->id.')"  title="View">
 
-                        </div>
-                        
-                        ';
+        <i class="bi bi-eye"></i> 
+
+    </button>
+
+    <button type="button"
+            class="btn btn-sm btn-warning text-white"
+            onclick="editEmployee('.$row->id.')" title="Edit">
+
+        <i class="bi bi-pencil-square"></i> 
+
+    </button>
+
+    <button type="button"
+            class="btn btn-sm btn-danger"
+            onclick="resetPassword('.$row->id.')" title="Reset Password">
+
+        <i class="bi bi-key"></i>
+
+    </button>
+
+</div>
+
+';
                 })
 
                 ->rawColumns([
@@ -133,7 +176,7 @@ class EmployeeController extends Controller
                 ->make(true);
         }
     }
-
+    
     public function exportEmployees(Request $request)
     {
         return Excel::download(
@@ -172,6 +215,22 @@ class EmployeeController extends Controller
         );
     }
 
+    public function changePassword(Request $request, $id)
+    {
+        $request->validate([
+            'password' => 'required|min:6'
+        ]);
+
+        $employee = Employee::findOrFail($id);
+
+        $employee->password = Hash::make($request->password);
+        $employee->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password changed successfully.'
+        ]);
+    }
     public function employeeOnboardList(Request $request)
     {
         if ($request->ajax()) {
@@ -277,7 +336,7 @@ class EmployeeController extends Controller
                                     data-bs-toggle="modal"
                                     data-bs-target="#viewEmployeeModal">
 
-                                View
+                                <i class="bi bi-eye"></i> 
 
                             </button>
 
@@ -287,7 +346,21 @@ class EmployeeController extends Controller
                                     data-bs-toggle="modal"
                                     data-bs-target="#addEmployeeModal">
 
-                                Edit
+                                <i class="bi bi-pencil-square"></i> 
+
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-danger text-white "
+                                    onClick="removeEmployee(' . $row->id . ')">
+
+                                <i class="bi bi-trash"></i> 
+
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-success text-white "
+                                    onClick="verifyEmployee(' . $row->id . ')">
+
+                                <i class="bi bi-check"></i> 
 
                             </button>
 
@@ -305,18 +378,68 @@ class EmployeeController extends Controller
                 ->make(true);
         }
     }
+    public function destroy($id)
+    {
+        $employee = Employee::find($id);
 
+        if (!$employee) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Employee not found.'
+            ], 404);
+        }
+
+        $employee->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Employee deleted successfully.'
+        ]);
+    }
     public function employeeDetails($id)
     {
         $employee = Employee::with([
             'designation',
             'department',
-            'reportingManager'
+            'reportingManager',
+            'educations',
+            'experiences'
         ])->findOrFail($id);
         $employee->photo_url = $employee->photo
             ? asset('storage/employees/photos/' . $employee->photo)
             : asset('assets/img/user.png');
         return response()->json($employee);
+    }
+
+    public function verifyEmployee($id)
+    {
+        $employee = Employee::find($id);
+
+        if (!$employee) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Employee not found.'
+            ], 404);
+
+        }
+
+        if ($employee->onboard_status == 'Completed') {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Employee is already verified.'
+            ], 400);
+
+        }
+
+        $employee->onboard_status = 'Completed';
+        $employee->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Employee verified successfully.'
+        ]);
     }
 
     public function onboardExport(Request $request)
@@ -338,68 +461,93 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-
             'name' => 'required',
-
             'email' => 'required|email|unique:employees,email',
-
             'emp_id' => 'required|unique:employees,emp_id',
-
             'department_id' => 'required',
-
             'designation_id' => 'required',
-
             'job_type' => 'required',
-
         ]);
+        $namePrefix = ucfirst(strtolower(substr(trim($request->name), 0, 3)));
+        $password = $namePrefix . '@123';
 
         Employee::create([
-
             'name' => $request->name,
-
             'email' => $request->email,
-
             'emp_id' => $request->emp_id,
-
             'department_id' => $request->department_id,
-
             'designation_id' => $request->designation_id,
-
             'job_type' => $request->job_type,
-
             'reporting_manager_id' => $request->reporting_manager_id,
-
             'joining_date' => $request->joining_date,
             'confirm_date' => $request->confirm_date,
-
             'status' => 1,
-
             'onboard_status' => 'Pending',
-
-            'password' => Hash::make('password'),
-
+            'password' => Hash::make($password),
         ]);
 
         return response()->json([
-
             'status' => true,
-
-            'message' => 'Employee added successfully'
+            'message' => 'Employee added successfully',
+            'password' => $password,
 
         ]);
     }
     // Edit Employee Page
     public function edit($id)
     {
+        $employee= Employee::with([
+            'department',
+            'designation',
+            'reportingManager',
+            'educations',
+            'experiences'
+        ])->findOrFail($id);
+         $employee->photo = $employee->photo
+            ? asset('storage/employees/photos/' . $employee->photo)
+            : asset('assets/img/user.png');
+        return response()->json($employee);
+    }
 
-        $employee = Employee::findOrFail($id);
+    public function updatePhoto(Request $request)
+    {
+        $request->validate([
+            'id'    => 'required|exists:employees,id',
+            'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048'
+        ]);
 
-        $managers = Employee::where('id', '!=', $id)->get();
+        $employee = Employee::findOrFail($request->id);
 
-        return view(
-            'pages.employee-edit',
-            compact('employee', 'managers')
-        );
+        if ($request->hasFile('photo')) {
+           
+            // Delete old photo
+            if (!empty($employee->photo) &&
+                Storage::disk('public')->exists('employees/photos/' . $employee->photo)) {
+
+                Storage::disk('public')->delete('employees/photos/' . $employee->photo);
+            }
+
+            // Generate filename
+            $extension = $request->file('photo')->getClientOriginalExtension();
+
+            $filename = now()->format('YmdHis') . '_' . $employee->id . '.' . $extension;
+
+            // Store image
+            $request->file('photo')->storeAs(
+                'employees/photos',
+                $filename,
+                'public'
+            );
+
+            // Save filename only
+            $employee->photo = $filename;
+            $employee->save();
+        }
+
+        return response()->json([
+            'status'=>true,
+            'message'=>'Profile photo updated successfully.'
+        ]);
     }
     // Update Employee
     public function update(Request $request, $id)
@@ -462,15 +610,7 @@ class EmployeeController extends Controller
             ->with('success', 'Employee updated successfully');
     }
     // Delete Employee
-    public function destroy($id)
-    {
-
-        Employee::findOrFail($id)->delete();
-
-        return redirect()
-            ->back()
-            ->with('success', 'Employee deleted successfully');
-    }
+   
 
     public function employeesByDepartment(Request $request)
     {
@@ -494,5 +634,67 @@ class EmployeeController extends Controller
             ->get();
 
         return response()->json($employees);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $employee = Employee::findOrFail($request->id);
+
+        $validated = $request->validate([
+
+            'name' => 'required|max:150',
+
+            'emp_id' => [
+                'required',
+                Rule::unique('employees', 'emp_id')->ignore($employee->id)
+            ],
+
+            'email' => [
+                'nullable',
+                'email',
+                Rule::unique('employees', 'personal_email')->ignore($employee->id)
+            ],
+
+            'phone' => 'required|digits_between:10,15',
+
+            'dob' => 'nullable|date',
+
+            'gender' => 'nullable',
+
+            'blood_group' => 'nullable',
+
+            'marital_status' => 'nullable',
+
+            'guardian_name' => 'nullable|max:150',
+
+            'address' => 'nullable',
+
+            'nationality' => 'nullable',
+
+            'emergency_phone' => 'nullable|digits_between:10,15',
+
+        ]);
+
+        $employee->update([
+
+            'name' => $request->name,
+            'emp_id' => $request->emp_id,
+            'personal_email' => $request->email,
+            'contact_no' => $request->phone,
+            'dob' => $request->dob,
+            'gender' => $request->gender,
+            'blood_group' => $request->blood_group,
+            'marital_status' => $request->marital_status,
+            'parent_name' => $request->guardian_name,
+            'address' => $request->address,
+            'nationality' => $request->nationality,
+            'alt_contact_no' => $request->emergency_phone,
+
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Profile updated successfully.'
+        ]);
     }
 }

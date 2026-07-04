@@ -1,4 +1,16 @@
-<div class="p-3">
-    <h2>Dashboard</h2>
-    <p>Welcome Dashboard</p>
+<div class="container-fluid">
+    @include('pages.dashboard.partials.summary-cards')
+    <div class="row">
+        @include('pages.dashboard.partials.task-status')
+        @include('pages.dashboard.partials.employee-distribution')
+    </div>
+    <div class="row">
+        @include('pages.dashboard.partials.onboarding-chart')
+        @include('pages.dashboard.partials.attendance-chart')
+    </div>
+    <div class="row">
+        @include('pages.dashboard.partials.my-tasks')
+        @include('pages.dashboard.partials.birthdays')
+        @include('pages.dashboard.partials.anniversaries')
+    </div>
 </div>

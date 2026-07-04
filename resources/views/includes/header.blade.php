@@ -203,10 +203,14 @@
                 <!--begin::Menu Footer-->
                 <li class="user-footer d-flex align-items-center w-100">
 
-                  <a href="#" class="btn btn-outline-secondary"  data-bs-toggle="modal"
-   data-bs-target="#profileModal">
+                  <button class="btn btn-outline-secondary"  
+                            @if(session('onboard_status') == 'Completed')
+                                onclick="viewProEmployee({{ session('id') }})"
+                            @else
+                                onclick="editProEmployee({{ session('id') }})"
+                            @endif>
                       Profile
-                  </a>
+                  </button>
 
                   <form method="POST" action="{{ route('logout') }}" class="ms-auto">
                       @csrf
@@ -231,362 +235,993 @@
 
   <!-- Modal for Profile -->
   <!-- Profile Modal -->
-  <div class="modal fade"
-      id="profileModal"
-      tabindex="-1"
-      aria-hidden="true">
+ <!-- View Modal -->
+<div class="modal fade"
+     id="pro_employeeProfileModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4">
+
+            <!-- Header -->
+            <div class="modal-header border-0">
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <img src="{{ asset('assets/img/user.png') }}"
+                         id="pro_employee_profile_image"
+                         class="rounded-circle"
+                         width="70"
+                         height="70">
+
+                    <div>
+                        <h5 class="fw-bold mb-1" id="pro_employee_name"></h5>
+
+                        <div class="text-muted small" id="pro_employee_designation"></div>
+
+                        <div class="text-muted small" id="pro_employee_code"></div>
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <hr>
+
+                <ul class="nav nav-pills mb-4 gap-2"
+                    id="pro_employeeProfileTabs"
+                    role="tablist">
+
+                    <li class="nav-item">
+                        <button class="nav-link active"
+                                data-bs-toggle="pill"
+                                data-bs-target="#employeeProfileInfo">
+                            Profile Information
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#employeeOfficialInfo">
+                            Official Information
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#employeeIdentityInfo">
+                            Documents
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#employeeEducationInfo">
+                            Educational Information
+                        </button>
+                    </li>
 
-      <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#employeeBankInfo">
+                            Banking Details
+                        </button>
+                    </li>
 
-          <div class="modal-content border-0 rounded-4">
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#employeeExperienceInfo">
+                            Experience Details
+                        </button>
+                    </li>
+
+                </ul>
+
+                <div class="tab-content">
+
+                    <div class="tab-pane fade show active" id="pro_employeeProfileInfo">
+
+                        <h5 class="mb-4">Profile Information</h5>
+
+                        <div class="row">
+
+                            <!-- Left -->
+                            <div class="col-md-5">
 
-              <!-- Header -->
-              <div class="modal-header border-0">
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Personal Email</small>
+                                    <span id="pro_profile_email" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Phone</small>
+                                    <span id="pro_profile_phone" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Gender</small>
+                                    <span id="pro_profile_gender" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Blood Group</small>
+                                    <span id="pro_profile_blood_group" class="fw-semibold">-</span>
+                                </div>
 
-                  <div class="d-flex align-items-center gap-3">
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Nationality</small>
+                                    <span id="pro_profile_nationality" class="fw-semibold">-</span>
+                                </div>
 
-                      <img
-                        src="{{ session('user_photo') ? asset('storage/employees/photos/' . session('user_photo')) : asset('assets/img/user.png') }}"
-                          class="rounded-circle"
-                          width="70"
-                          height="70">
-                      <div>
+                            </div>
 
-                          <h5 class="fw-bold mb-1">
-                              John Smsith
-                          </h5>
+                            <!-- Right -->
+                            <div class="col-md-7">
 
-                          <div class="text-muted small">
-                              UI-UX Designer
-                          </div>
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Date of Birth</small>
+                                    <span id="pro_profile_dob" class="fw-semibold">-</span>
+                                </div>
 
-                          <div class="text-muted small">
-                              E2406
-                          </div>
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Emergency Phone</small>
+                                    <span id="pro_profile_emergency_phone" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Marital Status</small>
+                                    <span id="pro_profile_marital_status" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Father's/Husband's Name</small>
+                                    <span id="pro_profile_parent_name" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Address</small>
+                                    <span id="pro_profile_address" class="fw-semibold">-</span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="tab-pane fade" id="pro_employeeOfficialInfo">
+
+                        <h5 class="mb-4">Official Information</h5>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Employee ID</small>
+                                <div id="view_pro_emp_id" class="fw-semibold"></div>
+                            </div>
 
-                      </div>
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Official Email</small>
+                                <div id="view_pro_email" class="fw-semibold"></div>
+                            </div>
 
-                  </div>
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Department</small>
+                                <div id="view_pro_department" class="fw-semibold"></div>
+                            </div>
 
-                  <button type="button"
-                          class="btn-close"
-                          data-bs-dismiss="modal"></button>
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Designation</small>
+                                <div id="view_pro_designation" class="fw-semibold"></div>
+                            </div>
 
-              </div>
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Reporting Manager</small>
+                                <div id="view_pro_reporting_manager" class="fw-semibold"></div>
+                            </div>
 
-              <div class="modal-body">
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Date of Joining</small>
+                                <div id="view_pro_joining_date" class="fw-semibold"></div>
+                            </div>
 
-                  <hr>
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Employment Type</small>
+                                <div id="view_pro_job_type" class="fw-semibold"></div>
+                            </div>
 
-                  <!-- Tabs -->
-                  <ul class="nav nav-pills mb-4 gap-2"
-                      id="profileTabs"
-                      role="tablist">
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Work Mode</small>
+                                <div id="view_pro_job_location" class="fw-semibold"></div>
+                            </div>
 
-                      <li class="nav-item">
-                          <button class="nav-link active"
-                                  data-bs-toggle="pill"
-                                  data-bs-target="#profileInfo">
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Work Location</small>
+                                <div id="view_pro_work_location" class="fw-semibold"></div>
+                            </div>
 
-                              Profile Information
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Employee Status</small>
+                                <div id="view_pro_status" class="fw-semibold"></div>
+                            </div>
 
-                          </button>
-                      </li>
+                        </div>
 
-                      <li class="nav-item">
-                          <button class="nav-link"
-                                  data-bs-toggle="pill"
-                                  data-bs-target="#officialInfo">
+                    </div>
 
-                              Official Information
+                    <div class="tab-pane fade" id="pro_employeeIdentityInfo">
 
-                          </button>
-                      </li>
+                        <h5 class="mb-4">Documents and ID Cards</h5>
 
-                      <li class="nav-item">
-                          <button class="nav-link"
-                                  data-bs-toggle="pill"
-                                  data-bs-target="#identityInfo">
+                        <div class="row">
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">Aadhaar Number</small>
+                                <span id="pro_identity_aadhar" class="fw-semibold">-</span>
+                            </div>
+                            <div class="col-4 mb-4" id="pro_doc_aadhar"></div>
 
-                              Identity Information
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">PAN Number</small>
+                                <span id="pro_identity_pan" class="fw-semibold">-</span>
+                            </div>
+                            <div class="col-4 mb-4" id="pro_doc_pan"></div>
+                            
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">Passport Number</small>
+                                <span id="pro_identity_passport" class="fw-semibold">-</span>
+                            </div>
+                            <div class="col-4 mb-4" id="pro_doc_passport" class="mt-3"></div>
+                            
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">UAN (Universal Account Number)</small>
+                                <span id="pro_identity_uan" class="fw-semibold">-</span>
+                            </div>
+                            <div class="col-4 mb-4" id="pro_doc_passbook" class="mt-3"></div>
 
-                          </button>
-                      </li>
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">Insurance Number</small>
+                                <span id="pro_identity_insurance" class="fw-semibold">-</span>
+                            </div>
+                            <div class="col-4 mb-4" id="pro_doc_insurance" class="mt-3"></div>
 
-                      <li class="nav-item">
-                          <button class="nav-link"
-                                  data-bs-toggle="pill"
-                                  data-bs-target="#educationInfo">
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">Resume</small>
+                            </div>
+                            <div class="col-4 mb-4" id="pro_doc_resume" class="mt-3"></div>
 
-                              Educational Information
 
-                          </button>
-                      </li>
+                        </div>
 
-                      <li class="nav-item">
-                          <button class="nav-link"
-                                  data-bs-toggle="pill"
-                                  data-bs-target="#bankInfo">
 
-                              Banking Details
+                    </div>
 
-                          </button>
-                      </li>
-
-                      <li class="nav-item">
-                          <button class="nav-link"
-                                  data-bs-toggle="pill"
-                                  data-bs-target="#documentInfo">
-
-                              Document Management
+                    <div class="tab-pane fade" id="pro_employeeEducationInfo">
 
-                          </button>
-                      </li>
-
-                  </ul>
-
-                  <!-- Tab Content -->
-                  <div class="tab-content">
-
-                      <!-- Profile Information -->
-                      <div class="tab-pane fade show active"
-                          id="profileInfo">
-
-                          <h6 class="fw-semibold mb-4">
-                              Profile Information
-                          </h6>
-
-                          <div class="row gy-4">
-
-                              <div class="col-md-6">
-
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Personal Email
-                                      </small>
-
-                                      <div class="fw-medium">
-                                          john.smith@gmail.com
-                                      </div>
-                                  </div>
-
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Phone
-                                      </small>
-
-                                      <div class="fw-medium">
-                                          9087654321
-                                      </div>
-                                  </div>
+                        <h5 class="mb-4">Educational Information</h5>
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Gender
-                                      </small>
+                        <div class="table-responsive">
 
-                                      <div class="fw-medium">
-                                          Male
-                                      </div>
-                                  </div>
+                            <table class="table table-striped align-middle">
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Blood Group
-                                      </small>
+                                <thead class="table-light">
 
-                                      <div class="fw-medium">
-                                          AB+ve
-                                      </div>
-                                  </div>
+                                    <tr>
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Nationality
-                                      </small>
-
-                                      <div class="fw-medium">
-                                          Indian
-                                      </div>
-                                  </div>
+                                        <th>Qualification</th>
 
-                              </div>
+                                        <th>University / Board</th>
 
-                              <div class="col-md-6">
+                                        <th>Year of Passing</th>
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Date of Birth
-                                      </small>
+                                        <th>Percentage / CGPA</th>
+                                        <th>Attachement</th>
 
-                                      <div class="fw-medium">
-                                          18-07-1999
-                                      </div>
-                                  </div>
+                                    </tr>
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Emergency Phone
-                                      </small>
-
-                                      <div class="fw-medium">
-                                          8097654432
-                                      </div>
-                                  </div>
+                                </thead>
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Marital Status
-                                      </small>
+                                <tbody id="pro_educationTableBody">
 
-                                      <div class="fw-medium">
-                                          Unmarried
-                                      </div>
-                                  </div>
+                                    <tr>
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Father/Mother Name
-                                      </small>
+                                        <td colspan="5" class="text-center text-muted">
+                                            No education details found.
+                                        </td>
 
-                                      <div class="fw-medium">
-                                          Abhin Das
-                                      </div>
-                                  </div>
+                                    </tr>
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Address
-                                      </small>
+                                </tbody>
 
-                                      <div class="fw-medium">
-                                          Flat No. 3B, Galaxy Apartments,
-                                          MG Road, Thrissur, Kerala - 680001
-                                      </div>
-                                  </div>
+                            </table>
 
-                              </div>
+                        </div>
 
-                          </div>
+                    </div>
+                    <div class="tab-pane fade" id="pro_employeeBankInfo">
 
-                      </div>
+                        <h5 class="mb-4">Banking Details</h5>
 
-                      <!-- Official Information -->
-                      <div class="tab-pane fade"
-                          id="officialInfo">
+                        <div class="row">
 
-                          <h6 class="fw-semibold mb-4">
-                              Official Information
-                          </h6>
+                            <div class="col-md-5">
 
-                          <div class="row">
+                                <div class="mb-4">
 
-                              <div class="col-md-6">
+                                    <small class="text-muted d-block">
+                                        Bank Account Number
+                                    </small>
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Employee ID
-                                      </small>
+                                    <span id="pro_bank_account_no" class="fw-semibold"></span>
 
-                                      <div class="fw-medium">
-                                          E2406
-                                      </div>
-                                  </div>
+                                </div>
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Department
-                                      </small>
+                                <div class="mb-4">
 
-                                      <div class="fw-medium">
-                                          Digital
-                                      </div>
-                                  </div>
+                                    <small class="text-muted d-block">
+                                        Bank Name
+                                    </small>
 
-                              </div>
+                                    <span id="pro_bank_name" class="fw-semibold"></span>
 
-                              <div class="col-md-6">
+                                </div>
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Designation
-                                      </small>
+                            </div>
 
-                                      <div class="fw-medium">
-                                          UI-UX Designer
-                                      </div>
-                                  </div>
+                            <div class="col-md-7">
 
-                                  <div class="mb-3">
-                                      <small class="text-muted d-block">
-                                          Joining Date
-                                      </small>
+                                <div class="mb-4">
 
-                                      <div class="fw-medium">
-                                          17-03-2025
-                                      </div>
-                                  </div>
+                                    <small class="text-muted d-block">
+                                        IFSC Code
+                                    </small>
 
-                              </div>
+                                    <span id="pro_bank_ifsc" class="fw-semibold"></span>
 
-                          </div>
+                                </div>
 
-                      </div>
+                                <div class="mb-4">
 
-                      <!-- Identity -->
-                      <div class="tab-pane fade"
-                          id="identityInfo">
+                                    <small class="text-muted d-block">
+                                        Branch
+                                    </small>
 
-                          <h6 class="fw-semibold mb-4">
-                              Identity Information
-                          </h6>
+                                    <span id="pro_bank_branch" class="fw-semibold"></span>
 
-                          <p>PAN, Aadhaar, Passport details here.</p>
+                                </div>
 
-                      </div>
+                            </div>
 
-                      <!-- Education -->
-                      <div class="tab-pane fade"
-                          id="educationInfo">
+                        </div>
 
-                          <h6 class="fw-semibold mb-4">
-                              Educational Information
-                          </h6>
+                    </div>
+                   <div class="tab-pane fade" id="pro_employeeExperienceInfo">
 
-                          <p>Education details here.</p>
+                        <h5 class="mb-4">Experience Details</h5>
 
-                      </div>
+                        <div class="table-responsive">
 
-                      <!-- Bank -->
-                      <div class="tab-pane fade"
-                          id="bankInfo">
+                            <table class="table table-striped align-middle">
 
-                          <h6 class="fw-semibold mb-4">
-                              Banking Details
-                          </h6>
+                                <thead class="table-light">
 
-                          <p>Bank details here.</p>
+                                    <tr>
 
-                      </div>
+                                        <th>Company Name</th>
 
-                      <!-- Documents -->
-                      <div class="tab-pane fade"
-                          id="documentInfo">
+                                        <th>Job Role</th>
 
-                          <h6 class="fw-semibold mb-4">
-                              Document Management
-                          </h6>
+                                        <th>Year of Experience</th>
 
-                          <p>Uploaded documents here.</p>
+                                        <th>Certificate</th>
 
-                      </div>
+                                    </tr>
 
-                  </div>
+                                </thead>
 
-              </div>
+                                <tbody id="pro_experienceTableBody">
 
-          </div>
+                                    <tr>
 
-      </div>
+                                        <td colspan="4" class="text-center text-muted">
+                                            No experience details found.
+                                        </td>
 
-  </div>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!--edit Modal-->
+
+<div class="modal fade" id="pro_attachmentViewerModal" tabindex="-1">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Attachment Preview
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body text-center">
+
+                <img id="pro_attachmentImage"
+                     class="img-fluid d-none"
+                     style="max-height:75vh;">
+
+                <iframe id="pro_attachmentPdf"
+                        class="d-none"
+                        width="100%"
+                        height="700"
+                        frameborder="0">
+                </iframe>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <a id="pro_attachmentDownload"
+                   href="#"
+                   download
+                   class="btn btn-success">
+
+                    <i class="bi bi-download"></i>
+                    Download
+
+                </a>
+
+                <button class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal fade" id="pro_employeeEditModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+
+        <div class="modal-content">
+
+            <!-- Header -->
+            <div class="modal-header">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="position-relative me-3">
+
+                        <img src="{{ asset('assets/img/user.png') }}"
+                            id="pro_edit_profile_image"
+                            class="rounded-circle border"
+                            width="80"
+                            height="80"
+                            style="object-fit:cover;">
+
+                        <button type="button"
+                                class="btn btn-primary btn-sm rounded-circle position-absolute"
+                                id="pro_changePhotoBtn"
+                                style="bottom:0;right:0;width:30px;height:30px;padding:0;">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+
+                        <input type="file"
+                            id="pro_profile_photo"
+                            accept="image/*"
+                            hidden>
+
+                    </div>
+
+                    <div>
+
+                        <h5 class="mb-0 fw-bold">
+                            Edit Employee
+                        </h5>
+
+                        <small id="pro_edit_employee_name"></small>
+
+                    </div>
+
+                </div>
+
+                <button class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <input type="hidden"
+                       id="pro_edit_employee_id">
+
+                <!-- Tabs -->
+
+                <ul class="nav nav-pills mb-4">
+
+                    <li class="nav-item">
+                        <button class="nav-link active"
+                                data-bs-toggle="pill"
+                                data-bs-target="#pro_editProfile">
+                            Profile
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#pro_editOfficial">
+                            Official
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#pro_editDocuments">
+                            Documents
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#pro_editEducation">
+                            Education
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#pro_editBank">
+                            Banking
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#pro_editExperience">
+                            Experience
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#pro_resetPassword">
+                            Password Setting
+                        </button>
+                    </li>
+
+                </ul>
+
+                <div class="tab-content">
+
+                    <!-- ====================== -->
+                    <!-- Profile -->
+                    <!-- ====================== -->
+
+                    <div class="tab-pane fade show active"
+                         id="pro_editProfile">
+
+                        <form id="pro_profileForm">
+
+                            <input type="hidden" name="id" id="pro_profile_id">
+
+                            <div class="row">
+
+                                <!-- Left Column -->
+                                <div class="col-md-6">
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="pro_edit_name" name="name" placeholder="Enter full name">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" id="pro_edit_dob" name="dob">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Emergency Phone</label>
+                                        <input type="text" class="form-control" id="pro_edit_emergency_phone" name="emergency_phone" placeholder="Enter emergency phone number">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Marital Status</label>
+                                        <select class="form-select" id="pro_edit_marital_status" name="marital_status">
+                                            <option value="">select</option>
+                                            <option value="Single">Single</option>
+                                            <option value="Married">Married</option>
+                                            <option value="Divorced">Divorced</option>
+                                            <option value="Widowed">Widowed</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Father's / Husband's Name</label>
+                                        <input type="text" class="form-control" id="pro_edit_guardian_name" name="guardian_name" placeholder="Enter father's / husband's name">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Address</label>
+                                        <textarea class="form-control" id="pro_edit_address" name="address" rows="3" placeholder="Enter address"></textarea>
+                                    </div>
+
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Employee ID <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="pro_edit_emp_id" name="emp_id" placeholder="Enter ID">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Personal Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="pro_edit_personal_email" name="email" placeholder="Enter personal email address">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Phone</label>
+                                        <input type="text" class="form-control" id="pro_edit_phone" name="phone" placeholder="Enter phone number">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Gender</label>
+                                        <select class="form-select" id="pro_edit_gender" name="gender">
+                                            <option value="">Select gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Blood Group</label>
+                                        <select class="form-select" id="pro_edit_blood_group" name="blood_group">
+                                            <option value="">Select blood group</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="O-">O-</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Nationality</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            id="pro_edit_nationality"
+                                            name="nationality"
+                                            placeholder="Enter nationality">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-4">
+
+                                <button type="button"
+                                        class="btn btn-light me-2"
+                                        data-bs-dismiss="modal">
+                                    Cancel
+                                </button>
+
+                                <button type="submit"
+                                        class="btn btn-primary" id="pro_save">
+                                    Save Changes
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                    <!-- ====================== -->
+                    <!-- Official -->
+                    <!-- ====================== -->
+
+                    <div class="tab-pane fade"
+                         id="pro_editOfficial">
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Employee ID</small>
+                                <div id="pro_view_emp_id" class="fw-semibold"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Official Email</small>
+                                <div id="pro_view_email" class="fw-semibold"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Department</small>
+                                <div id="pro_view_department" class="fw-semibold"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Designation</small>
+                                <div id="pro_view_designation" class="fw-semibold"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Reporting Manager</small>
+                                <div id="pro_view_reporting_manager" class="fw-semibold"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Date of Joining</small>
+                                <div id="pro_view_joining_date" class="fw-semibold"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Employment Type</small>
+                                <div id="pro_view_job_type" class="fw-semibold"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Work Mode</small>
+                                <div id="pro_view_job_location" class="fw-semibold"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Work Location</small>
+                                <div id="pro_view_work_location" class="fw-semibold"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted">Employee Status</small>
+                                <div id="pro_view_status" class="fw-semibold"></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ====================== -->
+                    <!-- Documents -->
+                    <!-- ====================== -->
+
+                    <div class="tab-pane fade"
+                         id="pro_editDocuments">
+
+                        <form id="pro_documentForm"
+                              enctype="multipart/form-data">
+
+                            <div class="row">
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label>Aadhaar</label>
+
+                                    <input type="file"
+                                           class="form-control"
+                                           name="aadhar">
+
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label>PAN</label>
+
+                                    <input type="file"
+                                           class="form-control"
+                                           name="pan">
+
+                                </div>
+
+                            </div>
+
+                            <div class="text-end">
+
+                                <button class="btn btn-primary">
+
+                                    Save Documents
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                    <!-- Education -->
+
+                    <div class="tab-pane fade"
+                         id="pro_editEducation">
+
+                        <div id="pro_educationRepeater"></div>
+
+                        <button class="btn btn-success">
+
+                            Add Qualification
+
+                        </button>
+
+                    </div>
+
+                    <!-- Bank -->
+
+                    <div class="tab-pane fade"
+                         id="pro_editBank">
+
+                        <form id="pro_bankForm">
+
+                            <div class="row">
+
+                                <div class="col-md-6">
+
+                                    <label>Bank</label>
+
+                                    <input type="text"
+                                           class="form-control"
+                                           name="bank_name"
+                                           id="pro_edit_bank">
+
+                                </div>
+
+                                <div class="col-md-6">
+
+                                    <label>Account No</label>
+
+                                    <input type="text"
+                                           class="form-control"
+                                           name="account_no"
+                                           id="pro_edit_account">
+
+                                </div>
+
+                            </div>
+
+                            <div class="text-end mt-3">
+
+                                <button class="btn btn-primary">
+
+                                    Save Bank
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                    <!-- Experience -->
+
+                    <div class="tab-pane fade"
+                         id="pro_editExperience">
+
+                        <div id="pro_experienceRepeater"></div>
+
+                        <button class="btn btn-success">
+
+                            Add Experience
+
+                        </button>
+
+                    </div>
+
+                    <!--Setting-->
+                     <div class="tab-pane fade"
+                         id="pro_resetPassword">
+
+                        <input type="hidden" id="reset_employee_id">
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">New Password</label>
+
+                                <div class="input-group">
+                                    <input type="password"
+                                        class="form-control"
+                                        id="new_password"
+                                        placeholder="Enter new password">
+
+                                    <button class="btn btn-outline-secondary"
+                                            type="button"
+                                            onclick="togglePassword('new_password', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Re-enter New Password</label>
+
+                                <div class="input-group">
+                                    <input type="password"
+                                        class="form-control"
+                                        id="confirm_password"
+                                        placeholder="Re-enter new password">
+
+                                    <button class="btn btn-outline-secondary"
+                                            type="button"
+                                            onclick="togglePassword('confirm_password', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="button"
+                                    class="btn btn-light"
+                                    data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    id="changePasswordBtn">
+                                Save Changes
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

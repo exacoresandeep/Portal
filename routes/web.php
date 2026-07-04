@@ -23,22 +23,33 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::view('/sample-page', 'pages.samplepage')->name('samplepage');
 // Dashboard (protected)
-Route::get('/dashboard', function () { return view("dashboard");})->name('dashboard')->middleware('auth')->middleware('department.access:dashboard');
-Route::view('/dashboard-content', 'pages.dashboard-content')->name('dashboard.content');
-
-// Route::view('/employee-directory', 'pages.employee-directory')->name('employee-directory');
-// Route::view('/onboard-employee', 'pages.onboard-employee')->name('onboard-employee');
-//employee
+Route::get('/dashboard/attendance', [LoginController::class, 'attendanceData'])
+    ->middleware('auth')
+    ->name('dashboard.attendance');
+Route::get('/dashboard', [LoginController::class, 'dashboardContent'])->name('dashboard')->middleware('auth')->middleware('department.access:dashboard');
+// Route::view('/dashboard-content', 'pages.dashboard-content')->middleware('auth')->name('dashboard.content');
+Route::get('/dashboard-content', [LoginController::class, 'dashboardContent'])->middleware('auth')->name('dashboard.content');
 Route::get('/employees',[EmployeeController::class, 'index'])->name('employees.index')->middleware('department.access:employees');
 Route::get('/employee-list',[EmployeeController::class, 'employeeList'])->name('employees.list');
 Route::get('/employees/export',[EmployeeController::class, 'exportEmployees'])->name('employees.export');
-
+Route::post('/employee/reset-password/{id}', [EmployeeController::class, 'resetPassword'])->name('employee.resetPassword');
 Route::get('/employee-directory',[EmployeeController::class, 'employeeDirectory'])->name('employeedirectory.index');
 Route::get('/employeeOnboard-list',[EmployeeController::class, 'employeeOnboardList'])->name('onboard.list');
 Route::get('/onboard/export', [EmployeeController::class, 'onboardExport'])->name('onboard.export');
 Route::get('/employee/details/{id}', [EmployeeController::class, 'employeeDetails'])->name('employee.details');
 Route::post('/employee/store', [EmployeeController::class, 'store'])->name('employee.store');
+Route::post('/employee/delete/{id}', [EmployeeController::class, 'destroy'])->name('employee.destroy');
+Route::post('/employee/change-password/{id}', [EmployeeController::class, 'changePassword'])->name('employee.changePassword');
 Route::post('/employee/update/{id}', [EmployeeController::class, 'update'])->name('employee.update');
+Route::post('/employee/update-photo',[EmployeeController::class,'updatePhoto'])->name('employee.update.photo');
+Route::post('/employee/verify/{id}', [EmployeeController::class, 'verifyEmployee'])->name('employee.verify');
+Route::get('/employee/edit/{id}',[EmployeeController::class,'edit']);
+Route::post('/employee/update-profile',[EmployeeController::class,'updateProfile'])->name("employee.updateProfile");
+Route::post('/employee/update-official',[EmployeeController::class,'updateOfficial']);
+Route::post('/employee/update-bank',[EmployeeController::class,'updateBank']);
+Route::post('/employee/update-education',[EmployeeController::class,'updateEducation']);
+Route::post('/employee/update-experience',[EmployeeController::class,'updateExperience']);
+Route::post('/employee/update-document',[EmployeeController::class,'updateDocument']);
 
 Route::get('/employees/edit/{id}', [EmployeeController::class, 'edit'])->name('employees.edit');
 Route::delete('/employees/delete/{id}', [EmployeeController::class, 'destroy'])->name('employees.delete');

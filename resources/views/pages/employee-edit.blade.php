@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
-            <h3 class="fw-bold mb-1">Employee Directory</h3>
+            <h3 class="fw-bold mb-1">Employee Directorys</h3>
         </div>
        <div>
             <button class="btn btn-success" id="exportBtn">

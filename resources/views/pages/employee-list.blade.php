@@ -204,7 +204,7 @@
                         <button class="nav-link"
                                 data-bs-toggle="pill"
                                 data-bs-target="#employeeIdentityInfo">
-                            Identity Information
+                            Documents
                         </button>
                     </li>
 
@@ -227,8 +227,8 @@
                     <li class="nav-item">
                         <button class="nav-link"
                                 data-bs-toggle="pill"
-                                data-bs-target="#employeeDocumentInfo">
-                            Document Management
+                                data-bs-target="#employeeExperienceInfo">
+                            Experience Details
                         </button>
                     </li>
 
@@ -236,34 +236,326 @@
 
                 <div class="tab-content">
 
-                    <div class="tab-pane fade show active"
-                         id="employeeProfileInfo">
-                        Employee Profile Information
+                    <div class="tab-pane fade show active" id="employeeProfileInfo">
+
+                        <h5 class="mb-4">Profile Information</h5>
+
+                        <div class="row">
+
+                            <!-- Left -->
+                            <div class="col-md-5">
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Personal Email</small>
+                                    <span id="profile_email" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Phone</small>
+                                    <span id="profile_phone" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Gender</small>
+                                    <span id="profile_gender" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Blood Group</small>
+                                    <span id="profile_blood_group" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Nationality</small>
+                                    <span id="profile_nationality" class="fw-semibold">-</span>
+                                </div>
+
+                            </div>
+
+                            <!-- Right -->
+                            <div class="col-md-7">
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Date of Birth</small>
+                                    <span id="profile_dob" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Emergency Phone</small>
+                                    <span id="profile_emergency_phone" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Marital Status</small>
+                                    <span id="profile_marital_status" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Father's/Husband's Name</small>
+                                    <span id="profile_parent_name" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Address</small>
+                                    <span id="profile_address" class="fw-semibold">-</span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <div class="tab-pane fade"
-                         id="employeeOfficialInfo">
-                        Employee Official Information
+                    <div class="tab-pane fade" id="employeeOfficialInfo">
+
+                        <h5 class="mb-4">Official Information</h5>
+
+                        <div class="row">
+
+                            <!-- Left -->
+                            <div class="col-md-5">
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Employee ID</small>
+                                    <span id="official_emp_id" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Department</small>
+                                    <span id="official_department" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Reporting Manager</small>
+                                    <span id="official_reporting_manager" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Employment Type</small>
+                                    <span id="official_employment_type" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Employee Status</small>
+                                    <span id="employee_status" class="fw-semibold">-</span>
+                                </div>
+
+                            </div>
+
+                            <!-- Right -->
+                            <div class="col-md-7">
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Official Email</small>
+                                    <span id="official_email" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Designation</small>
+                                    <span id="official_designation" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Date of Joining</small>
+                                    <span id="official_joining_date" class="fw-semibold">-</span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Work Location</small>
+                                    <span id="official_work_location" class="fw-semibold">-</span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <div class="tab-pane fade"
-                         id="employeeIdentityInfo">
-                        Employee Identity Information
+                    <div class="tab-pane fade" id="employeeIdentityInfo">
+
+                        <h5 class="mb-4">Documents and ID Cards</h5>
+
+                        <div class="row">
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">Aadhaar Number</small>
+                                <span id="identity_aadhar" class="fw-semibold">-</span>
+                            </div>
+                            <div class="col-4 mb-4" id="doc_aadhar"></div>
+
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">PAN Number</small>
+                                <span id="identity_pan" class="fw-semibold">-</span>
+                            </div>
+                            <div class="col-4 mb-4" id="doc_pan"></div>
+                            
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">Passport Number</small>
+                                <span id="identity_passport" class="fw-semibold">-</span>
+                            </div>
+                            <div class="col-4 mb-4" id="doc_passport" class="mt-3"></div>
+                            
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">UAN (Universal Account Number)</small>
+                                <span id="identity_uan" class="fw-semibold">-</span>
+                            </div>
+                            <div class="col-4 mb-4" id="doc_passbook" class="mt-3"></div>
+
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">Insurance Number</small>
+                                <span id="identity_insurance" class="fw-semibold">-</span>
+                            </div>
+                            <div class="col-4 mb-4" id="doc_insurance" class="mt-3"></div>
+
+                            <div class="col-2 mb-4">
+                                <small class="text-muted d-block">Resume</small>
+                            </div>
+                            <div class="col-4 mb-4" id="doc_resume" class="mt-3"></div>
+
+
+                        </div>
+
+
                     </div>
 
-                    <div class="tab-pane fade"
-                         id="employeeEducationInfo">
-                        Employee Educational Information
-                    </div>
+                    <div class="tab-pane fade" id="employeeEducationInfo">
 
-                    <div class="tab-pane fade"
-                         id="employeeBankInfo">
-                        Employee Banking Details
-                    </div>
+                        <h5 class="mb-4">Educational Information</h5>
 
-                    <div class="tab-pane fade"
-                         id="employeeDocumentInfo">
-                        Employee Documents
+                        <div class="table-responsive">
+
+                            <table class="table table-striped align-middle">
+
+                                <thead class="table-light">
+
+                                    <tr>
+
+                                        <th>Qualification</th>
+
+                                        <th>University / Board</th>
+
+                                        <th>Year of Passing</th>
+
+                                        <th>Percentage / CGPA</th>
+                                        <th>Attachement</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="educationTableBody">
+
+                                    <tr>
+
+                                        <td colspan="5" class="text-center text-muted">
+                                            No education details found.
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade" id="employeeBankInfo">
+
+                        <h5 class="mb-4">Banking Details</h5>
+
+                        <div class="row">
+
+                            <div class="col-md-5">
+
+                                <div class="mb-4">
+
+                                    <small class="text-muted d-block">
+                                        Bank Account Number
+                                    </small>
+
+                                    <span id="bank_account_no" class="fw-semibold"></span>
+
+                                </div>
+
+                                <div class="mb-4">
+
+                                    <small class="text-muted d-block">
+                                        Bank Name
+                                    </small>
+
+                                    <span id="bank_name" class="fw-semibold"></span>
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-7">
+
+                                <div class="mb-4">
+
+                                    <small class="text-muted d-block">
+                                        IFSC Code
+                                    </small>
+
+                                    <span id="bank_ifsc" class="fw-semibold"></span>
+
+                                </div>
+
+                                <div class="mb-4">
+
+                                    <small class="text-muted d-block">
+                                        Branch
+                                    </small>
+
+                                    <span id="bank_branch" class="fw-semibold"></span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                   <div class="tab-pane fade" id="employeeExperienceInfo">
+
+                        <h5 class="mb-4">Experience Details</h5>
+
+                        <div class="table-responsive">
+
+                            <table class="table table-striped align-middle">
+
+                                <thead class="table-light">
+
+                                    <tr>
+
+                                        <th>Company Name</th>
+
+                                        <th>Job Role</th>
+
+                                        <th>Year of Experience</th>
+
+                                        <th>Certificate</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="experienceTableBody">
+
+                                    <tr>
+
+                                        <td colspan="4" class="text-center text-muted">
+                                            No experience details found.
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -277,8 +569,899 @@
 
 <!--edit Modal-->
 
+<div class="modal fade" id="attachmentViewerModal" tabindex="-1">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Attachment Preview
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body text-center">
+
+                <img id="attachmentImage"
+                     class="img-fluid d-none"
+                     style="max-height:75vh;">
+
+                <iframe id="attachmentPdf"
+                        class="d-none"
+                        width="100%"
+                        height="700"
+                        frameborder="0">
+                </iframe>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <a id="attachmentDownload"
+                   href="#"
+                   download
+                   class="btn btn-success">
+
+                    <i class="bi bi-download"></i>
+                    Download
+
+                </a>
+
+                <button class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal fade" id="employeeEditModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+
+        <div class="modal-content">
+
+            <!-- Header -->
+            <div class="modal-header">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="position-relative me-3">
+
+                        <img src="{{ asset('assets/img/user.png') }}"
+                            id="edit_profile_image"
+                            class="rounded-circle border"
+                            width="80"
+                            height="80"
+                            style="object-fit:cover;">
+
+                        <button type="button"
+                                class="btn btn-primary btn-sm rounded-circle position-absolute"
+                                id="changePhotoBtn"
+                                style="bottom:0;right:0;width:30px;height:30px;padding:0;">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+
+                        <input type="file"
+                            id="profile_photo"
+                            accept="image/*"
+                            hidden>
+
+                    </div>
+
+                    <div>
+
+                        <h5 class="mb-0 fw-bold">
+                            Edit Employee
+                        </h5>
+
+                        <small id="edit_employee_name"></small>
+
+                    </div>
+
+                </div>
+
+                <button class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <input type="hidden"
+                       id="edit_employee_id">
+
+                <!-- Tabs -->
+
+                <ul class="nav nav-pills mb-4">
+
+                    <li class="nav-item">
+                        <button class="nav-link active"
+                                data-bs-toggle="pill"
+                                data-bs-target="#editProfile">
+                            Profile
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#editOfficial">
+                            Official
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#editDocuments">
+                            Documents
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#editEducation">
+                            Education
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#editBank">
+                            Banking
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link"
+                                data-bs-toggle="pill"
+                                data-bs-target="#editExperience">
+                            Experience
+                        </button>
+                    </li>
+
+                </ul>
+
+                <div class="tab-content">
+
+                    <!-- ====================== -->
+                    <!-- Profile -->
+                    <!-- ====================== -->
+
+                    <div class="tab-pane fade show active"
+                         id="editProfile">
+
+                        <form id="profileForm">
+
+                            <input type="hidden" name="id" id="profile_id">
+
+                            <div class="row">
+
+                                <!-- Left Column -->
+                                <div class="col-md-6">
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="edit_name" name="name" placeholder="Enter full name">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" id="edit_dob" name="dob">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Emergency Phone</label>
+                                        <input type="text" class="form-control" id="edit_emergency_phone" name="emergency_phone" placeholder="Enter emergency phone number">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Marital Status</label>
+                                        <select class="form-select" id="edit_marital_status" name="marital_status">
+                                            <option value="">select</option>
+                                            <option value="Single">Single</option>
+                                            <option value="Married">Married</option>
+                                            <option value="Divorced">Divorced</option>
+                                            <option value="Widowed">Widowed</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Father's / Husband's Name</label>
+                                        <input type="text" class="form-control" id="edit_guardian_name" name="guardian_name" placeholder="Enter father's / husband's name">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Address</label>
+                                        <textarea class="form-control" id="edit_address" name="address" rows="3" placeholder="Enter address"></textarea>
+                                    </div>
+
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Employee ID <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="edit_emp_id" name="emp_id" placeholder="Enter ID">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Personal Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="edit_personal_email" name="email" placeholder="Enter personal email address">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Phone</label>
+                                        <input type="text" class="form-control" id="edit_phone" name="phone" placeholder="Enter phone number">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Gender</label>
+                                        <select class="form-select" id="edit_gender" name="gender">
+                                            <option value="">Select gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Blood Group</label>
+                                        <select class="form-select" id="edit_blood_group" name="blood_group">
+                                            <option value="">Select blood group</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="O-">O-</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Nationality</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            id="edit_nationality"
+                                            name="nationality"
+                                            placeholder="Enter nationality">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-4">
+
+                                <button type="button"
+                                        class="btn btn-light me-2"
+                                        data-bs-dismiss="modal">
+                                    Cancel
+                                </button>
+
+                                <button type="submit"
+                                        class="btn btn-primary" id="save">
+                                    Save Changes
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                    <!-- ====================== -->
+                    <!-- Official -->
+                    <!-- ====================== -->
+
+                    <div class="tab-pane fade"
+                         id="editOfficial">
+
+                        <form id="officialForm">
+
+                            <input type="hidden"
+                                   name="id"
+                                   id="official_id">
+
+                            <div class="row">
+
+                                <div class="col-md-4">
+
+                                    <label>Employee ID</label>
+
+                                    <input type="text"
+                                           class="form-control"
+                                           name="emp_id"
+                                           id="edit_emp_id">
+
+                                </div>
+
+                                <div class="col-md-4">
+
+                                    <label>Official Email</label>
+
+                                    <input type="email"
+                                           class="form-control"
+                                           name="official_email"
+                                           id="edit_official_email">
+
+                                </div>
+
+                                <div class="col-md-4">
+
+                                    <label>Department</label>
+
+                                    <select class="form-select"
+                                            name="department_id"
+                                            id="edit_department">
+
+                                    </select>
+
+                                </div>
+
+                                <div class="col-md-4 mt-3">
+
+                                    <label>Designation</label>
+
+                                    <select class="form-select"
+                                            name="designation_id"
+                                            id="edit_designation">
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                            <div class="text-end mt-3">
+
+                                <button class="btn btn-primary">
+
+                                    Save Official
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                    <!-- ====================== -->
+                    <!-- Documents -->
+                    <!-- ====================== -->
+
+                    <div class="tab-pane fade"
+                         id="editDocuments">
+
+                        <form id="documentForm"
+                              enctype="multipart/form-data">
+
+                            <div class="row">
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label>Aadhaar</label>
+
+                                    <input type="file"
+                                           class="form-control"
+                                           name="aadhar">
+
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label>PAN</label>
+
+                                    <input type="file"
+                                           class="form-control"
+                                           name="pan">
+
+                                </div>
+
+                            </div>
+
+                            <div class="text-end">
+
+                                <button class="btn btn-primary">
+
+                                    Save Documents
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                    <!-- Education -->
+
+                    <div class="tab-pane fade"
+                         id="editEducation">
+
+                        <div id="educationRepeater"></div>
+
+                        <button class="btn btn-success">
+
+                            Add Qualification
+
+                        </button>
+
+                    </div>
+
+                    <!-- Bank -->
+
+                    <div class="tab-pane fade"
+                         id="editBank">
+
+                        <form id="bankForm">
+
+                            <div class="row">
+
+                                <div class="col-md-6">
+
+                                    <label>Bank</label>
+
+                                    <input type="text"
+                                           class="form-control"
+                                           name="bank_name"
+                                           id="edit_bank">
+
+                                </div>
+
+                                <div class="col-md-6">
+
+                                    <label>Account No</label>
+
+                                    <input type="text"
+                                           class="form-control"
+                                           name="account_no"
+                                           id="edit_account">
+
+                                </div>
+
+                            </div>
+
+                            <div class="text-end mt-3">
+
+                                <button class="btn btn-primary">
+
+                                    Save Bank
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                    <!-- Experience -->
+
+                    <div class="tab-pane fade"
+                         id="editExperience">
+
+                        <div id="experienceRepeater"></div>
+
+                        <button class="btn btn-success">
+
+                            Add Experience
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 <script>
+    $.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    }
+});
+$('#profileForm').on('submit', function (e) {
+
+    e.preventDefault();
+
+    $('.is-invalid').removeClass('is-invalid');
+    $('.invalid-feedback').remove();
+
+    $.ajax({
+
+        url: "{{ route('employee.updateProfile') }}",
+
+        type: "POST",
+
+        data: $(this).serialize(),
+
+        beforeSend: function () {
+
+            $('#save').prop('disabled', true);
+
+            Swal.fire({
+                title: 'Saving...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+        },
+
+        success: function (response) {
+
+            Swal.close();
+
+            $('#save').prop('disabled', false);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: response.message,
+                timer: 1500,
+                showConfirmButton: false
+            });
+
+            $('#employeeTable').DataTable().ajax.reload(null, false);
+
+        },
+
+        error: function (xhr) {
+
+            Swal.close();
+
+            $('#save').prop('disabled', false);
+
+            if (xhr.status == 422) {
+
+                let errors = xhr.responseJSON.errors;
+
+                $.each(errors, function (key, value) {
+
+                    let input = $('[name="' + key + '"]');
+
+                    input.addClass('is-invalid');
+
+                    input.after('<div class="invalid-feedback">' + value[0] + '</div>');
+
+                });
+
+            } else {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: xhr.responseJSON.message ?? 'Something went wrong.'
+                });
+
+            }
+
+        }
+
+    });
+
+});
+    // Open file browser
+$('#changePhotoBtn').click(function () {
+
+    $('#profile_photo').click();
+
+});
+
+
+// Upload automatically after selecting image
+$('#profile_photo').change(function () {
+
+    let file = this.files[0];
+
+    if (!file) return;
+
+    // Preview image
+    let reader = new FileReader();
+
+    reader.onload = function (e) {
+
+        $('#edit_profile_image').attr('src', e.target.result);
+
+    }
+
+    reader.readAsDataURL(file);
+
+
+    // Upload
+
+    let formData = new FormData();
+
+    formData.append('photo', file);
+    formData.append('id', $('#profile_id').val());
+    formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
+    $.ajax({
+
+        url: "{{ route('employee.update.photo') }}",
+
+        type: "POST",
+
+        data: formData,
+
+        processData: false,
+
+        contentType: false,
+
+        beforeSend:function(){
+
+            Swal.fire({
+                title:'Uploading...',
+                allowOutsideClick:false,
+                didOpen:()=>{
+                    Swal.showLoading();
+                }
+            });
+
+        },
+
+        success:function(res){
+
+            Swal.fire({
+                icon:'success',
+                title:'Success',
+                text:res.message,
+                timer:1500,
+                showConfirmButton:false
+            });
+
+            $('#employeeTable').DataTable().ajax.reload(null,false);
+
+        },
+
+        error:function(xhr){
+
+            Swal.fire({
+                icon:'error',
+                title:'Error',
+                text:xhr.responseJSON?.message ?? 'Unable to upload image.'
+            });
+
+        }
+
+    });
+
+});
+function editEmployee(id)
+{
+
+    $.ajax({
+        
+
+        url:'/employee/edit/'+id,
+
+        type:'GET',
+
+        beforeSend:function(){
+
+            Swal.fire({
+                title:'Loading...',
+                text:'Fetching employee details',
+                allowOutsideClick:false,
+                didOpen:()=>{
+                    Swal.showLoading();
+                }
+            });
+
+        },
+
+        success:function(emp){
+
+            Swal.close();
+
+            // Hidden ID
+            $('#edit_employee_id').val(emp.id);
+            $('#profile_id').val(emp.id);
+            $('#official_id').val(emp.id);
+
+            // Header
+            $('#edit_employee_name').text(emp.name);
+
+            if(emp.photo){
+                $('#edit_profile_image').attr('src',emp.photo);
+            }
+
+            // Profile
+
+            $('#edit_name').val(emp.name);
+            $('#edit_personal_email').val(emp.personal_email);
+            $('#edit_dob').val(emp.dob);
+            $('#edit_emergency_phone').val(emp.alt_contact_no);
+            $('#edit_marital_status').val(emp.marital_status);
+            $('#edit_guardian_name').val(emp.parent_name);
+            $('#edit_address').val(emp.address);
+            $('#edit_emp_id').val(emp.emp_id);
+
+            $('#edit_phone').val(emp.contact_no);
+            $('#edit_gender').val(emp.gender);
+            $('#edit_blood_group').val(emp.blood_group);
+            $('#edit_nationality').val(emp.nationality);
+
+            // Official
+
+            $('#edit_emp_id').val(emp.emp_id);
+            $('#edit_official_email').val(emp.official_email);
+            $('#edit_department').val(emp.department_id).trigger('change');
+            $('#edit_designation').val(emp.designation_id).trigger('change');
+
+            // Banking
+
+            $('#edit_bank').val(emp.bank_name);
+            $('#edit_account').val(emp.account_no);
+
+            // Open first tab
+
+            $('#employeeEditModal').modal('show');
+
+            $('#editProfile-tab').tab('show');
+
+        },
+
+        error:function(xhr){
+
+            Swal.fire({
+                icon:'error',
+                title:'Error',
+                text:xhr.responseJSON?.message ?? 'Unable to load employee.'
+            });
+
+        }
+
+    });
+
+}
+    function viewAttachment(file)
+    {
+        if (!file) return;
+
+        let extension = file.split('.').pop().toLowerCase();
+
+        $('#attachmentImage').addClass('d-none');
+        $('#attachmentPdf').addClass('d-none');
+
+        $('#attachmentDownload').attr('href', file);
+
+        if (['jpg','jpeg','png','gif','webp'].includes(extension)) {
+
+            $('#attachmentImage')
+                .attr('src', file)
+                .removeClass('d-none');
+
+        }
+        else if (extension === 'pdf') {
+
+            $('#attachmentPdf')
+                .attr('src', file)
+                .removeClass('d-none');
+
+        }
+        else {
+
+            window.open(file,'_blank');
+            return;
+
+        }
+
+        $('#attachmentViewerModal').modal('show');
+    }
+    $('#employeeEditModal').on('hidden.bs.modal',function(){
+
+        $(this).find('form')[0]?.reset();
+
+        $('form').trigger('reset');
+
+    });
+    function documentCard(title,file){
+
+    if(!file){
+
+        return `
+            <label class="fw-semibold">${title}</label>
+
+            <div class="border rounded p-3 text-muted">
+
+                No document uploaded
+
+            </div>
+        `;
+    }
+
+    let fileName=file.split('/').pop();
+
+    return `
+    <label class="fw-semibold">${title}</label>
+    <div class="border rounded p-3 d-flex justify-content-between align-items-center">
+        <div>
+           <i class="bi bi-file-earmark-pdf-fill text-danger fs-4 me-2"></i>
+            ${fileName}
+        </div>
+        <div>
+            <a href="${file}" target="_blank" class="btn btn-sm btn-primary">
+                <i class="bi bi-eye-fill"></i>
+            </a>
+            <a href="${file}" download class="btn btn-sm btn-success">
+                <i class="bi bi-download"></i>
+            </a>
+        </div>
+    </div>
+    `;
+}
+function resetPassword(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to reset this employee's password.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Reset Password',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            // Your AJAX call here
+            $.ajax({
+                url: '/employee/reset-password/' + id,
+                type: 'POST',
+                data: {
+                    id: id,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    Swal.fire(
+                        'Reset!',
+                        'Employee password has been reset successfully.',
+                        'success'
+                    );
+                },
+                error: function() {
+                    Swal.fire(
+                        'Error!',
+                        'Something went wrong.',
+                        'error'
+                    );
+                }
+            });
+
+        }
+    });
+}
 function viewEmployee(id)
 {
     $.ajax({
@@ -289,26 +1472,215 @@ function viewEmployee(id)
 
             $('#employee_name').text(response.name);
             $('#employee_profile_image').attr('src', response.photo_url);
-            $('#employee_email').text(response.email);
-            $('#employee_department').text(response.department?.name ?? '-');
-            $('#employee_job_type').text(response.job_type);
-            $('#employee_emp_id').text(response.emp_id);
             $('#employee_designation').text(response.designation?.name ?? '-');
-            $('#employee_reporting_manager').text(response.reporting_manager?.name ?? '-');
-            $('#employee_joining_date').text(response.joining_date);
-            $('#employee_confirm_date').text(response.confirm_date);
+            $('#employee_code').text(response.emp_id ?? '-');
+            $('#profile_email').text(response.email ?? '-');
+            $('#profile_phone').text(response.contact_no ?? '-');
+            $('#profile_gender').text(response.gender ?? '-');
+            $('#profile_blood_group').text(response.blood_group ?? '-');
+            $('#profile_nationality').text(response.nationality ?? '-');
 
+            $('#profile_dob').text(response.dob ?? '-');
+            $('#profile_emergency_phone').text(response.alt_contact_no ?? '-');
+            $('#profile_marital_status').text(response.marital_status ?? '-');
+            $('#profile_parent_name').text(response.parent_name ?? '-');
+            $('#profile_address').text(response.address ?? '-');
+            // Official Information
+
+            $('#official_emp_id').text(response.emp_id ?? '-');
+
+            $('#official_email').text(response.email ?? '-');
+
+            $('#official_department').text(
+                response.department ? response.department.name : '-'
+            );
+
+            $('#official_designation').text(
+                response.designation ? response.designation.name : '-'
+            );
+
+            $('#official_reporting_manager').text(
+                response.reporting_manager ? response.reporting_manager.name : '-'
+            );
+
+            $('#official_joining_date').text(
+                response.joining_date ?? '-'
+            );
+
+            $('#official_employment_type').text(
+                response.employment_type ?? '-'
+            );
+
+            $('#official_work_location').text(
+                response.job_location ?? '-'
+            );
+
+            // Identity Information
+
+            $('#identity_aadhar').text(
+                response.aadhar_no ?? '-'
+            );
+
+            $('#identity_pan').text(
+                response.pan_no ?? '-'
+            );
+
+            $('#identity_passport').text(
+                response.passport_no ?? '-'
+            );
+
+            $('#identity_uan').text(
+                response.uan ?? '-'
+            );
+
+            $('#identity_insurance').text(
+                response.insurance_no ?? '-'
+            );
             $('#employee_status').text(
                 response.status == 1 ? 'Active' : 'Inactive'
             );
+            $('#bank_account_no').text(response.account_no ?? '-');
 
+            $('#bank_name').text(response.bank_name ?? '-');
+
+            $('#bank_ifsc').text(response.ifsc ?? '-');
+
+            $('#bank_branch').text(response.branch ?? '-');
+            $('#educationTableBody').html('');
+
+            if (response.educations && response.educations.length > 0) {
+
+                $.each(response.educations, function(index, education){
+
+                    $('#educationTableBody').append(`
+                        <tr>
+
+                            <td>${education.qualification ?? '-'}</td>
+
+                            <td>${education.university_board ?? '-'}</td>
+
+                            <td>${education.passing_year ?? '-'}</td>
+
+                            <td>${education.percentage ?? '-'}%</td>
+
+                            <td>
+                                
+            
+                            ${education.attachment ? `<a href="javascript:void(0)"
+   onclick="viewAttachment('${education.attachment}')"
+   class="btn btn-sm btn-primary">
+
+    <i class="bi bi-eye-fill"></i>
+
+    </a>
+                                <a href="${education.attachment}" download class="btn btn-sm btn-success">
+                                    <i class="bi bi-download"></i>
+                                </a>` : '-'}
+                            </td>
+
+                        </tr>
+                    `);
+
+                });
+
+            }
+            else{
+
+                $('#educationTableBody').html(`
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            No education details found.
+                        </td>
+                    </tr>
+                `);
+
+            }
+            $('#experienceTableBody').html('');
+
+            if (response.experiences && response.experiences.length > 0) {
+
+                $.each(response.experiences, function(index, experience) {
+
+                    let attachment = '-';
+
+                    if (experience.attachment) {
+                        attachment = `
+                            <a href="javascript:void(0)"
+                                onclick="viewAttachment('${experience.attachment}')"
+                                class="btn btn-sm btn-primary"
+                                title="View">
+
+                                    <i class="bi bi-eye-fill"></i>
+
+                                </a>
+
+                            <a href="${experience.attachment}" download title="Download"  class="btn btn-sm btn-success">
+                                <i class="bi bi-download"></i>
+                            </a>
+                        `;
+                    }
+
+                    $('#experienceTableBody').append(`
+                        <tr>
+
+                            <td>${experience.company_name ?? '-'}</td>
+
+                            <td>${experience.job_role ?? '-'}</td>
+
+                            <td>${experience.year_of_experience ?? '-'} Year(s)</td>
+
+                            <td>${attachment}</td>
+
+                        </tr>
+                    `);
+
+                });
+
+            } else {
+
+                $('#experienceTableBody').html(`
+                    <tr>
+                        <td colspan="4" class="text-center">
+                            No experience details found.
+                        </td>
+                    </tr>
+                `);
+
+            }
+            $('#doc_aadhar').html(
+                documentCard('Aadhaar Card',response.adhar_card)
+            );
+
+            $('#doc_pan').html(
+                documentCard('PAN Card',response.pan_card)
+            );
+
+            $('#doc_passport').html(
+                documentCard('Passport',response.passport)
+            );
+
+            $('#doc_resume').html(
+                documentCard('Resume',response.resume)
+            );
+
+            $('#doc_passbook').html(
+                documentCard('Passbook',response.passbook)
+            );
+
+            $('#doc_insurance').html(
+                documentCard('Insurance Card',response.insurance)
+            );
             $('#employeeProfileModal').modal('show');
         },
             error: function(xhr, status, error) {
 
             console.error(error);
 
-            alert('Unable to fetch employee details. Please try again.');
+           Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Unable to fetch employee details. Please try again.'
+            });
 
             // Optional: clear modal fields
             $('#employee_name').text('');
