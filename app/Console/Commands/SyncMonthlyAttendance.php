@@ -59,7 +59,7 @@ class SyncMonthlyAttendance extends Command
         }
 
         $this->info(
-            $logs->count() . ' records synced successfully.'
+            $logs->count() . ' records synced successfully at '.now()->format('Y-m-d H:i:s')
         );
     }
 }
