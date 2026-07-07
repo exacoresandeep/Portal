@@ -11,7 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class LoginController extends Controller
 {
-    
+    public function showLogin()
+    {
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+
+        return view('auth.login');
+    }
 
     // Handle login
     public function login(Request $request)

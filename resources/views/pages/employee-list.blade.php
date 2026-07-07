@@ -875,71 +875,172 @@
                     <!-- Official -->
                     <!-- ====================== -->
 
-                    <div class="tab-pane fade"
-                         id="editOfficial">
+                    <div class="tab-pane fade" id="editOfficial">
 
                         <form id="officialForm">
 
+                            @csrf
+
                             <input type="hidden"
-                                   name="id"
-                                   id="official_id">
+                                name="id"
+                                id="official_id">
 
                             <div class="row">
 
-                                <div class="col-md-4">
+                                <!-- Left -->
 
-                                    <label>Employee ID</label>
+                                <div class="col-md-6">
 
-                                    <input type="text"
-                                           class="form-control"
-                                           name="emp_id"
-                                           id="edit_emp_id">
+                                    <div class="mb-3">
+                                        <label class="form-label">Employee ID</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            name="emp_id"
+                                            id="edit_official_emp_id"
+                                            placeholder="Enter employee ID">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Department</label>
+
+                                        <select class="form-select"
+                                                name="department_id"
+                                                id="edit_department">
+                                             @foreach($departments as $department)
+                                                <option value="{{ $department->id }}">
+                                                    {{ $department->department_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Reporting Manager</label>
+
+                                        <select class="form-select"
+                                                name="reporting_manager"
+                                                id="edit_reporting_manager">
+                                        </select>
+
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Job Type</label>
+
+                                        <select class="form-select"
+                                                name="job_type"
+                                                id="edit_job_type">
+
+                                            <option value="">Select Job Type</option>
+                                            <option value="Permanent">Permanent</option>
+                                            <option value="Contract">Contract</option>
+                                            <option value="Intern">Intern</option>
+
+                                        </select>
+
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Work Location</label>
+
+                                        <input type="text"
+                                            class="form-control"
+                                            name="work_location"
+                                            id="edit_work_location"
+                                            placeholder="Enter work location">
+
+                                    </div>
 
                                 </div>
 
-                                <div class="col-md-4">
+                                <!-- Right -->
 
-                                    <label>Official Email</label>
+                                <div class="col-md-6">
 
-                                    <input type="email"
-                                           class="form-control"
-                                           name="official_email"
-                                           id="edit_official_email">
+                                    <div class="mb-3">
 
-                                </div>
+                                        <label class="form-label">Official Email</label>
 
-                                <div class="col-md-4">
+                                        <input type="email"
+                                            class="form-control"
+                                            name="official_email"
+                                            id="edit_official_email"
+                                            placeholder="Enter official email">
 
-                                    <label>Department</label>
+                                    </div>
 
-                                    <select class="form-select"
-                                            name="department_id"
-                                            id="edit_department">
+                                    <div class="mb-3">
 
-                                    </select>
+                                        <label class="form-label">Designation</label>
 
-                                </div>
+                                        <select class="form-select"
+                                                name="designation_id"
+                                                id="edit_designation">
+                                        </select>
 
-                                <div class="col-md-4 mt-3">
+                                    </div>
 
-                                    <label>Designation</label>
+                                    <div class="mb-3">
 
-                                    <select class="form-select"
-                                            name="designation_id"
-                                            id="edit_designation">
+                                        <label class="form-label">Date of Joining</label>
 
-                                    </select>
+                                        <input type="date"
+                                            class="form-control"
+                                            name="joining_date"
+                                            id="edit_joining_date">
+
+                                    </div>
+
+                                    <div class="mb-3">
+
+                                        <label class="form-label">Work Mode</label>
+
+                                        <select class="form-select"
+                                                name="work_mode"
+                                                id="edit_work_mode">
+
+                                            <option value="">Select Work Mode</option>
+                                            <option value="Office">Office</option>
+                                            <option value="Remote">Remote</option>
+                                            <option value="Hybrid">Hybrid</option>
+
+                                        </select>
+
+                                    </div>
+
+                                    <div class="mb-3">
+
+                                        <label class="form-label">Employee Status</label>
+
+                                        <select class="form-select"
+                                                name="employee_status"
+                                                id="edit_employee_status">
+
+                                            <option value="">Select Status</option>
+                                            <option value="Active">Active</option>
+                                            <option value="Inactive">Inactive</option>
+                                            <option value="Resigned">Resigned</option>
+
+                                        </select>
+
+                                    </div>
 
                                 </div>
 
                             </div>
 
-                            <div class="text-end mt-3">
+                            <div class="text-end mt-4">
 
-                                <button class="btn btn-primary">
+                                <button type="button"
+                                        class="btn btn-light"
+                                        data-bs-dismiss="modal">
+                                    Cancel
+                                </button>
 
-                                    Save Official
-
+                                <button type="submit"
+                                        class="btn btn-primary">
+                                    Save Official Information
                                 </button>
 
                             </div>
@@ -1288,7 +1389,6 @@ function editEmployee(id)
             // Hidden ID
             $('#edit_employee_id').val(emp.id);
             $('#profile_id').val(emp.id);
-            $('#official_id').val(emp.id);
 
             // Header
             $('#edit_employee_name').text(emp.name);
@@ -1315,10 +1415,18 @@ function editEmployee(id)
 
             // Official
 
-            $('#edit_emp_id').val(emp.emp_id);
-            $('#edit_official_email').val(emp.official_email);
+            $('#edit_official_emp_id').val(emp.emp_id);
+
+            $('#edit_official_email').val(emp.email);
             $('#edit_department').val(emp.department_id).trigger('change');
             $('#edit_designation').val(emp.designation_id).trigger('change');
+
+            $('#edit_reporting_manager').val(emp.reporting_manager);
+            $('#edit_joining_date').val(emp.joining_date);
+            $('#edit_job_type').val(emp.job_type);
+            $('#edit_work_mode').val(emp.work_mode);
+            $('#edit_work_location').val(emp.work_location);
+            $('#edit_employee_status').val(emp.employee_status);
 
             // Banking
 
@@ -1806,5 +1914,72 @@ $(document).ready(function () {
     });
 
 });
+$('#officialForm').submit(function(e){
 
+    e.preventDefault();
+
+    $.ajax({
+
+        url:'/employee/update-official',
+
+        type:'POST',
+
+        data:$(this).serialize(),
+
+        beforeSend:function(){
+
+            $('#officialForm button[type=submit]')
+                .prop('disabled',true)
+                .text('Saving...');
+
+        },
+
+        success:function(res){
+
+            Swal.fire({
+
+                icon:'success',
+                title:'Success',
+
+                text:res.message
+
+            });
+
+        },
+
+        error:function(xhr){
+
+            let errors=xhr.responseJSON.errors;
+
+            let msg='';
+
+            $.each(errors,function(k,v){
+
+                msg+=v[0]+'<br>';
+
+            });
+
+            Swal.fire({
+
+                icon:'error',
+
+                title:'Validation',
+
+                html:msg
+
+            });
+
+        },
+
+        complete:function(){
+
+            $('#officialForm button[type=submit]')
+                .prop('disabled',false)
+                .text('Save Official Information');
+
+        }
+
+    });
+
+});
 </script>

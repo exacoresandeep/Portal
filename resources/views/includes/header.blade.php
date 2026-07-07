@@ -1200,13 +1200,13 @@
 
                         </div>
 
-                        <div class="mt-3">
+                        <div class="d-flex justify-content-end mt-4">
                             <button type="button"
                                     class="btn btn-light"
                                     data-bs-dismiss="modal">
                                 Cancel
                             </button>
-
+&nbsp;
                             <button type="button"
                                     class="btn btn-primary"
                                     id="changePasswordBtn">

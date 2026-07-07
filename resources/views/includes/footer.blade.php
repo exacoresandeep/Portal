@@ -42,20 +42,53 @@
       <!-- DataTables JS -->
       <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
+    function setCookie(name, value, days) {
+
+        let expires = "";
+
+        if (days) {
+            let date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+
+        document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
+    }
+    function getCookie(name) {
+
+        let nameEQ = name + "=";
+        let ca = document.cookie.split(';');
+
+        for (let i = 0; i < ca.length; i++) {
+
+            let c = ca[i].trim();
+
+            if (c.indexOf(nameEQ) == 0) {
+                return decodeURIComponent(c.substring(nameEQ.length));
+            }
+        }
+
+        return null;
+    }
 $('#pro_employeeEditModal').find('form').each(function () {
     this.reset();
 });
+function loadPage(pageUrl) {
+    if (!pageUrl) return;
+    setCookie('activeMenu', pageUrl, 7);
+    $('#main-content').load(pageUrl);
+}
 $(document).ready(function () {
-
-    function loadPage(pageUrl) {
-
-        if (!pageUrl) return;
-
-        localStorage.setItem('activeMenu', pageUrl);
-
-        $('#main-content').load(pageUrl);
+    // Restore last page
+    let activeMenu = getCookie('activeMenu');
+    if (activeMenu) {
+        loadPage(activeMenu);
+    } else {
+        let firstMenu = $('.menu-link').first();
+        if (firstMenu.length) {
+            loadPage(firstMenu.data('page'));
+        }
     }
-
     // Parent Menu Click
     $(document).on(
         'click',
@@ -124,25 +157,8 @@ $(document).ready(function () {
 
         }
     );
-
-    // Restore last page
-    let activeMenu = localStorage.getItem('activeMenu');
-
-    if (activeMenu) {
-
-        loadPage(activeMenu);
-
-    } else {
-
-        let firstMenu = $('.menu-link').first();
-
-        if (firstMenu.length) {
-
-            loadPage(firstMenu.data('page'));
-        }
-    }
-
 });
+
 function viewProEmployee(id)
 {
     $.ajax({
@@ -352,7 +368,8 @@ function viewProEmployee(id)
         }
     });
 }
-   function documentProCard(title,file){
+
+function documentProCard(title,file){
 
     if(!file){
 
@@ -387,6 +404,7 @@ function viewProEmployee(id)
     </div>
     `;
 }
+
 function viewProAttachment(file)
 {
     if (!file) return;
@@ -421,6 +439,7 @@ function viewProAttachment(file)
 
     $('#pro_attachmentViewerModal').modal('show');
 }
+
 function editProEmployee(id)
 {
 
@@ -533,6 +552,7 @@ function togglePassword(id, button) {
     }
 
 }
+
 $('#changePasswordBtn').click(function () {
 
     let employee_id = $('#reset_employee_id').val();
@@ -620,6 +640,102 @@ $('#changePasswordBtn').click(function () {
     });
 
 });
+
+
+var working = "00:00:00";
+var breaking = "00:00:00";
+var lastDirection = "";
+var timer = null;
+
+$(document).ready(function () {
+
+    loadAttendance();
+
+    setInterval(function () {
+        loadAttendance();
+    }, 60000);
+
+});
+
+function loadAttendance() {
+
+    $.ajax({
+        url: "{{ route('dashboard.attendance') }}",
+        type: "GET",
+
+        success: function(res){
+
+            working = res.workingHours;
+            breaking = res.breakHours;
+            lastDirection = res.lastDirection;
+
+            if(res.checkIn == "Not Checked In"){
+
+                $("#checkInTime")
+                    .removeClass("text-success")
+                    .addClass("text-danger")
+                    .html('<i class="bi bi-x-circle-fill"></i> Not Checked');
+
+            }else{
+
+                $("#checkInTime")
+                    .removeClass("text-danger")
+                    .addClass("text-success")
+                    .html('<i class="bi bi-check-circle-fill"></i> ' + res.checkIn);
+
+            }
+
+            $("#workingHours").text(working);
+            $("#breakHours").text(breaking);
+
+            startTimer();
+        }
+    });
+
+}
+
+function tick(time){
+
+    let p = time.split(':');
+
+    let sec =
+        parseInt(p[0]) * 3600 +
+        parseInt(p[1]) * 60 +
+        parseInt(p[2]);
+
+    sec++;
+
+    let h = String(Math.floor(sec / 3600)).padStart(2,'0');
+    let m = String(Math.floor((sec % 3600) / 60)).padStart(2,'0');
+    let s = String(sec % 60).padStart(2,'0');
+
+    return h + ":" + m + ":" + s;
+}
+
+function startTimer(){
+
+    if(timer){
+        clearInterval(timer);
+    }
+
+    timer = setInterval(function(){
+
+        if(lastDirection === "in"){
+
+            working = tick(working);
+            $("#workingHours").text(working);
+
+        }else if(lastDirection === "out"){
+
+            breaking = tick(breaking);
+            $("#breakHours").text(breaking);
+
+        }
+
+    },1000);
+
+}
+
 </script>
     <!--end::Script-->
   </body>

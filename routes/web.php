@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AssetRequestController;
@@ -15,13 +14,25 @@ use App\Http\Controllers\TrainingPhaseController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\TaskController;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Employee;
 
 // Handle login
 Route::get('/', function () { return view('auth.login'); })->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+Route::get('/login', function () {
+
+    if (Auth::check()) {
+        $employees = Employee::where('status', 1)->get();
+            return view('dashboard', $employees);
+        
+    }
+
+    return view('auth.login');
+
+})->name('getlogin');
 // Logout
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-Route::view('/sample-page', 'pages.samplepage')->name('samplepage');
 // Dashboard (protected)
 Route::get('/dashboard/attendance', [LoginController::class, 'attendanceData'])
     ->middleware('auth')
