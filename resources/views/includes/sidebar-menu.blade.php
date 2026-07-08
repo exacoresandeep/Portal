@@ -9,7 +9,7 @@ $pages = config('access.page')[session('department_id')] ?? [];
         <!--begin::Sidebar Brand-->
         <div class="sidebar-brand">
           <!--begin::Brand Link-->
-          <a href="{{ route('dashboard.content') }}" class="brand-link" >
+          <a href="{{ route('dashboard') }}" class="brand-link" >
             <!--begin::Brand Image-->
             <img
               src="{{ asset('assets/images/logo.svg') }}"
