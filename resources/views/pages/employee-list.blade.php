@@ -908,7 +908,7 @@
                                                 id="edit_department">
                                              @foreach($departments as $department)
                                                 <option value="{{ $department->id }}">
-                                                    {{ $department->department_name }}
+                                                    {{ $department->name }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -921,6 +921,11 @@
                                         <select class="form-select"
                                                 name="reporting_manager"
                                                 id="edit_reporting_manager">
+                                                @foreach($managers as $manager)
+                                                <option value="{{ $manager->id }}">
+                                                    {{ $manager->name }}
+                                                </option>
+                                            @endforeach
                                         </select>
 
                                     </div>
@@ -977,6 +982,11 @@
                                         <select class="form-select"
                                                 name="designation_id"
                                                 id="edit_designation">
+                                            @foreach($designations as $designation)
+                                                <option value="{{ $designation->id }}">
+                                                    {{ $designation->name }}
+                                                </option>
+                                            @endforeach
                                         </select>
 
                                     </div>
@@ -1014,13 +1024,12 @@
                                         <label class="form-label">Employee Status</label>
 
                                         <select class="form-select"
-                                                name="employee_status"
+                                                name="status"
                                                 id="edit_employee_status">
 
                                             <option value="">Select Status</option>
-                                            <option value="Active">Active</option>
-                                            <option value="Inactive">Inactive</option>
-                                            <option value="Resigned">Resigned</option>
+                                            <option value="1">Active</option>
+                                            <option value="0">Inactive</option>
 
                                         </select>
 
@@ -1385,10 +1394,11 @@ function editEmployee(id)
         success:function(emp){
 
             Swal.close();
-
+            console.log(emp);
             // Hidden ID
             $('#edit_employee_id').val(emp.id);
             $('#profile_id').val(emp.id);
+            $('#official_id').val(emp.id);
 
             // Header
             $('#edit_employee_name').text(emp.name);
@@ -1421,12 +1431,12 @@ function editEmployee(id)
             $('#edit_department').val(emp.department_id).trigger('change');
             $('#edit_designation').val(emp.designation_id).trigger('change');
 
-            $('#edit_reporting_manager').val(emp.reporting_manager);
+            $('#edit_reporting_manager').val(emp.reporting_manager.id).trigger('change');
             $('#edit_joining_date').val(emp.joining_date);
             $('#edit_job_type').val(emp.job_type);
-            $('#edit_work_mode').val(emp.work_mode);
+            $('#edit_work_mode').val(emp.job_location);
+            $('#edit_employee_status').val(emp.status).trigger('change');
             $('#edit_work_location').val(emp.work_location);
-            $('#edit_employee_status').val(emp.employee_status);
 
             // Banking
 

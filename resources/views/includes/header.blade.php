@@ -46,13 +46,14 @@
           <ul class="navbar-nav ms-auto">
             
 
-            <!--begin::Messages Dropdown Menu-->
+            <!--begin::Messages Dropdown Menu remove s-->
+            
             <li class="nav-item dropdown">
               <a class="nav-link" data-bs-toggle="dropdown" href="#">
                 <i class="bi bi-backpack4-fill"></i>
                 <span class="navbar-badge badge text-bg-danger">3</span>
               </a>
-              <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <div class="d-none dropdown-menu dropdown-menu-lg dropdown-menu-end">
                 <a href="#" class="dropdown-item">
                   <!--begin::Message-->
                   <div class="d-flex">
@@ -136,13 +137,13 @@
             </li>
             <!--end::Messages Dropdown Menu-->
 
-            <!--begin::Notifications Dropdown Menu-->
-            <li class="nav-item dropdown">
+            <!--begin::Notifications Dropdown Menu  remove s-->
+            <li class="nav-item dropdowns">
               <a class="nav-link" data-bs-toggle="dropdown" href="#">
                 <i class="bi bi-bell-fill"></i>
                 <span class="navbar-badge badge text-bg-warning">15</span>
               </a>
-              <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <div class="d-none dropdown-menu dropdown-menu-lg dropdown-menu-end">
                 <span class="dropdown-item dropdown-header">15 Notifications</span>
                 <div class="dropdown-divider"></div>
                 <a href="#" class="dropdown-item">

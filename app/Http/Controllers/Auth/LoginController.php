@@ -38,9 +38,10 @@ class LoginController extends Controller
                 'department' => Auth::user()->department,
                 'department_id' => Auth::user()->department_id,
                 ]);    
+                return redirect()->route('dashboard');
             
-           $employees = Employee::where('status', 1)->get();
-            return view('dashboard', $employees);
+            // $employees = Employee::where('status', 1)->get();
+            // return view('dashboard', compact("employees"));
         }
 
         return back()->with('error', 'Invalid credentials');
@@ -143,7 +144,6 @@ class LoginController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        
         $employees = Employee::where('status', 1)->get();
         return view('dashboard', $employees);
     }

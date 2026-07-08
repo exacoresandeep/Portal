@@ -24,12 +24,14 @@ class EmployeeController extends Controller
         $jobTypes = JobType::where('status', 'active')->get();
         $departments = Department::where('status', 'active')->get();
         $designations = Designation::where('status', 'active')->get();
+        $managers = Employee::where('status', '1')->get();
 
         return view(
             'pages.employee-list',
             compact(
                 'jobTypes',
                 'departments',
+                'managers',
                 'designations'
             )
         );
@@ -696,5 +698,55 @@ class EmployeeController extends Controller
             'status' => true,
             'message' => 'Profile updated successfully.'
         ]);
+    }
+
+
+   public function updateOfficial(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:employees,id',
+            'emp_id' => 'required|max:50',
+            'official_email' => 'nullable|email|max:255',
+            'department_id' => 'nullable|exists:departments,id',
+            'designation_id' => 'nullable|exists:designations,id',
+            'reporting_manager' => 'nullable|exists:employees,id',
+            'joining_date' => 'nullable|date',
+            'job_type' => 'nullable|in:Permanent,Contract,Intern',
+            'work_mode' => 'nullable|in:Office,Remote,Hybrid',
+            'employee_status' => 'nullable|in:Active,Inactive,Resigned',
+            'work_location' => 'nullable|string|max:255',
+        ]);
+
+        try {
+
+            $employee = Employee::findOrFail($request->id);
+
+            $employee->update([
+                'emp_id'             => $request->emp_id,
+                'official_email'     => $request->official_email,
+                'department_id'      => $request->department_id,
+                'designation_id'     => $request->designation_id,
+                'reporting_manager'  => $request->reporting_manager,
+                'joining_date'       => $request->joining_date,
+                'job_type'           => $request->job_type,
+                'work_mode'          => $request->work_mode,
+                'employee_status'    => $request->employee_status,
+                'work_location'      => $request->work_location,
+                'status'      => $request->status,
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Official information updated successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ],500);
+
+        }
     }
 }

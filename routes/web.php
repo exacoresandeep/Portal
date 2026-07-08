@@ -21,23 +21,18 @@ use App\Models\Employee;
 Route::get('/', function () { return view('auth.login'); })->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::get('/login', function () {
-
     if (Auth::check()) {
         $employees = Employee::where('status', 1)->get();
-            return view('dashboard', $employees);
-        
+        return view('dashboard', compact('employees'));        
     }
-
     return view('auth.login');
-
 })->name('getlogin');
-// Logout
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Dashboard (protected)
 Route::get('/dashboard/attendance', [LoginController::class, 'attendanceData'])
     ->middleware('auth')
     ->name('dashboard.attendance');
-Route::get('/dashboard', [LoginController::class, 'dashboardContent'])->name('dashboard')->middleware('auth')->middleware('department.access:dashboard');
+Route::get('/dashboard', [LoginController::class, 'dashboard'])->name('dashboard')->middleware('auth')->middleware('department.access:dashboard');
 // Route::view('/dashboard-content', 'pages.dashboard-content')->middleware('auth')->name('dashboard.content');
 Route::get('/dashboard-content', [LoginController::class, 'dashboardContent'])->middleware('auth')->name('dashboard.content');
 Route::get('/employees',[EmployeeController::class, 'index'])->name('employees.index')->middleware('department.access:employees');
