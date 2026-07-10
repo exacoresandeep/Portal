@@ -462,31 +462,138 @@
     </div>
 
 </div>
-<div class="modal fade" id="attachmentModal">
+<div class="modal fade" id="editTaskModal" tabindex="-1">
 
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-lg">
 
         <div class="modal-content">
 
-            <div class="modal-header">
+            <form id="editTaskForm" enctype="multipart/form-data">
 
-                <h5>Attachment</h5>
+                @csrf
 
-                <button class="btn-close"
-                        data-bs-dismiss="modal"></button>
+                <div class="modal-header">
 
-            </div>
+                    <h5 class="modal-title">
+                        Edit Task
+                    </h5>
 
-            <div class="modal-body p-0">
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
 
-                <iframe
-                    id="attachmentFrame"
-                    width="100%"
-                    height="600"
-                    frameborder="0">
-                </iframe>
+                </div>
 
-            </div>
+                <div class="modal-body">
+
+                    <input type="hidden"
+                           id="editTaskId"
+                           name="task_id">
+                    <div class="row">
+                        <!-- Assigned To -->
+                        <div class="col-lg-6 mb-3">
+                            <label>Assigned To</label>
+
+                            <select class="form-select"
+                                    name="assigned_to"
+                                    id="editAssignedTo">
+
+                                @foreach($employees as $employee)
+                                    <option value="{{ $employee->id }}">
+                                        {{ $employee->name }}
+                                    </option>
+                                @endforeach
+
+                            </select>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="col-lg-6 mb-3">
+                            <label>Start Date</label>
+
+                            <input type="date"
+                                class="form-control"
+                                name="start_date"
+                                id="editStartDate">
+                        </div>
+
+                        <!-- End Date -->
+                        <div class="col-lg-6 mb-3">
+                            <label>End Date</label>
+
+                            <input type="date"
+                                class="form-control"
+                                name="end_date"
+                                id="editEndDate">
+                        </div>
+
+                        <!-- Estimated Hour -->
+                        <div class="col-lg-6 mb-3">
+                            <label>Estimated Hour</label>
+
+                            <input type="number"
+                                step="0.5"
+                                class="form-control"
+                                name="estimated_hour"
+                                id="editEstimatedHour">
+                        </div>
+
+                        <!-- Remaining Hour -->
+                        <div class="col-lg-6 mb-3">
+                            <label>Remaining Hour</label>
+
+                            <input type="number"
+                                    step="0.5"
+                                class="form-control"
+                                name="remaining_hour"
+                                id="editRemainingHour" readonly>
+                        </div>
+
+                        <!-- Dependencies -->
+                        <div class="col-lg-6 mb-3">
+                            <label>Dependencies</label>
+
+                            <textarea class="form-control"
+                                    name="dependencies"
+                                    id="editDependencies"></textarea>
+                        </div>
+
+                        <!-- Attachment -->
+                        <div class="col-lg-6 mb-3">
+
+                            <label>Attachment</label>
+
+                            <input type="file"
+                                class="form-control"
+                                name="attachment">
+
+                        </div>
+                        <div class="col-lg-6 mb-3 d-flex flex-column">
+
+                            <div id="attachmentPreview" class="mt-auto"></div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Close
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Update Task
+                    </button>
+
+                </div>
+
+            </form>
 
         </div>
 
@@ -759,6 +866,40 @@
     </div>
 
 </div>
+<div class="modal fade" id="attachmentModal">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5>Attachment</h5>
+
+                <button class="btn-close"
+                        data-bs-dismiss="modal"></button>
+
+            </div>
+
+            <div class="modal-body p-0">
+
+                <iframe
+                    id="attachmentFrame"
+                    width="100%"
+                    height="600"
+                    frameborder="0">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
 <script>
     
 $('#saveTaskBtn').click(function () {
@@ -1330,6 +1471,117 @@ $('#update_progress').on('input', function () {
 
     $('#progress_bar').css('width', value + '%');
     $('#progress_bar').text(value + '%');
+
+});
+var originalEstimated = 0;
+var originalRemaining = 0;
+$(document).on('click', '.editBtn', function () {
+
+    let id = $(this).data('id');
+
+    $.ajax({
+
+        url: '/tasks/edit/' + id ,
+
+        type: 'GET',
+
+        success: function (res) {
+        // console.log(res);
+            $('#editTaskId').val(res.task.id);
+
+            $('#editAssignedTo').val(res.task_update.employee_id).trigger('change');
+
+            $('#editStartDate').val(res.task_update.start_date);
+
+            $('#editEndDate').val(res.task_update.end_date);
+
+            originalEstimated = parseFloat(res.estimated_hour);
+            originalRemaining = parseFloat(res.remaining_hour);
+
+            $('#editEstimatedHour').val(originalEstimated);
+            $('#editRemainingHour').val(originalRemaining).css({'background-color': '#f3e9e9'});
+
+            $('#editDependencies').val(res.task_update.dependencies);
+
+            if(res.task_update.attachment){
+
+                $('#attachmentPreview').html(
+                    '<button href="#" class="viewAttachment btn btn-success" data-url="'+res.task_update.attachment+'">View Attachment</button>'
+                );
+
+            }else{
+
+                $('#attachmentPreview').html('-');
+
+            }
+           
+
+            $('#editTaskModal').modal('show');
+
+        }
+
+    });
+
+});
+$('#editEstimatedHour').on('input', function () {
+
+    let newEstimated = parseFloat($(this).val()) || 0;
+
+    let difference = newEstimated - originalEstimated;
+
+    let newRemaining = originalRemaining + difference;
+
+    if (newRemaining < 0) {
+        newRemaining = 0;
+    }
+
+    $('#editRemainingHour').val(newRemaining.toFixed(2));
+
+});
+
+$('#editTaskForm').submit(function(e){
+
+    e.preventDefault();
+
+    let formData = new FormData(this);
+
+    $.ajax({
+
+        url:'/tasks/allocationupdate',
+
+        type:'POST',
+
+        data:formData,
+
+        processData:false,
+
+        contentType:false,
+
+        success:function(res){
+
+            Swal.fire(
+                'Success',
+                res.message,
+                'success'
+            );
+
+            $('#editTaskModal').modal('hide');
+
+            $('#taskTable').DataTable().ajax.reload(null,false);
+
+        },
+
+        error:function(xhr){
+
+            Swal.fire(
+                'Error',
+                xhr.responseJSON.message,
+                'error'
+            );
+
+        }
+
+    });
 
 });
 </script>

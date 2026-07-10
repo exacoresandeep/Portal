@@ -403,8 +403,7 @@ class TaskController extends Controller
             ]);
         }
     }
-
-    
+ 
     public function delete($id)
     {
         DB::beginTransaction();
@@ -789,12 +788,6 @@ class TaskController extends Controller
     public function utilization()
     {
         $departments = Department::where('status', 'active')->get();
-        $employees = Employee::where('status',1)->count();
-
-        $fully = 0;
-        $partial = 0;
-        $bench = 0;
-        $under = 0;
         $employees=Employee::where("status","1")->orderBy('name')->get();
         $projects = Project::where("status","Active")
         ->where(function ($query) {
@@ -805,21 +798,12 @@ class TaskController extends Controller
         return view('pages.task.resource-utilization',
         compact('projects','employees','departments'));
     }
-
-   
-    
+ 
     public function utilizationList(Request $request)
     {
         $year  = $request->year ?? date('Y');
         $month = $request->month ?? date('m');
-        
-        /*
-        |--------------------------------------------------------------------------
-        | Employees
-        |--------------------------------------------------------------------------
-        */
-
-        
+       
         $employees = Employee::select(
             'id',
             'name',
@@ -836,15 +820,9 @@ class TaskController extends Controller
             );
 
         })
-
+        
         ->orderBy('name')
         ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Active Projects
-        |--------------------------------------------------------------------------
-        */
 
         $projects = Project::select(
                 'id',
@@ -855,21 +833,10 @@ class TaskController extends Controller
             ->where('status', 'Active')
             ->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Schedule Calendars
-        |--------------------------------------------------------------------------
-        */
-
         $calendars = ScheduleCalendar::where('year', $year)
             ->get()
             ->keyBy('project_id');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Allocation Query (One SQL Only)
-        |--------------------------------------------------------------------------
-        */
         $from = Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
         $to  = Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
         $allocations = DB::table('tasks')
@@ -969,9 +936,16 @@ class TaskController extends Controller
         $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
 
         $data = [];
+        $totalEmployees = 0;
+        $fully = 0;
+        // $optimal = 0;
+        $partial = 0;
+        $under = 0;
+        $bench = 0;
+        // $over = 0;
 
         foreach ($employees as $employee) {
-
+            
             $employeeProjects = $projects->filter(function ($project) use ($employee) {
 
                 return is_array($project->team_members)
@@ -1045,6 +1019,29 @@ class TaskController extends Controller
                 $badge = 'dark';
 
             }
+            $totalEmployees++;
+
+                switch ($status) {
+
+                    case 'Fully Utilized':
+                        $fully++;
+                        break;
+
+                    case 'Partially Utilized':
+                        $partial++;
+                        break;
+
+                    case 'Under Utilized':
+                        $under++;
+                        break;
+
+                    case 'Available / Bench':
+                        $bench++;
+                        break;
+
+                    
+                }
+
 
             $data[] = [
 
@@ -1069,8 +1066,104 @@ class TaskController extends Controller
                 'current_allocation',
                 'status'
             ])
+            ->with([
+                'summary' => [
+                    'employees' => $totalEmployees,
+                    'fully' => $fully,
+                    'partial' => $partial,
+                    'under' => $under,
+                    'bench' => $bench,
+                ]
+            ])
+
             ->make(true);
     }
 
+    public function edit($id)
+    {
+        $task = Task::with('latestUpdate')->findOrFail($id);
+
+        $firstUpdate = TaskUpdate::where('task_id', $id)
+            ->orderBy('id', 'asc')
+            ->first();
+
+        $lastUpdate = TaskUpdate::where('task_id', $id)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $lastUpdate->attachment=$lastUpdate->attachment
+                    ? asset('storage/tasks/'.$lastUpdate->attachment)
+                    : null;
+
+        return response()->json([
+            'task' => $task,
+            'task_update' => $lastUpdate,
+            'estimated_hour' => $firstUpdate ? $firstUpdate->remaining_hours : 0,
+            'remaining_hour' => $lastUpdate ? $lastUpdate->remaining_hours : 0,
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'task_id' => 'required|exists:tasks,id',
+            'assigned_to' => 'required',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'estimated_hour' => 'required|numeric',
+            'remaining_hour' => 'required|numeric',
+        ]);
+
+        $firstUpdate = TaskUpdate::where('task_id', $request->task_id)
+            ->orderBy('id', 'asc')
+            ->first();
+
+        $lastUpdate = TaskUpdate::where('task_id', $request->task_id)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        // Update first row (Estimated Hour)
+        if ($firstUpdate) {
+            $firstUpdate->remaining_hours = $request->estimated_hour;
+            $firstUpdate->save();
+        }
+
+        // Update latest row
+        if ($lastUpdate) {
+            $lastUpdate->employee_id = $request->assigned_to;
+            $lastUpdate->start_date = $request->start_date;
+            $lastUpdate->end_date = $request->end_date;
+            $lastUpdate->remaining_hours = $request->remaining_hour;
+            $lastUpdate->dependencies = $request->dependencies;
+
+            $lastUpdate->hours_worked = $lastUpdate->hours_worked;
+            $lastUpdate->progress = $lastUpdate->progress;
+            $lastUpdate->status = $lastUpdate->status;
+
+            if ($request->hasFile('attachment')) {
+
+                if ($lastUpdate->attachment &&
+                    Storage::disk('public')->exists('tasks/' . $lastUpdate->attachment)) {
+
+                    Storage::disk('public')->delete('tasks/' . $lastUpdate->attachment);
+                }
+
+                $file = $request->file('attachment');
+
+                $fileName = $request->task_id . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+                $file->storeAs('tasks', $fileName, 'public');
+
+                $lastUpdate->attachment = $fileName;
+            }
+
+            $lastUpdate->save();
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Task updated successfully.'
+        ]);
+    }
     
 }

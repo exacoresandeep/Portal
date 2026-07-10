@@ -26,7 +26,7 @@
                             </div>
                             <div class="ms-3">
                                 <h6 class="text-muted mb-1">Total Employees</h6>
-                                <h4 class="fw-bold text-primary mb-0">85</h4>
+                                <h4 class="fw-bold text-primary mb-0" id="totalEmployees">0</h4>
                             </div>
                         </div>
                     </div>
@@ -41,7 +41,8 @@
                             </div>
                             <div class="ms-3">
                                 <h6 class="text-muted mb-1">Fully Utilized</h6>
-                                <h4 class="fw-bold text-success mb-0">45</h4>
+                                <h4 class="fw-bold text-success mb-0" id="fullyUtilized">0</h4>
+
                             </div>
                         </div>
                     </div>
@@ -56,7 +57,7 @@
                             </div>
                             <div class="ms-3">
                                 <h6 class="text-muted mb-1">Partially Utilized</h6>
-                                <h4 class="fw-bold text-danger mb-0">20</h4>
+                                <h4 class="fw-bold text-danger mb-0" id="partiallyUtilized">0</h4>
                             </div>
                         </div>
                     </div>
@@ -71,7 +72,7 @@
                             </div>
                             <div class="ms-3">
                                 <h6 class="text-muted mb-1">Under Utilized</h6>
-                                <h4 class="fw-bold text-warning mb-0">10</h4>
+                                <h4 class="fw-bold text-warning mb-0" id="underUtilized">0</h4>
                             </div>
                         </div>
                     </div>
@@ -86,7 +87,7 @@
                             </div>
                             <div class="ms-3">
                                 <h6 class="text-muted mb-1">Available / Bench</h6>
-                                <h4 class="fw-bold text-danger mb-0">10</h4>
+                                <h4 class="fw-bold text-danger mb-0" id="benchEmployees">0</h4>
                             </div>
                         </div>
                     </div>
@@ -245,6 +246,21 @@
                 d.department = $('#filter_department').val();
                 d.billable = $('#filter_billable').val();
                 d.utilization = $('#filter_utilization').val();
+            },
+            dataSrc: function (json) {
+
+                $('#totalEmployees').text(json.summary.employees);
+                $('#fullyUtilized').text(json.summary.fully);
+                $('#optimalUtilized').text(json.summary.optimal);
+                $('#partiallyUtilized').text(json.summary.partial);
+                $('#underUtilized').text(json.summary.under);
+                $('#benchEmployees').text(json.summary.bench);
+
+                if ($('#overAllocated').length) {
+                    $('#overAllocated').text(json.summary.over);
+                }
+
+                return json.data;
             }
 
         },

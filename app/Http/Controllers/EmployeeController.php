@@ -14,6 +14,7 @@ use App\Exports\OnboardEmployeeExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class EmployeeController extends Controller
 {
@@ -410,6 +411,9 @@ class EmployeeController extends Controller
         $employee->photo_url = $employee->photo
             ? asset('storage/employees/photos/' . $employee->photo)
             : asset('assets/img/user.png');
+        $employee->passbook = $employee->passbook
+            ? asset('storage/employees/passbook/' . $employee->passbook)
+            : "-";
         return response()->json($employee);
     }
 
@@ -711,7 +715,7 @@ class EmployeeController extends Controller
             'designation_id' => 'nullable|exists:designations,id',
             'reporting_manager' => 'nullable|exists:employees,id',
             'joining_date' => 'nullable|date',
-            'job_type' => 'nullable|in:Permanent,Contract,Intern',
+            'job_type' => 'nullable|in:Permanent,Temporary,Trainee,Contract',
             'work_mode' => 'nullable|in:Office,Remote,Hybrid',
             'employee_status' => 'nullable|in:Active,Inactive,Resigned',
             'work_location' => 'nullable|string|max:255',
@@ -726,7 +730,7 @@ class EmployeeController extends Controller
                 'official_email'     => $request->official_email,
                 'department_id'      => $request->department_id,
                 'designation_id'     => $request->designation_id,
-                'reporting_manager'  => $request->reporting_manager,
+                'reporting_manager_id'  => $request->reporting_manager,
                 'joining_date'       => $request->joining_date,
                 'job_type'           => $request->job_type,
                 'work_mode'          => $request->work_mode,
@@ -745,6 +749,60 @@ class EmployeeController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => $e->getMessage()
+            ],500);
+
+        }
+    }
+    public function updateBank(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:employees,id',
+            'account_no' => 'required',
+            'bank_name' => 'required',
+            'ifsc' => 'required',
+            'branch' => 'required',
+            'passbook' => 'nullable|mimes:pdf,png,jpg|max:5120'
+        ]);
+
+        try{
+
+            $employee = Employee::findOrFail($request->id);
+
+            $employee->account_no = $request->account_no;
+            $employee->bank_name = $request->bank_name;
+            $employee->ifsc = $request->ifsc;
+            $employee->branch = $request->branch;
+
+            if($request->hasFile('passbook')){
+            // Delete old file
+                if ($employee->passbook && Storage::disk('public')->exists('employees/passbook/' . $employee->passbook)) {
+                    Storage::disk('public')->delete('employees/passbook/' . $employee->passbook);
+                }
+
+                $file = $request->file('passbook');
+
+                // Example: 25_20260708_180530.pdf
+                $fileName = $employee->id . '_' . Carbon::now()->format('Ymd_His') . '.' . $file->getClientOriginalExtension();
+
+                // Store file
+                $file->storeAs('employees/passbook', $fileName, 'public');
+
+                // Save only filename in database
+                $employee->passbook = $fileName;
+            }
+
+            $employee->save();
+
+            return response()->json([
+                'status'=>true,
+                'message'=>'Bank details updated successfully.'
+            ]);
+
+        }catch(\Exception $e){
+
+            return response()->json([
+                'status'=>false,
+                'message'=>$e->getMessage()
             ],500);
 
         }

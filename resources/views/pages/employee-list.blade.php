@@ -394,11 +394,7 @@
                             </div>
                             <div class="col-4 mb-4" id="doc_passport" class="mt-3"></div>
                             
-                            <div class="col-2 mb-4">
-                                <small class="text-muted d-block">UAN (Universal Account Number)</small>
-                                <span id="identity_uan" class="fw-semibold">-</span>
-                            </div>
-                            <div class="col-4 mb-4" id="doc_passbook" class="mt-3"></div>
+                            
 
                             <div class="col-2 mb-4">
                                 <small class="text-muted d-block">Insurance Number</small>
@@ -486,6 +482,7 @@
                                     <span id="bank_name" class="fw-semibold"></span>
 
                                 </div>
+                                <div class="col-12 mb-4" id="doc_passbook" class="mt-3"></div>
 
                             </div>
 
@@ -510,6 +507,8 @@
                                     <span id="bank_branch" class="fw-semibold"></span>
 
                                 </div>
+                               
+                                
 
                             </div>
 
@@ -569,66 +568,7 @@
 
 <!--edit Modal-->
 
-<div class="modal fade" id="attachmentViewerModal" tabindex="-1">
 
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-
-        <div class="modal-content">
-
-            <div class="modal-header">
-
-                <h5 class="modal-title">
-                    Attachment Preview
-                </h5>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                </button>
-
-            </div>
-
-            <div class="modal-body text-center">
-
-                <img id="attachmentImage"
-                     class="img-fluid d-none"
-                     style="max-height:75vh;">
-
-                <iframe id="attachmentPdf"
-                        class="d-none"
-                        width="100%"
-                        height="700"
-                        frameborder="0">
-                </iframe>
-
-            </div>
-
-            <div class="modal-footer">
-
-                <a id="attachmentDownload"
-                   href="#"
-                   download
-                   class="btn btn-success">
-
-                    <i class="bi bi-download"></i>
-                    Download
-
-                </a>
-
-                <button class="btn btn-secondary"
-                        data-bs-dismiss="modal">
-
-                    Close
-
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
 
 <div class="modal fade" id="employeeEditModal" tabindex="-1" aria-hidden="true">
 
@@ -939,8 +879,9 @@
 
                                             <option value="">Select Job Type</option>
                                             <option value="Permanent">Permanent</option>
+                                            <option value="Temporary">Temporary</option>
+                                            <option value="Trainee">Trainee</option>
                                             <option value="Contract">Contract</option>
-                                            <option value="Intern">Intern</option>
 
                                         </select>
 
@@ -1123,43 +1064,84 @@
 
                     <!-- Bank -->
 
-                    <div class="tab-pane fade"
-                         id="editBank">
+                    <div class="tab-pane fade" id="editBank">
 
-                        <form id="bankForm">
+                        <form id="bankForm" enctype="multipart/form-data">
+                            @csrf
+
+                            <input type="hidden" name="id" id="bank_employee_id">
 
                             <div class="row">
 
                                 <div class="col-md-6">
 
-                                    <label>Bank</label>
+                                    <div class="mb-3">
+                                        <label class="form-label">Bank Account Number</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            name="account_no"
+                                            id="bank_account_number"
+                                            placeholder="Enter bank account number">
+                                    </div>
 
-                                    <input type="text"
-                                           class="form-control"
-                                           name="bank_name"
-                                           id="edit_bank">
+                                    <div class="mb-3">
+                                        <label class="form-label">Bank Name</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            name="bank_name"
+                                            id="edit_bank_name"
+                                            placeholder="Enter bank name">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Passbook</label>
+                                        <input type="file"
+                                            class="form-control"
+                                            name="passbook"
+                                            id="passbook"
+                                            accept=".pdf">
+                                        <small class="text-muted">PDF (Max 5MB)</small>
+
+                                        <div id="passbookPreview" class="mt-2"></div>
+                                    </div>
 
                                 </div>
 
                                 <div class="col-md-6">
 
-                                    <label>Account No</label>
+                                    <div class="mb-3">
+                                        <label class="form-label">IFSC Code</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            name="ifsc"
+                                            id="ifsc_code"
+                                            placeholder="Enter IFSC code">
+                                    </div>
 
-                                    <input type="text"
-                                           class="form-control"
-                                           name="account_no"
-                                           id="edit_account">
+                                    <div class="mb-3">
+                                        <label class="form-label">Branch Name</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            name="branch"
+                                            id="branch_name"
+                                            placeholder="Enter branch name">
+                                    </div>
 
                                 </div>
 
                             </div>
 
-                            <div class="text-end mt-3">
+                            <div class="text-end mt-4">
 
-                                <button class="btn btn-primary">
+                                <button type="button"
+                                        class="btn btn-light"
+                                        data-bs-dismiss="modal">
+                                    Cancel
+                                </button>
 
-                                    Save Bank
-
+                                <button type="submit"
+                                        class="btn btn-primary">
+                                    Save Changes
                                 </button>
 
                             </div>
@@ -1192,7 +1174,66 @@
     </div>
 
 </div>
+<div class="modal fade" id="attachmentViewerModal" tabindex="-1">
 
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Attachment Preview
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body text-center">
+
+                <img id="attachmentImage"
+                     class="img-fluid d-none"
+                     style="max-height:75vh;">
+
+                <iframe id="attachmentPdf"
+                        class="d-none"
+                        width="100%"
+                        height="700"
+                        frameborder="0">
+                </iframe>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <a id="attachmentDownload"
+                   href="#"
+                   download
+                   class="btn btn-success">
+
+                    <i class="bi bi-download"></i>
+                    Download
+
+                </a>
+
+                <button class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 <script>
     $.ajaxSetup({
     headers: {
@@ -1399,16 +1440,16 @@ function editEmployee(id)
             $('#edit_employee_id').val(emp.id);
             $('#profile_id').val(emp.id);
             $('#official_id').val(emp.id);
-
+            
             // Header
             $('#edit_employee_name').text(emp.name);
-
+            
             if(emp.photo){
                 $('#edit_profile_image').attr('src',emp.photo);
             }
-
+            
             // Profile
-
+            
             $('#edit_name').val(emp.name);
             $('#edit_personal_email').val(emp.personal_email);
             $('#edit_dob').val(emp.dob);
@@ -1417,31 +1458,51 @@ function editEmployee(id)
             $('#edit_guardian_name').val(emp.parent_name);
             $('#edit_address').val(emp.address);
             $('#edit_emp_id').val(emp.emp_id);
-
+            
             $('#edit_phone').val(emp.contact_no);
             $('#edit_gender').val(emp.gender);
             $('#edit_blood_group').val(emp.blood_group);
             $('#edit_nationality').val(emp.nationality);
-
+            
             // Official
-
+            
             $('#edit_official_emp_id').val(emp.emp_id);
-
+            
             $('#edit_official_email').val(emp.email);
             $('#edit_department').val(emp.department_id).trigger('change');
             $('#edit_designation').val(emp.designation_id).trigger('change');
-
+            
             $('#edit_reporting_manager').val(emp.reporting_manager.id).trigger('change');
             $('#edit_joining_date').val(emp.joining_date);
             $('#edit_job_type').val(emp.job_type);
             $('#edit_work_mode').val(emp.job_location);
             $('#edit_employee_status').val(emp.status).trigger('change');
             $('#edit_work_location').val(emp.work_location);
-
+            
             // Banking
+            
+            $('#bank_employee_id').val(emp.id);
+            $('#bank_account_number').val(emp.account_no);
+            $('#edit_bank_name').val(emp.bank_name);
+            $('#ifsc_code').val(emp.ifsc);
+            $('#branch_name').val(emp.branch);
+           if (emp.passbook) {
 
-            $('#edit_bank').val(emp.bank_name);
-            $('#edit_account').val(emp.account_no);
+                let fileUrl = '/storage/employees/passbook/' + emp.passbook;
+
+                $('#passbookPreview').html(`
+                    <button type="button"
+                            class="btn btn-sm btn-info"
+                            onclick="viewAttachment('${fileUrl}')">
+                        <i class="fas fa-eye"></i> View Passbook
+                    </button>
+                `);
+
+            } else {
+
+                $('#passbookPreview').html('');
+
+            }
 
             // Open first tab
 
@@ -1530,9 +1591,12 @@ function editEmployee(id)
             ${fileName}
         </div>
         <div>
-            <a href="${file}" target="_blank" class="btn btn-sm btn-primary">
+           
+            <button type="button"
+                    class="btn btn-sm btn-info"
+                    onclick="viewAttachment('${file}')">
                 <i class="bi bi-eye-fill"></i>
-            </a>
+            </button>
             <a href="${file}" download class="btn btn-sm btn-success">
                 <i class="bi bi-download"></i>
             </a>
@@ -1833,7 +1897,7 @@ $(document).ready(function () {
         window.location.href = url;
 
     });
-    let table = $('#employeeTable').DataTable({
+    var table = $('#employeeTable').DataTable({
 
         processing: true,
 
@@ -1922,9 +1986,7 @@ $(document).ready(function () {
         table.ajax.reload();
 
     });
-
-});
-$('#officialForm').submit(function(e){
+    $('#officialForm').submit(function(e){
 
     e.preventDefault();
 
@@ -1945,7 +2007,7 @@ $('#officialForm').submit(function(e){
         },
 
         success:function(res){
-
+            table.ajax.reload();
             Swal.fire({
 
                 icon:'success',
@@ -1992,4 +2054,73 @@ $('#officialForm').submit(function(e){
     });
 
 });
+
+$('#bankForm').submit(function(e){
+
+    e.preventDefault();
+
+    let formData = new FormData(this);
+
+    $.ajax({
+
+        url:'/employee/update-bank',
+
+        type:'POST',
+
+        data:formData,
+
+        processData:false,
+
+        contentType:false,
+
+        headers:{
+            'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')
+        },
+
+        success:function(response){
+            table.ajax.reload();
+            if(response.status){
+
+                Swal.fire(
+                    'Success',
+                    response.message,
+                    'success'
+                );
+
+            }else{
+
+                Swal.fire(
+                    'Error',
+                    response.message,
+                    'error'
+                );
+
+            }
+
+        },
+
+        error:function(xhr){
+
+            let errors='';
+
+            $.each(xhr.responseJSON.errors,function(key,value){
+
+                errors+=value[0]+'<br>';
+
+            });
+
+            Swal.fire(
+                'Validation Error',
+                errors,
+                'error'
+            );
+
+        }
+
+    });
+
+});
+
+});
+
 </script>

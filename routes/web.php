@@ -238,6 +238,7 @@ Route::prefix('tasks')->group(function(){
     Route::get('/view-my-task/{id}',[TaskController::class,'viewMyTask']);
     Route::get('/my-task-list',[TaskController::class,'myTaskList'])->name('tasks.mytask.list');
     Route::post('/update', [TaskController::class, 'saveTaskUpdate'])->name('tasks.update');
+    Route::post('/allocationupdate', [TaskController::class, 'update'])->name('tasks.allocationupdate');
     Route::post('/task-progress-update',[TaskController::class,'updateProgress'])->name('task.progress.update');
 });
 use Illuminate\Support\Facades\DB;

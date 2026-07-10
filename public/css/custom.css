@@ -163,3 +163,7 @@ table.dataTable.no-footer {
 .text-purple{
     color:#7A3EF0;
 }
+
+.employeeEditModal{
+    z-index: 100;
+}
