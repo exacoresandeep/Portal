@@ -22,8 +22,18 @@ Route::get('/', function () { return view('auth.login'); })->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::get('/login', function () {
     if (Auth::check()) {
+        $currentMonth = Carbon::now()->month;
         $employees = Employee::where('status', 1)->get();
-        return view('dashboard', compact('employees'));        
+        $birthdays = Employee::where('status', 1)
+                    ->whereMonth('dob',$currentMonth)
+                ->orderByRaw('DAY(dob)')
+                ->get();
+        $anniversaries = Employee::where('status', 1)
+                ->whereMonth('joining_date',$currentMonth)
+            ->orderByRaw('DAY(joining_date)')
+            ->get();
+        return view('dashboard', compact('employees','birthdays',
+            'anniversaries'));        
     }
     return view('auth.login');
 })->name('getlogin');
@@ -56,7 +66,14 @@ Route::post('/employee/update-bank',[EmployeeController::class,'updateBank']);
 Route::post('/employee/update-education',[EmployeeController::class,'updateEducation']);
 Route::post('/employee/update-experience',[EmployeeController::class,'updateExperience']);
 Route::post('/employee/update-document',[EmployeeController::class,'updateDocument']);
-
+Route::get('/dashboard/stats', [EmployeeController::class, 'dashboardStats'])->name('dashboard.stats');
+Route::get('/dashboard/employee-stats', [EmployeeController::class, 'employeeDashboardStats'])->name('dashboard.employee.stats');
+Route::get('/dashboard/employee-distribution',[EmployeeController::class,'employeeDistribution'])->name('dashboard.employee.distribution');
+Route::get('/dashboard/task-status',[EmployeeController::class, 'taskStatus'])->name('dashboard.task.status');
+Route::get('/dashboard/onboarding-chart',[EmployeeController::class, 'onboardingChart'])->name('dashboard.onboarding.chart');
+Route::get('/dashboard/attendance-overview',[EmployeeController::class,'attendanceOverview'])->name('dashboard.attendance.overview');    
+Route::get('/dashboard/my-tasks', [TaskController::class, 'dashboardMyTasks'])
+    ->name('dashboard.myTasks');
 Route::get('/employees/edit/{id}', [EmployeeController::class, 'edit'])->name('employees.edit');
 Route::delete('/employees/delete/{id}', [EmployeeController::class, 'destroy'])->name('employees.delete');
 Route::get('/employees-by-department',[EmployeeController::class,'employeesByDepartment'])->name('employees.department');

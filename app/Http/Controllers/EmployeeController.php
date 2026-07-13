@@ -7,15 +7,22 @@ use App\Models\Employee;
 use Illuminate\Support\Facades\Hash;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\JobType;
+use App\Models\Leave;
+use App\Models\LeaveCount;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\Project;
+use App\Models\TaskUpdate;
 use App\Exports\EmployeeExport;
 use App\Exports\OnboardEmployeeExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Auth;
+use App\Models\EmployeeLeave;
 class EmployeeController extends Controller
 {
 
@@ -139,35 +146,35 @@ class EmployeeController extends Controller
 
                     return '
 
-<div class="d-flex gap-1">
+        <div class="d-flex gap-1">
 
-    <button type="button"
-            class="btn btn-sm btn-primary"
-            onclick="viewEmployee('.$row->id.')"  title="View">
+            <button type="button"
+                    class="btn btn-sm btn-primary"
+                    onclick="viewEmployee('.$row->id.')"  title="View">
 
-        <i class="bi bi-eye"></i> 
+                <i class="bi bi-eye"></i> 
 
-    </button>
+            </button>
 
-    <button type="button"
-            class="btn btn-sm btn-warning text-white"
-            onclick="editEmployee('.$row->id.')" title="Edit">
+            <button type="button"
+                    class="btn btn-sm btn-warning text-white"
+                    onclick="editEmployee('.$row->id.')" title="Edit">
 
-        <i class="bi bi-pencil-square"></i> 
+                <i class="bi bi-pencil-square"></i> 
 
-    </button>
+            </button>
 
-    <button type="button"
-            class="btn btn-sm btn-danger"
-            onclick="resetPassword('.$row->id.')" title="Reset Password">
+            <button type="button"
+                    class="btn btn-sm btn-danger"
+                    onclick="resetPassword('.$row->id.')" title="Reset Password">
 
-        <i class="bi bi-key"></i>
+                <i class="bi bi-key"></i>
 
-    </button>
+            </button>
 
-</div>
+        </div>
 
-';
+        ';
                 })
 
                 ->rawColumns([
@@ -705,7 +712,7 @@ class EmployeeController extends Controller
     }
 
 
-   public function updateOfficial(Request $request)
+    public function updateOfficial(Request $request)
     {
         $request->validate([
             'id' => 'required|exists:employees,id',
@@ -806,5 +813,271 @@ class EmployeeController extends Controller
             ],500);
 
         }
+    }
+
+    public function employeeDashboardStats(){
+        $employeeId = Auth::user()->id; // Change if your employee id column is different
+        $year = date('Y');
+        // Total Tasks
+        $totalTasks = TaskUpdate::where('employee_id', $employeeId)
+            ->where('status', '!=', 'Completed')
+            ->distinct('task_id')
+            ->count('task_id');
+
+        // Completed Tasks
+        $completedTasks = TaskUpdate::where('employee_id', $employeeId)
+            ->where('status', 'Completed')
+            ->distinct('task_id')
+            ->count('task_id');
+
+        // Total Projects
+        $totalProjects = Project::where('status', 'Active')
+            ->where(function ($query) use ($employeeId) {
+
+                $query->where('project_manager_id', $employeeId)
+                    ->orWhere('team_head_id', $employeeId)
+                    ->orWhereRaw('FIND_IN_SET(?, team_members)', [$employeeId]);
+
+            })
+            ->count();
+
+        $leaveCount = LeaveCount::where('employee_id', $employeeId)
+        // ->where('year', $year)
+        ->first();
+
+        $leaveBalance = 0;
+
+        if ($leaveCount) {
+
+            $total =
+                $leaveCount->sick_leaves +
+                $leaveCount->casual_leaves +
+                $leaveCount->earned_leaves;
+
+            $used = Leave::where('employee_id', $employeeId)
+                ->where('status', 'Approved')
+                ->whereYear('from_date', $year)
+                ->count();
+                
+
+            $leaveBalance = $total - $used;
+        }
+
+        // Attendance Days
+        $attendanceDays = 0;
+
+        $tableName = 'z_attendance_log_' . now()->format('n_Y');
+
+        if (Schema::hasTable($tableName)) {
+
+            $attendanceDays = DB::table($tableName)
+                ->where('employee_id', $employeeId)
+                ->whereMonth('log_date', now()->month)
+                ->whereYear('log_date', now()->year)
+                ->distinct(DB::raw('DATE(log_date)'))
+                ->count(DB::raw('DATE(log_date)'));
+        }
+
+        return response()->json([
+            'total_tasks'      => $totalTasks,
+            'completed_tasks'  => $completedTasks,
+            'total_projects'   => $totalProjects,
+            'leave_balance'    => $leaveBalance,
+            'attendance_days'  => $attendanceDays,
+        ]);
+    }
+    public function dashboardStats()
+    {
+        $tableName = 'z_attendance_log_' . now()->format('n_Y');
+        $presentToday = 0;
+        if (Schema::hasTable($tableName)) {
+            $presentToday = DB::table($tableName)
+                ->whereYear('log_date', now()->year)
+                ->whereMonth('log_date', now()->month)
+                ->whereDay('log_date', now()->day)
+                ->distinct('employee_id')
+                ->count('employee_id');
+        }
+        $totalEmployee=Employee::where('status', 1)->count();
+        $leaveCount=$totalEmployee-$presentToday;
+        $data = [
+            'total_employees' => $totalEmployee,
+            'present_today' => $presentToday,
+            'on_leave' => $leaveCount,
+            'total_projects' => Project::where('status', 'Active')->count(),
+            'total_tasks' => TaskUpdate::where('status', '!=', 'Completed')
+                            ->distinct('task_id')
+                            ->count('task_id'),
+        ];
+
+        return response()->json($data);
+    }
+
+    public function employeeDistribution()
+    {
+        $colors = [
+            '#0d6efd', // Blue
+            '#198754', // Green
+            '#dc3545', // Red
+            '#ffc107', // Yellow
+            '#0dcaf0', // Cyan
+            '#6f42c1', // Purple
+            '#fd7e14', // Orange
+            '#20c997', // Teal
+            '#e83e8c', // Pink
+            '#6610f2', // Indigo
+            '#6c757d', // Gray
+            '#795548', // Brown
+            '#009688', // Dark Teal
+            '#3f51b5', // Deep Indigo
+            '#8bc34a', // Light Green
+            '#ff5722', // Deep Orange
+            '#607d8b', // Blue Grey
+            '#9c27b0', // Violet
+            '#ff9800', // Amber
+            '#4caf50', // Lime Green
+            '#f44336', // Bright Red
+            '#03a9f4', // Light Blue
+            '#cddc39', // Lime
+            '#673ab7', // Deep Purple
+            '#ff4081', // Rose
+        ];
+
+        $departments = Department::where('status', 'active')
+            ->withCount([
+                'employees as employee_count' => function ($q) {
+                    $q->where('status', 1);
+                }
+            ])
+            ->get();
+
+        $data = [];
+
+        foreach ($departments as $index => $department) {
+
+            $data[] = [
+                'name'  => $department->name,
+                'count' => $department->employee_count,
+                'color' => $colors[$index % count($colors)]
+            ];
+
+        }
+
+        return response()->json([
+            'total' => Employee::where('status',1)->count(),
+            'departments' => $data
+        ]);
+    }
+
+    public function taskStatus()
+    {
+        $statuses = [
+            'Not Started',
+            'Completed',
+            'In Progress',
+            'Pending',
+            'On Hold',
+            'Over Due'
+        ];
+
+        $colors = [
+            '#6c757d', // Not Started - Gray
+            '#198754', // Completed - Green
+            '#0d6efd', // In Progress - Blue
+            '#ffc107', // Pending - Yellow
+            '#6f42c1', // On Hold - Purple
+            '#dc3545', // Over Due - Red
+        ];
+
+        $data = [];
+
+        foreach ($statuses as $index => $status) {
+
+            if ($status == 'Over Due') {
+
+                $count = TaskUpdate::where('status', '!=', 'Completed')
+                    ->whereDate('end_date', '<', today())
+                    ->distinct('task_id')
+                    ->count();
+
+            } else {
+
+                $count = TaskUpdate::where('status', $status)->distinct('task_id')->count();
+            }
+
+            $data[] = [
+                'name'  => $status,
+                'count' => $count,
+                'color' => $colors[$index]
+            ];
+        }
+
+        return response()->json([
+            'total' => TaskUpdate::distinct('task_id')->count(),
+            'statuses' => $data
+        ]);
+    }
+    public function onboardingChart(Request $request)
+    {
+        $year = $request->year ?? date('Y');
+
+        $records = Employee::select(
+                DB::raw('MONTH(joining_date) as month'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->whereYear('joining_date', $year)
+            ->groupBy(DB::raw('MONTH(joining_date)'))
+            ->pluck('total', 'month');
+
+        $months = [];
+        $counts = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+
+            $months[] = date('M', mktime(0,0,0,$i,1));
+            $counts[] = $records[$i] ?? 0;
+        }
+
+        return response()->json([
+            'labels' => $months,
+            'data'   => $counts
+        ]);
+    }
+
+    public function attendanceOverview(Request $request)
+    {
+        $year = $request->year ?? date('Y');
+
+        $totalEmployees = Employee::where('status', 1)->count();
+
+        $labels = [];
+        $presentData = [];
+        $absentData = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+
+            $labels[] = date('M', mktime(0, 0, 0, $month, 1));
+
+            $tableName = "z_attendance_log_{$month}_{$year}";
+
+            if (!Schema::hasTable($tableName)) {
+                $presentData[] = 0;
+                $absentData[] = 0;
+                continue;
+            }
+
+            $present = DB::table($tableName)
+                ->distinct('employee_id')
+                ->count('employee_id');
+
+            $presentData[] = $present;
+            $absentData[] = max($totalEmployees - $present, 0);
+        }
+
+        return response()->json([
+            'labels'  => $labels,
+            'present' => $presentData,
+            'absent'  => $absentData,
+        ]);
     }
 }

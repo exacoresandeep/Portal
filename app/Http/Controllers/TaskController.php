@@ -1256,5 +1256,18 @@ class TaskController extends Controller
             'message' => 'Task updated successfully.'
         ]);
     }
+    public function dashboardMyTasks()
+    {
+        $tasks = Task::with(['project', 'latestUpdate'])
+            ->whereHas('latestUpdate', function ($q) {
+                $q->where('employee_id', Auth::id())
+                ->where('status', '!=', 'Completed');
+            })
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return response()->json($tasks);
+    }
     
 }

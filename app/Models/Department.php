@@ -16,4 +16,10 @@ class Department extends Model
     protected $casts = [
         'access_pages' => 'array',
     ];
+
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
 }
+

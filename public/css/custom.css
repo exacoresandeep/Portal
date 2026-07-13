@@ -167,3 +167,13 @@ table.dataTable.no-footer {
 .employeeEditModal{
     z-index: 100;
 }
+
+.bg-pink{
+    background:#d63384 !important;
+}
+
+.chart-wrapper{
+    position:relative;
+    width:220px;
+    margin:auto;
+}

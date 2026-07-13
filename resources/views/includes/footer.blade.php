@@ -41,44 +41,86 @@
 
       <!-- DataTables JS -->
       <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script>
-    function setCookie(name, value, days) {
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function setCookie(name, value, days) {
 
-        let expires = "";
+    let expires = "";
 
-        if (days) {
-            let date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-
-        document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
+    if (days) {
+        let date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
     }
-    function getCookie(name) {
 
-        let nameEQ = name + "=";
-        let ca = document.cookie.split(';');
+    document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
+}
+function getCookie(name) {
 
-        for (let i = 0; i < ca.length; i++) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
 
-            let c = ca[i].trim();
+    for (let i = 0; i < ca.length; i++) {
 
-            if (c.indexOf(nameEQ) == 0) {
-                return decodeURIComponent(c.substring(nameEQ.length));
-            }
+        let c = ca[i].trim();
+
+        if (c.indexOf(nameEQ) == 0) {
+            return decodeURIComponent(c.substring(nameEQ.length));
         }
-
-        return null;
     }
+
+    return null;
+}
 $('#pro_employeeEditModal').find('form').each(function () {
     this.reset();
 });
 function loadPage(pageUrl) {
     if (!pageUrl) return;
     setCookie('activeMenu', pageUrl, 7);
-    $('#main-content').load(pageUrl);
+    // $('#main-content').load(pageUrl);
+    $('#main-content').load(pageUrl, function () {
+
+        // Dashboard page loaded
+        if (pageUrl.includes('dashboard')) {
+
+            @php
+                $departmentId = session('department_id');
+            @endphp
+
+            @if($departmentId == 1 || $departmentId == 2)
+                loadDashboardStats();
+                loadTaskStatus();
+                initEmployeeDistributionChart();
+                loadOnboardingChart();
+                loadAttendanceOverview();
+                
+            @else
+                loademployeeDashboardStats();
+            @endif
+            loadMyTasks();
+            loadAttendance();
+
+            if (window.dashboardInterval) {
+                clearInterval(window.dashboardInterval);
+            }
+
+            window.dashboardInterval = setInterval(function () {
+                loadDashboardStats();
+                loadAttendance();
+            }, 60000);
+        } else {
+
+            // Stop dashboard timer when leaving dashboard
+            if (window.dashboardInterval) {
+                clearInterval(window.dashboardInterval);
+                window.dashboardInterval = null;
+            }
+        }
+    });
 }
 $(document).ready(function () {
+
+    
     // Restore last page
     let activeMenu = getCookie('activeMenu');
     if (activeMenu) {
@@ -553,6 +595,45 @@ function togglePassword(id, button) {
 
 }
 
+function loadDashboardStats() {
+
+    $.ajax({
+        url: "{{ route('dashboard.stats') }}",
+        type: "GET",
+        dataType: "json",
+        success: function (response) {
+
+            $("#totalEmployees").text(response.total_employees);
+            $("#presentToday").text(response.present_today);
+            $("#onLeave").text(response.on_leave);
+            $("#totalProjects").text(response.total_projects);
+            $("#totalTasks").text(response.total_tasks);
+
+        }
+    });
+
+}
+function loademployeeDashboardStats() {
+
+    $.ajax({
+        url: "{{ route('dashboard.employee.stats') }}",
+        type: "GET",
+        dataType: "json",
+        success: function (response) {
+
+            $("#totalTasks").text(response.total_tasks);
+            $("#completedTasks").text(response.completed_tasks);
+            $("#totalProjects").text(response.total_projects);
+            $("#leaveBalance").text(response.leave_balance);
+            $("#attendanceDays").text(response.attendance_days);
+
+        },
+        error: function (xhr) {
+            console.log(xhr.responseText);
+        }
+    });
+
+}
 $('#changePasswordBtn').click(function () {
 
     let employee_id = $('#reset_employee_id').val();
@@ -647,15 +728,7 @@ var breaking = "00:00:00";
 var lastDirection = "";
 var timer = null;
 
-$(document).ready(function () {
 
-    loadAttendance();
-
-    setInterval(function () {
-        loadAttendance();
-    }, 60000);
-
-});
 
 function loadAttendance() {
 
@@ -736,6 +809,593 @@ function startTimer(){
 
 }
 
+// var doughnutcenterText = {
+//     id: 'doughnutcenterText',
+//     afterDraw(chart) {
+
+//         const {ctx} = chart;
+//         const meta = chart.getDatasetMeta(0);
+
+//         if (!meta.data.length) return;
+
+//         const x = meta.data[0].x;
+//         const y = meta.data[0].y;
+
+//         ctx.save();
+
+//         ctx.textAlign = 'center';
+
+//         ctx.font = 'bold 28px sans-serif';
+//         ctx.fillStyle = '#212529';
+//         ctx.fillText('158', x, y - 8);
+
+//         ctx.font = '14px sans-serif';
+//         ctx.fillStyle = '#6c757d';
+//         ctx.fillText('Total Tasks', x, y + 18);
+
+//         ctx.restore();
+//     }
+// };
+
+// var taskChart = null;
+
+// function initTaskStatusChart() {
+//     const canvas = document.getElementById("taskStatusChart");
+
+//     if (!canvas) {
+//         console.log("Canvas not found");
+//         return;
+//     }
+
+//     if (taskChart) {
+//         taskChart.destroy();
+//     }
+
+//     taskChart = new Chart(canvas, {
+//         type: 'doughnut',
+//         data: {
+//             labels: ['Completed','In Progress','Pending','Over Due'],
+//             datasets: [{
+//                 data: [75,45,30,8],
+//                 backgroundColor:[
+//                     '#22c55e',
+//                     '#fbbf24',
+//                     '#d63384',
+//                     '#ef4444'
+//                 ],
+//                 borderWidth:0
+//             }]
+//         },
+//         options:{
+//             responsive:true,
+//             maintainAspectRatio:false,
+//             cutout:'72%',
+//             plugins:{
+//                 legend:{
+//                     display:false
+//                 }
+//             }
+//         },
+//         plugins:[doughnutcenterText]
+//     });
+
+// }
+let taskChart = null;
+
+const doughnutcenterText = {
+
+    id: 'doughnutcenterText',
+
+    afterDraw(chart, args, options) {
+
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+
+        if (!meta.data.length) return;
+
+        const x = meta.data[0].x;
+        const y = meta.data[0].y;
+
+        ctx.save();
+
+        ctx.textAlign = 'center';
+
+        ctx.font = 'bold 28px sans-serif';
+        ctx.fillStyle = '#212529';
+        ctx.fillText(options.total, x, y - 8);
+
+        ctx.font = '14px sans-serif';
+        ctx.fillStyle = '#6c757d';
+        ctx.fillText('Total Tasks', x, y + 18);
+
+        ctx.restore();
+    }
+};
+
+function drawTaskChart(labels, values, colors, total) {
+
+    if (taskChart) {
+        taskChart.destroy();
+    }
+
+    taskChart = new Chart(
+        document.getElementById('taskStatusChart'),
+        {
+            type: 'doughnut',
+
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                    borderWidth: 0
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '72%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    doughnutcenterText: {
+                        total: total
+                    }
+                }
+            },
+
+            plugins: [doughnutcenterText]
+        }
+    );
+}
+
+function loadTaskStatus() {
+
+    $.ajax({
+        url: "{{ route('dashboard.task.status') }}",
+        type: "GET",
+        dataType: "json",
+
+        success: function(response) {
+
+            let labels = [];
+            let values = [];
+            let colors = [];
+            let legend = '';
+
+            response.statuses.forEach(function(item){
+
+                labels.push(item.name);
+                values.push(item.count);
+                colors.push(item.color);
+
+                legend += `
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <span class="badge rounded-pill"
+                                  style="background:${item.color};width:14px;height:14px;">
+                            </span>
+
+                            ${item.name}
+                        </div>
+
+                        <strong>${item.count}</strong>
+                    </div>
+                `;
+            });
+
+            $("#taskStatusLegend").html(legend);
+
+            drawTaskChart(
+                labels,
+                values,
+                colors,
+                response.total
+            );
+
+        }
+    });
+
+}
+
+let employeeChart = null;
+function initEmployeeDistributionChart() {
+
+    $.get("{{ route('dashboard.employee.distribution') }}", function(response) {
+
+        let labels = [];
+        let values = [];
+        let colors = [];
+        let html = '';
+
+        response.departments.forEach(function(item){
+
+            labels.push(item.name);
+            values.push(item.count);
+            colors.push(item.color);
+
+            html += `
+                <div class="d-flex justify-content-between mb-3">
+                    <div>
+                        <span class="badge rounded-pill"
+                              style="background:${item.color};width:14px;height:14px;">
+                        </span>
+
+                        ${item.name}
+                    </div>
+
+                    <strong>${item.count}</strong>
+                </div>
+            `;
+
+        });
+
+        $("#departmentLegend").html(html);
+
+        drawEmployeeChart(
+            labels,
+            values,
+            colors,
+            response.total
+        );
+
+    });
+
+}
+
+const employeeCenterText = {
+
+    id:'employeeCenterText',
+
+    afterDraw(chart,args,options){
+
+        const {ctx} = chart;
+        const meta = chart.getDatasetMeta(0);
+
+        if(!meta.data.length) return;
+
+        const x = meta.data[0].x;
+        const y = meta.data[0].y;
+
+        ctx.save();
+
+        ctx.textAlign='center';
+
+        ctx.font='bold 28px sans-serif';
+        ctx.fillStyle='#212529';
+        ctx.fillText(options.total,x,y-8);
+
+        ctx.font='14px sans-serif';
+        ctx.fillStyle='#6c757d';
+        ctx.fillText('Employees',x,y+18);
+
+        ctx.restore();
+
+    }
+
+};
+
+function drawEmployeeChart(labels,data,colors,total){
+
+    if(employeeChart){
+        employeeChart.destroy();
+    }
+
+    employeeChart = new Chart(
+        document.getElementById('employeeDistributionChart'),
+        {
+            type:'doughnut',
+
+            data:{
+                labels:labels,
+                datasets:[{
+                    data:data,
+                    backgroundColor:colors,
+                    borderWidth:0
+                }]
+            },
+
+            options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                cutout:'72%',
+                plugins:{
+                    legend:{
+                        display:false
+                    },
+                    employeeCenterText:{
+                        total:total
+                    }
+                }
+            },
+
+            plugins:[employeeCenterText]
+        }
+    );
+
+}
+
+
+
+function loadOnboardingChart() {
+
+    $.ajax({
+
+        url: "{{ route('dashboard.onboarding.chart') }}",
+
+        data: {
+            year: $("#onboardingYear").val()
+        },
+
+        success: function(response) {
+
+            drawOnboardingChart(
+                response.labels,
+                response.data
+            );
+
+        }
+
+    });
+
+}
+
+$(document).on("change", "#onboardingYear", function () {
+    loadOnboardingChart();
+});
+
+let onboardingChart = null;
+
+function drawOnboardingChart(labels, data) {
+
+    if (onboardingChart) {
+        onboardingChart.destroy();
+    }
+
+    onboardingChart = new Chart(
+        document.getElementById("onboardingChart"),
+        {
+            type: "line",
+
+            data: {
+                labels: labels,
+
+                datasets: [{
+                    label: "Onboarding",
+                    data: data,
+
+                    borderColor: "#3b82f6",
+                    backgroundColor: "#3b82f6",
+
+                    borderWidth: 2,
+
+                    fill: false,
+
+                    tension: 0.4,      // Smooth curve
+
+                    pointRadius: 3,
+
+                    pointHoverRadius: 5,
+
+                    pointBackgroundColor: "#2563eb",
+
+                    pointBorderColor: "#ffffff",
+
+                    pointBorderWidth: 2
+                }]
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                interaction: {
+                    intersect: false,
+                    mode: "index"
+                },
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    },
+
+                    tooltip: {
+                        backgroundColor: "#ffffff",
+                        titleColor: "#212529",
+                        bodyColor: "#212529",
+                        borderColor: "#dee2e6",
+                        borderWidth: 1,
+                        displayColors: true
+                    }
+
+                },
+
+                scales: {
+
+                    x: {
+
+                        grid: {
+                            display: false
+                        }
+
+                    },
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+                            precision: 0
+                        },
+
+                        grid: {
+                            color: "#f1f3f5"
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+let attendanceChart = null;
+
+function loadAttendanceOverview() {
+
+    $.ajax({
+
+        url: "{{ route('dashboard.attendance.overview') }}",
+
+        data: {
+            year: $("#attendanceYear").val()
+        },
+
+        success: function(response){
+
+            drawAttendanceChart(
+                response.labels,
+                response.present,
+                response.absent
+            );
+
+        }
+
+    });
+
+}
+
+$(document).on("change","#attendanceYear",function(){
+
+    loadAttendanceOverview();
+
+});
+
+function drawAttendanceChart(labels,present,absent){
+
+    if(attendanceChart){
+        attendanceChart.destroy();
+    }
+
+    attendanceChart = new Chart(
+        document.getElementById("attendanceChart"),
+        {
+            type:'bar',
+
+            data:{
+                labels:labels,
+
+                datasets:[
+                    {
+                        label:'Present',
+                        data:present,
+                        backgroundColor:'#2563eb',
+                        borderRadius:5,
+                        barThickness:12
+                    },
+                    {
+                        label:'Absent',
+                        data:absent,
+                        backgroundColor:'#fbbf24',
+                        borderRadius:5,
+                        barThickness:12
+                    }
+                ]
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+                    legend:{
+                        position:'top',
+                        align:'end'
+                    }
+                },
+
+                scales:{
+                    x:{
+                        grid:{
+                            display:false
+                        }
+                    },
+                    y:{
+                        beginAtZero:true,
+                        ticks:{
+                            precision:0
+                        }
+                    }
+                }
+
+            }
+
+        }
+    );
+
+}
+function loadMyTasks(){
+
+    $.get("{{ route('dashboard.myTasks') }}",function(response){
+
+        let html='';
+
+        if(response.length===0){
+
+            html=`<tr>
+                    <td colspan="4" class="text-center text-muted">
+                        No Tasks Found
+                    </td>
+                  </tr>`;
+
+        }else{
+
+            response.forEach(function(task){
+
+                html+=`
+                <tr>
+                    <td>${task.latest_update.task_name}</td>
+                    <td>${task.project.project_name}</td>
+                    <td>
+                        <span class="badge bg-primary">
+                            ${task.latest_update.priority}
+                        </span>
+                    </td>
+                    <td>${formatDate(task.latest_update.end_date)}</td>
+                </tr>`;
+            });
+
+        }
+
+        $("#dashboardMyTasks").html(html);
+
+    });
+
+}
+
+function formatDate(date){
+
+    let d=new Date(date);
+
+    return d.toLocaleDateString('en-GB');
+}
+
+$(document).on('click', '#viewAllMyTasks', function (e) {
+    e.preventDefault();
+
+    $('#menuMyTasks').trigger('click');
+});
 </script>
     <!--end::Script-->
   </body>

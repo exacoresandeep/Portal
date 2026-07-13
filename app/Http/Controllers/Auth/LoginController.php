@@ -49,8 +49,22 @@ class LoginController extends Controller
 
     public function dashboardContent()
     {
+        $currentMonth = Carbon::now()->month;
         $employees = Employee::where('status', 1)->get();
-        return view('pages.dashboard-content', $employees);
+        $birthdays = Employee::where('status', 1)
+                    ->whereMonth('dob',$currentMonth)
+                ->orderByRaw('DAY(dob)')
+                ->get();
+        $anniversaries = Employee::where('status', 1)
+                ->whereMonth('joining_date',$currentMonth)
+            ->orderByRaw('DAY(joining_date)')
+            ->get();
+        
+        return view('pages.dashboard-content', compact(
+            'employees',
+            'birthdays',
+            'anniversaries'
+            ));
     }
 
     public function attendanceData()
@@ -144,8 +158,22 @@ class LoginController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        $employees = Employee::where('status', 1)->get();
-        return view('dashboard', $employees);
+        $currentMonth = Carbon::now()->month;
+        $employees = Employee::where('status', 1)->get(); 
+        $birthdays = Employee::where('status', 1)
+                    ->whereMonth('dob',$currentMonth)
+                ->orderByRaw('DAY(dob)')
+                ->get();
+        $anniversaries = Employee::where('status', 1)
+                ->whereMonth('joining_date',$currentMonth)
+            ->orderByRaw('DAY(joining_date)')
+            ->get();
+        
+        return view('dashboard', compact(
+            'employees',
+            'birthdays',
+            'anniversaries'
+            ));
     }
 
     // Logout

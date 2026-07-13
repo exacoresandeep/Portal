@@ -278,7 +278,7 @@ $pages = config('access.page')[session('department_id')] ?? [];
                   @if(in_array('my-tasks',$pages))
                   <li class="nav-item ">
                     <a href="javascript:void(0)"
-                  data-page="{{ route('tasks.mytask') }}" class="nav-link menu-link">
+                 id="menuMyTasks" data-page="{{ route('tasks.mytask') }}" class="nav-link menu-link">
                       <i class="nav-icon bi bi-circle"></i>
                       <p>My Tasks</p>
                     </a>
