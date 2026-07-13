@@ -803,32 +803,29 @@ class TaskController extends Controller
     {
         $year  = $request->year ?? date('Y');
         $month = $request->month ?? date('m');
-       
+
+        $from = Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
+        $to   = Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
+
         $employees = Employee::select(
-            'id',
-            'name',
-            'department_id'
-        )
-        ->with('department:id,name')
-        ->where('status',1)
-
-        ->when($request->filter_department,function($q) use($request){
-
-            $q->where(
-                'department_id',
-                $request->filter_department
-            );
-
-        })
-        
-        ->orderBy('name')
-        ->get();
+                'id',
+                'name',
+                'department_id'
+            )
+            ->with('department:id,name')
+            ->where('status', 1)
+            ->when($request->filter_department, function ($q) use ($request) {
+                $q->where('department_id', $request->filter_department);
+            })
+            ->orderBy('name')
+            ->get();
 
         $projects = Project::select(
                 'id',
                 'project_name',
                 'team_members',
-                'status'
+                'project_manager_id',
+                'team_head_id'
             )
             ->where('status', 'Active')
             ->get();
@@ -837,65 +834,60 @@ class TaskController extends Controller
             ->get()
             ->keyBy('project_id');
 
-        $from = Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
-        $to  = Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
-        $allocations = DB::table('tasks')
-        
-        ->join(DB::raw("
-            (
-                SELECT tu1.*
-                FROM task_updates tu1
-                INNER JOIN
-                (
-                    SELECT task_id,MIN(id) first_id
-                    FROM task_updates
-                    GROUP BY task_id
-                ) x
-                ON x.first_id=tu1.id
-            ) first_update
-        "),function($join){
-
-            $join->on(
-                'tasks.id',
-                '=',
-                'first_update.task_id'
-            );
-
-        })
-
-        ->where(function ($q) use ($from, $to) {
-
-            $q->whereBetween('first_update.start_date', [$from, $to])
-
-            ->orWhereBetween('first_update.end_date', [$from, $to])
-
-            ->orWhere(function ($qq) use ($from, $to) {
-
-                    $qq->where('first_update.start_date', '<=', $from)
-                    ->where('first_update.end_date', '>=', $to);
-
-            });
-
-        })
-
-        ->select(
-            'tasks.project_id',
-            'first_update.employee_id',
-            DB::raw('SUM(first_update.remaining_hours) total_hours')
-        )
-
-        ->groupBy(
-            'tasks.project_id',
-            'first_update.employee_id'
-        )
-
-        ->get();
-
         /*
         |--------------------------------------------------------------------------
-        | Allocation Map
+        | Allocation Hours
         |--------------------------------------------------------------------------
         */
+
+        $allocations = DB::table('tasks')
+            ->join(DB::raw("
+                (
+                    SELECT tu1.*
+                    FROM task_updates tu1
+                    INNER JOIN
+                    (
+                        SELECT task_id, MIN(id) first_id
+                        FROM task_updates
+                        GROUP BY task_id
+                    ) x
+                    ON x.first_id = tu1.id
+                ) first_update
+            "), function ($join) {
+                $join->on(
+                    'tasks.id',
+                    '=',
+                    'first_update.task_id'
+                );
+            })
+
+            ->where(function ($q) use ($from, $to) {
+
+                $q->whereBetween('first_update.start_date', [$from, $to])
+
+                ->orWhereBetween('first_update.end_date', [$from, $to])
+
+                ->orWhere(function ($qq) use ($from, $to) {
+
+                    $qq->where('first_update.start_date', '<=', $from)
+                        ->where('first_update.end_date', '>=', $to);
+
+                });
+
+            })
+
+            ->select(
+                'tasks.project_id',
+                'first_update.employee_id',
+                DB::raw('SUM(first_update.remaining_hours) as total_hours')
+            )
+
+            ->groupBy(
+                'tasks.project_id',
+                'first_update.employee_id'
+            )
+
+            ->get();
 
         $allocationMap = [];
 
@@ -903,112 +895,188 @@ class TaskController extends Controller
 
             $allocationMap[$row->employee_id][$row->project_id]
                 = $row->total_hours;
-
         }
 
         /*
         |--------------------------------------------------------------------------
-        | Holiday Count Map
+        | Employee Utilization
         |--------------------------------------------------------------------------
         */
-
-        $holidayMap = [];
-
-        foreach ($calendars as $projectId => $calendar) {
-
-            $holidayMap[$projectId] = collect($calendar->holidays ?? [])
-                ->filter(function ($holiday) use ($year, $month) {
-
-                    return date('Y', strtotime($holiday['date'])) == $year
-                        && date('n', strtotime($holiday['date'])) == $month;
-
-                })
-                ->count();
-
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Month Capacity
-        |--------------------------------------------------------------------------
-        */
-
-        $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
 
         $data = [];
+
         $totalEmployees = 0;
         $fully = 0;
-        // $optimal = 0;
         $partial = 0;
         $under = 0;
         $bench = 0;
-        // $over = 0;
 
+        $daysInMonth = Carbon::parse($from)
+            ->diffInDays(Carbon::parse($to))
+            + 1;
+        
         foreach ($employees as $employee) {
-            
-            $employeeProjects = $projects->filter(function ($project) use ($employee) {
 
-                return is_array($project->team_members)
-                    && isset($project->team_members[$employee->id]);
+            $sumAllocatedHours = 0;
 
-            });
+            $holidayDates = [];
 
             $currentAllocation = [];
 
-            $totalAllocatedHours = 0;
+            /*
+            |--------------------------------------------------------------------------
+            | Find Employee Projects
+            |--------------------------------------------------------------------------
+            */
 
-            $maxHours = 0;
+            $employeeProjects = $projects->filter(function ($project) use ($employee) {
 
+                $teamMembers = is_array($project->team_members)
+                    ? $project->team_members
+                    : json_decode($project->team_members, true);
+
+                $isTeamMember =
+                    is_array($teamMembers)
+                    && array_key_exists($employee->id, $teamMembers);
+
+                $isProjectManager =
+                    $project->project_manager_id == $employee->id;
+
+                $isTeamHead =
+                    $project->team_head_id == $employee->id;
+
+                return
+                    $isTeamMember
+                    || $isProjectManager
+                    || $isTeamHead;
+            });
+
+            $currentAllocationHtml = '<table class="table-borderless mb-0" style="background:transparent;">';
+            $currentAllocationHtml .= '<tbody>';
             foreach ($employeeProjects as $project) {
 
-                $holidayCount = $holidayMap[$project->id] ?? 0;
+                /*
+                |--------------------------------------------------------------------------
+                | Holidays
+                |--------------------------------------------------------------------------
+                */
 
-                $workingDays = $daysInMonth - $holidayCount;
+                $calendar = $calendars[$project->id] ?? null;
 
-                $projectCapacity = $workingDays * 8;
+                if ($calendar) {
 
-                $maxHours = max($maxHours, $projectCapacity);
+                    foreach (($calendar->holidays ?? []) as $holiday) {
 
-                $hours = $allocationMap[$employee->id][$project->id] ?? 0;
+                        $holidayDate = $holiday['date'] ?? null;
 
-                $totalAllocatedHours += $hours;
+                        if (
+                            $holidayDate &&
+                            $holidayDate >= $from &&
+                            $holidayDate <= $to
+                        ) {
+                            $holidayDates[] = $holidayDate;
+                        }
+                    }
+                }
 
-                $allocation = $projectCapacity > 0
-                    ? round(($hours / $projectCapacity) * 100, 2)
-                    : 0;
+                /*
+                |--------------------------------------------------------------------------
+                | Allocation Hours
+                |--------------------------------------------------------------------------
+                */
+
+                $projectAllocatedHours =
+                    $allocationMap[$employee->id][$project->id]
+                    ?? 0;
+
+                $sumAllocatedHours += $projectAllocatedHours;
 
                 $currentAllocation[] =
                     $project->project_name .
-                    ' (' . $allocation . '%)';
+                    ' (' .
+                    number_format($projectAllocatedHours, 2) .
+                    ' Hrs)';
+                
+                
+                if ($employeeProjects->isNotEmpty()) {
+                    $currentAllocationHtml .= '
+                    <tr style="background:transparent;">
+                        <td class="ps-0 pb-0">'.$project->project_name.'</td>
+                        <td class="text-end pb-0">'.number_format($projectAllocatedHours,2).'</td>
+                    </tr>';
+
+                }
+            }
+            if ($employeeProjects->isEmpty()) {
+                $currentAllocationHtml .= '
+                    <tr style="background:transparent;">
+                        <td colspan="2" class="ps-0 pb-0 text-end">No Projects</td>
+                    </tr>';
             }
 
-            $totalAllocation = $maxHours > 0
-                ? round(($totalAllocatedHours / $maxHours) * 100, 2)
+            
+            $currentAllocationHtml .= '</tbody></table>';
+            
+
+            /*
+            |--------------------------------------------------------------------------
+            | Unique Holidays
+            |--------------------------------------------------------------------------
+            */
+
+            $holidayDates = array_unique($holidayDates);
+
+            $holidayCount = count($holidayDates);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Capacity
+            |--------------------------------------------------------------------------
+            */
+
+            $totalHours =
+                ($daysInMonth - $holidayCount) * 8;
+            
+            $allocatedHours = $sumAllocatedHours;
+
+            $remainingAllocation =
+                max(0, $totalHours - $allocatedHours);
+
+            $allocationPercentage =
+                $totalHours > 0
+                ? round(
+                    ($allocatedHours / $totalHours) * 100,
+                    2
+                )
                 : 0;
 
-            $balance = max(0, 100 - $totalAllocation);
+            /*
+            |--------------------------------------------------------------------------
+            | Status
+            |--------------------------------------------------------------------------
+            */
 
-            if ($totalAllocation == 0) {
+            if ($allocationPercentage == 0) {
 
                 $status = 'Available / Bench';
                 $badge = 'danger';
 
-            } elseif ($totalAllocation <= 39) {
+            } elseif ($allocationPercentage <= 39) {
 
                 $status = 'Under Utilized';
                 $badge = 'warning';
 
-            } elseif ($totalAllocation <= 69) {
+            } elseif ($allocationPercentage <= 69) {
 
                 $status = 'Partially Utilized';
                 $badge = 'secondary';
 
-            } elseif ($totalAllocation <= 89) {
+            } elseif ($allocationPercentage <= 89) {
 
                 $status = 'Optimally Utilized';
                 $badge = 'success';
 
-            } elseif ($totalAllocation <= 100) {
+            } elseif ($allocationPercentage <= 100) {
 
                 $status = 'Fully Utilized';
                 $badge = 'primary';
@@ -1017,31 +1085,28 @@ class TaskController extends Controller
 
                 $status = 'Over Allocated';
                 $badge = 'dark';
-
             }
+
             $totalEmployees++;
 
-                switch ($status) {
+            switch ($status) {
 
-                    case 'Fully Utilized':
-                        $fully++;
-                        break;
+                case 'Fully Utilized':
+                    $fully++;
+                    break;
 
-                    case 'Partially Utilized':
-                        $partial++;
-                        break;
+                case 'Partially Utilized':
+                    $partial++;
+                    break;
 
-                    case 'Under Utilized':
-                        $under++;
-                        break;
+                case 'Under Utilized':
+                    $under++;
+                    break;
 
-                    case 'Available / Bench':
-                        $bench++;
-                        break;
-
-                    
-                }
-
+                case 'Available / Bench':
+                    $bench++;
+                    break;
+            }
 
             $data[] = [
 
@@ -1049,15 +1114,42 @@ class TaskController extends Controller
 
                 'department' => $employee->department->name ?? '-',
 
-                'current_allocation' => implode('<br>', $currentAllocation),
+                'current_allocation' =>$currentAllocationHtml,
+                    // implode('<br>', $currentAllocation),
 
-                'total_allocation' => number_format($totalAllocation, 2) . '%',
+                'total_allocation' =>
+                    $allocatedHours,
 
-                'balance' => number_format($balance, 2) . '%',
+                'balance' =>
+                    $remainingAllocation."/".$totalHours,
 
-                'status' => '<span class="badge bg-' . $badge . '">' . $status . '</span>'
-
+                'status' =>
+                    '<span class="badge bg-' .
+                    $badge .
+                    '">' .
+                    $status .
+                    '</span>',
             ];
+        }
+        if ($request->filled('utilization')) {
+
+            $statusMap = [
+                'Available / Bench'    => 'Available / Bench',
+                'Under Utilized'       => 'Under Utilized',
+                'Partially Utilized'   => 'Partially Utilized',
+                'Optimally Utilized'   => 'Optimally Utilized',
+                'Fully Utilized'       => 'Fully Utilized',
+                'Over Allocated'       => 'Over Allocated',
+            ];
+
+            $filterStatus = $statusMap[$request->utilization] ?? $request->utilization;
+
+            $data = collect($data)
+                ->filter(function ($row) use ($filterStatus) {
+                    return strip_tags($row['status']) == $filterStatus;
+                })
+                ->values()
+                ->toArray();
         }
 
         return DataTables::of(collect($data))
@@ -1075,7 +1167,6 @@ class TaskController extends Controller
                     'bench' => $bench,
                 ]
             ])
-
             ->make(true);
     }
 

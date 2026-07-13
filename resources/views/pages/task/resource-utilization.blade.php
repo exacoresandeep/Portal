@@ -151,41 +151,30 @@
                 </select>
             </div>
 
-            <div class="col-lg-2 col-md-3 col-sm-6">
-                <label class="form-label">Billable Status</label>
-                <select class="form-select" id="filter_billable">
-                    <option selected hidden>Select Status</option>
-                    <option value="billable">Billable</option>
-                    <option value="non-billable">Non Billable</option>
-                </select>
-            </div>
+            
             <div class="col-lg-2 col-md-3 col-sm-6">
                 <label class="form-label">Utilization Status </label>
                 <select class="form-select" id="filter_utilization">
                     <option value="">All Utilization</option>
 
                     <option value="Fully Utilized">
-                        🟢 Fully Utilized (90% - 100%)
+                        Fully Utilized (90% - 100%)
                     </option>
 
                     <option value="Optimally Utilized">
-                        🟢 Optimally Utilized (70% - 89%)
+                        Optimally Utilized (70% - 89%)
                     </option>
 
                     <option value="Partially Utilized">
-                        🟡 Partially Utilized (40% - 69%)
+                        Partially Utilized (40% - 69%)
                     </option>
 
                     <option value="Under Utilized">
-                        🟠 Under Utilized (1% - 39%)
+                        Under Utilized (1% - 39%)
                     </option>
 
                     <option value="Available / Bench">
-                        🔴 Available / Bench (0%)
-                    </option>
-
-                    <option value="Over Allocated">
-                        ⚫ Over Allocated (>100%)
+                        Available / Bench (0%)
                     </option>
                 </select>
             </div>
@@ -212,7 +201,7 @@
                         <th>Current Allocation</th>
                         <th>Total Allocation</th>
                         <th>Balance Allocation</th>
-                        <th>Billable Status</th>
+                        {{-- <th>Billable Status</th> --}}
                         <th>Utilization Status</th>
 
                     </tr>
@@ -243,22 +232,18 @@
 
                 d.year = $('#year').val();
                 d.month = $('#month').val();
-                d.department = $('#filter_department').val();
-                d.billable = $('#filter_billable').val();
+                d.filter_department = $('#filter_department').val();
                 d.utilization = $('#filter_utilization').val();
             },
             dataSrc: function (json) {
 
                 $('#totalEmployees').text(json.summary.employees);
                 $('#fullyUtilized').text(json.summary.fully);
-                $('#optimalUtilized').text(json.summary.optimal);
                 $('#partiallyUtilized').text(json.summary.partial);
                 $('#underUtilized').text(json.summary.under);
                 $('#benchEmployees').text(json.summary.bench);
 
-                if ($('#overAllocated').length) {
-                    $('#overAllocated').text(json.summary.over);
-                }
+                
 
                 return json.data;
             }
@@ -303,12 +288,12 @@
                 className: 'text-center'
             },
 
-            {
-                data: 'billable',
-                name: 'billable',
-                orderable: false,
-                searchable: false
-            },
+            // {
+            //     data: 'billable',
+            //     name: 'billable',
+            //     orderable: false,
+            //     searchable: false
+            // },
             {
                 data: 'status',
                 name: 'status',

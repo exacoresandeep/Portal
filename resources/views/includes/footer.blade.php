@@ -184,16 +184,16 @@ function viewProEmployee(id)
             $('#pro_profile_address').text(response.address ?? '-');
             // Official Information
 
-            $('#view_pro_emp_id').text(emp.emp_id ?? '-');
-            $('#view_pro_email').text(emp.email ?? '-');
-            $('#view_pro_department').text(emp.department?.name ?? '-');
-            $('#view_pro_designation').text(emp.designation?.name ?? '-');
-            $('#view_pro_reporting_manager').text(emp.reporting_manager?.name ?? '-');
-            $('#view_pro_joining_date').text(emp.joining_date ?? '-');
-            $('#view_pro_job_type').text(emp.job_type ?? '-');
-            $('#view_pro_job_location').text(emp.job_location ?? '-');
-            $('#view_pro_work_location').text(emp.work_location ?? '-');
-            $('#view_pro_status').text(emp.status == 1 ? 'Active' : 'Inactive');
+            $('#view_pro_emp_id').text(response.emp_id ?? '-');
+            $('#view_pro_email').text(response.email ?? '-');
+            $('#view_pro_department').text(response.department?.name ?? '-');
+            $('#view_pro_designation').text(response.designation?.name ?? '-');
+            $('#view_pro_reporting_manager').text(response.reporting_manager?.name ?? '-');
+            $('#view_pro_joining_date').text(response.joining_date ?? '-');
+            $('#view_pro_job_type').text(response.job_type ?? '-');
+            $('#view_pro_job_location').text(response.job_location ?? '-');
+            $('#view_pro_work_location').text(response.work_location ?? '-');
+            $('#view_pro_status').text(response.status == 1 ? 'Active' : 'Inactive');
 
             // Identity Information
 

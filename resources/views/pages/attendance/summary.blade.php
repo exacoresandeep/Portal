@@ -145,12 +145,12 @@
 
                     <div class="col-md-3">
                         <small>Total Working Hour</small>
-                        <h6 id="workingHours"></h6>
+                        <h6 id="totworkingHours"></h6>
                     </div>
 
                     <div class="col-md-3">
                         <small>Total Break Hour</small>
-                        <h6 id="breakHours"></h6>
+                        <h6 id="totbreakHours"></h6>
                     </div>
 
                 </div>
@@ -214,11 +214,11 @@ $(document).on(
                     res.date
                 );
 
-                $('#workingHours').text(
+                $('#totworkingHours').text(
                     res.working_hours + ' hrs'
                 );
 
-                $('#breakHours').text(
+                $('#totbreakHours').text(
                     res.break_hours + ' hrs'
                 );
 
