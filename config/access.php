@@ -13,6 +13,7 @@ return [
             'employees',
             'employee-offboard',
             'payroll',
+            'payslip',
 
             'asset-management',
             'assets-requests',
@@ -59,6 +60,7 @@ return [
             'employees',
             'employee-offboard',
             'payroll',
+            'payslip',
 
             'asset-management',
             'assets-requests',
@@ -105,21 +107,24 @@ return [
             'tasks-allocation',
             'my-tasks',
             'tasks-utilization',
-
+            'payslip',
         ],
 
         4 => [
 
             'dashboard',
             'employees',
+            'payslip',
         ],
         5 => [
 
             'dashboard',
             'employees',
+            'payslip',
         ],
         6 => [
 
+            'payslip',
             'dashboard',
             'employees',
 
@@ -128,12 +133,14 @@ return [
 
             'dashboard',
             'employees',
+            'payslip',
 
         ],
         8 => [
 
             'dashboard',
             'employees',
+            'payslip',
 
         ],
         9 => [
@@ -143,18 +150,21 @@ return [
             'time-attendance',
             'attendance-regularization',
             'attendance-summary',
+            'payslip',
 
         ],
         10 => [
 
             'dashboard',
             'employees',
+            'payslip',
 
         ],
         11 => [
 
             'dashboard',
             'employees',
+            'payslip',
 
         ],
 

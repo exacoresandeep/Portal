@@ -14,7 +14,6 @@
         <div class="row">
             @include('pages.dashboard.partials.my-tasks')
             @include('pages.dashboard.partials.birthdays')
-            @include('pages.dashboard.partials.anniversaries')
         </div>
     </div>
 </div>

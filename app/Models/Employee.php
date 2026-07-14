@@ -41,7 +41,6 @@ class Employee extends Authenticatable
         'account_no',
         'ifsc',
         'branch',
-        // Document uploads
         'adhar_card',
         'pan_card',
         'resume',

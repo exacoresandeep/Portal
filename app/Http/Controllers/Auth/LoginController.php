@@ -50,6 +50,8 @@ class LoginController extends Controller
     public function dashboardContent()
     {
         $currentMonth = Carbon::now()->month;
+        $currentYear = now()->year;
+        $currentDay   = now()->day;
         $employees = Employee::where('status', 1)->get();
         $birthdays = Employee::where('status', 1)
                     ->whereMonth('dob',$currentMonth)
@@ -57,8 +59,10 @@ class LoginController extends Controller
                 ->get();
         $anniversaries = Employee::where('status', 1)
                 ->whereMonth('joining_date',$currentMonth)
-            ->orderByRaw('DAY(joining_date)')
-            ->get();
+                ->whereYear('joining_date', '!=', $currentYear)
+                 ->whereDay('joining_date', $currentDay)
+                ->orderByRaw('DAY(joining_date)')
+                ->get();
         
         return view('pages.dashboard-content', compact(
             'employees',
@@ -159,15 +163,19 @@ class LoginController extends Controller
             return redirect()->route('login');
         }
         $currentMonth = Carbon::now()->month;
+        $currentYear = now()->year;
+        $currentDay   = now()->day;
         $employees = Employee::where('status', 1)->get(); 
         $birthdays = Employee::where('status', 1)
-                    ->whereMonth('dob',$currentMonth)
+                ->whereMonth('dob',$currentMonth)
                 ->orderByRaw('DAY(dob)')
                 ->get();
         $anniversaries = Employee::where('status', 1)
                 ->whereMonth('joining_date',$currentMonth)
-            ->orderByRaw('DAY(joining_date)')
-            ->get();
+                ->whereYear('joining_date', '!=', $currentYear)
+                 ->whereDay('joining_date', $currentDay)
+                ->orderByRaw('DAY(joining_date)')
+                ->get();
         
         return view('dashboard', compact(
             'employees',

@@ -13,16 +13,19 @@ use App\Http\Controllers\EmployeeOffboardController;
 use App\Http\Controllers\TrainingPhaseController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\PayslipController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Employee;
-
+use Carbon\Carbon;
 // Handle login
 Route::get('/', function () { return view('auth.login'); })->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::get('/login', function () {
     if (Auth::check()) {
         $currentMonth = Carbon::now()->month;
+        $currentYear = now()->year;
+        $currentDay   = now()->day;
         $employees = Employee::where('status', 1)->get();
         $birthdays = Employee::where('status', 1)
                     ->whereMonth('dob',$currentMonth)
@@ -30,6 +33,8 @@ Route::get('/login', function () {
                 ->get();
         $anniversaries = Employee::where('status', 1)
                 ->whereMonth('joining_date',$currentMonth)
+                ->whereYear('joining_date', '!=', $currentYear)
+                ->whereDay('joining_date', $currentDay)
             ->orderByRaw('DAY(joining_date)')
             ->get();
         return view('dashboard', compact('employees','birthdays',
@@ -236,6 +241,14 @@ Route::prefix('payroll')->name('payroll.')->group(function () {
     Route::delete('/delete/{id}', [PayrollController::class, 'delete'])->name('delete');
     Route::get('/template/download', [PayrollController::class, 'downloadTemplate'])
     ->name('template.download');
+});
+Route::prefix('payslip')->name('payslip.')->group(function () {
+    Route::get('/', [PayslipController::class, 'index'])->name('index');
+    Route::get('/list', [PayslipController::class, 'list'])->name('list');
+    Route::get('/view/{id}', [PayslipController::class, 'view'])->name('view');
+    Route::get(
+    '/template/download/{id}',[PayslipController::class,'downloadTemplate'])->name('template.download');
+    Route::get('/summary',[PayslipController::class,'summary'])->name('summary');
 });
 
 Route::prefix('tasks')->group(function(){

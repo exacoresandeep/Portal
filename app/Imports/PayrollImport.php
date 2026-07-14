@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Payroll;
+use App\Models\Employee;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -33,8 +34,8 @@ class PayrollImport implements
                 continue;
             }
 
-            $employeeId = trim($row['employee_id']);
-
+            $employeeId = Employee::where("emp_id",trim($row['employee_id']))->value(id);
+            
             $data = [
 
                 'employee_name'          => $row['employee_name'] ?? null,

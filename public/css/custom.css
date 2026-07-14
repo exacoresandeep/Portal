@@ -177,3 +177,215 @@ table.dataTable.no-footer {
     width:220px;
     margin:auto;
 }
+
+
+/* payslip */
+/*==================================================
+  PAYSLIP DESIGN
+==================================================*/
+
+#payrollModal .modal-dialog{
+    max-width:900px;
+}
+
+#printArea{
+    background:#fff;
+    font-family:Arial, Helvetica, sans-serif;
+    color:#222;
+    font-size:12px;
+}
+
+#printArea h4{
+    font-size:24px;
+    font-weight:700;
+    letter-spacing:.5px;
+}
+
+#printArea small{
+    font-size:11px;
+}
+
+#printArea table{
+    margin-bottom:0;
+}
+
+#printArea .table{
+    font-size:12px;
+}
+
+#printArea .table td,
+#printArea .table th{
+    padding:5px 8px;
+    vertical-align:middle;
+}
+
+#printArea .table-borderless td{
+    padding:3px 8px;
+}
+
+#printArea .table-dark th{
+    background:#07122f !important;
+    border-color:#07122f !important;
+    color:#fff;
+    font-size:12px;
+    font-weight:600;
+}
+
+#printArea .table-bordered td,
+#printArea .table-bordered th{
+    border:1px solid #d8d8d8;
+}
+
+#printArea .fw-bold{
+    font-weight:700!important;
+}
+
+#printArea .text-end{
+    text-align:right;
+}
+
+#printArea .text-center{
+    text-align:center;
+}
+
+#printArea .border{
+    border:1px solid #222!important;
+}
+
+#printArea hr{
+    margin:15px 0;
+}
+
+#printArea .net-pay-box{
+
+    background:#f2640c;
+
+    color:#fff;
+
+    padding:18px;
+
+    border-radius:4px;
+
+}
+
+#printArea .net-pay-box h2{
+
+    font-size:34px;
+
+    margin:0;
+
+    font-weight:700;
+
+}
+
+#printArea .company-address{
+
+    color:#666;
+
+    font-size:11px;
+
+}
+
+#printArea .label{
+
+    color:#666;
+
+    width:150px;
+
+    text-transform:uppercase;
+
+    font-size:11px;
+
+}
+
+#printArea .value{
+
+    color:#000;
+
+    font-weight:500;
+
+}
+
+#printArea .footer-note{
+
+    margin-top:18px;
+
+    font-size:10px;
+
+    color:#777;
+
+    text-align:center;
+
+}
+
+#printArea .salary-period{
+
+    display:inline-block;
+
+    border:1px solid #333;
+
+    padding:6px 25px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+}
+
+#printArea tbody tr:hover{
+
+    background:transparent;
+
+}
+
+#printArea .table-sm td{
+
+    padding:4px 8px;
+
+}
+
+#printArea .orange{
+
+    color:#f2640c;
+
+}
+
+#printArea .blue{
+
+    color:#07122f;
+
+}
+
+#printArea .company-name{
+
+    font-size:26px;
+
+    font-weight:700;
+
+    color:#07122f;
+
+}
+
+#printArea .table td:first-child{
+
+    color:#444;
+
+}
+
+#printArea .table td:last-child{
+
+    font-weight:600;
+
+}
+
+/* .modal-header{
+
+    border-bottom:none;
+
+}
+
+.modal-footer{
+
+    border-top:none;
+
+} */

@@ -91,6 +91,15 @@ $pages = config('access.page')[session('department_id')] ?? [];
                     </a>
                   </li>
                   @endif
+                   @if(in_array('payslip',$pages))
+                  <li class="nav-item ">
+                    <a href="javascript:void(0)"
+                  data-page="{{ route('payslip.index') }}" class="nav-link menu-link">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <p>PaySlip Management</p>
+                    </a>
+                  </li>
+                  @endif
                 </ul>
               </li>
               @endif

@@ -1385,15 +1385,12 @@ function loadMyTasks(){
 }
 
 function formatDate(date){
-
     let d=new Date(date);
-
     return d.toLocaleDateString('en-GB');
 }
 
 $(document).on('click', '#viewAllMyTasks', function (e) {
     e.preventDefault();
-
     $('#menuMyTasks').trigger('click');
 });
 </script>
