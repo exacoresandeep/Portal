@@ -96,7 +96,7 @@ $pages = config('access.page')[session('department_id')] ?? [];
                     <a href="javascript:void(0)"
                   data-page="{{ route('payslip.index') }}" class="nav-link menu-link">
                       <i class="nav-icon bi bi-circle"></i>
-                      <p>PaySlip Management</p>
+                      <p>PaySlip</p>
                     </a>
                   </li>
                   @endif

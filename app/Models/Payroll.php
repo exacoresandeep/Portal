@@ -26,6 +26,13 @@ class Payroll extends Model
         'net_payment',
         'basic',
         'other_allowance',
+
+        'house_rent',
+        'conveyance',
+        'medical',
+        'cea',
+        'telephone',
+
         'performance_bonus',
         'project_allowance',
         'special_allowance',

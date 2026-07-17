@@ -39,7 +39,13 @@ class PayrollController extends Controller
         return DataTables::of($query)
 
             ->addIndexColumn()
+            ->addColumn('employee_id', function ($row) {
 
+                return date(
+                    'F',
+                    mktime(0, 0, 0, $row->month, 1)
+                );
+            })
             ->addColumn('month_name', function ($row) {
 
                 return date(

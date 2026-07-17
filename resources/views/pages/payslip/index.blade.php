@@ -666,7 +666,7 @@
 
     
 
-   <div class="modal fade" id="payrollModal" tabindex="-1">
+<div class="modal fade" id="payrollModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
 
@@ -730,32 +730,32 @@
 
                             <tr>
                                 <td>DEPARTMENT</td>
-                                <td id="mDepartment"></td>
+                                <td id="">{{ auth()->user()->department->name }}</td>
                             </tr>
 
                             <tr>
                                 <td>DIVISION</td>
-                                <td id="mDivision"></td>
+                                <td id="mDivision">0</td>
                             </tr>
 
                             <tr>
                                 <td>LOCATION</td>
-                                <td id="mLocation"></td>
+                                <td id="">{{ auth()->user()->work_location }}</td>
                             </tr>
 
                             <tr>
                                 <td>DESIGNATION</td>
-                                <td id="mDesignation"></td>
+                                <td id="">{{ auth()->user()->designation->name }}</td>
                             </tr>
 
                             <tr>
                                 <td>DATE OF BIRTH</td>
-                                <td id="mDOB"></td>
+                                <td id="">{{ auth()->user()->dob}}</td>
                             </tr>
 
                             <tr>
                                 <td>DATE OF JOINING</td>
-                                <td id="mJoining"></td>
+                                <td id="">{{ auth()->user()->joining_date}}</td>
                             </tr>
 
                         </table>
@@ -778,17 +778,17 @@
 
                             <tr>
                                 <td>PAN NUMBER</td>
-                                <td id="mPan"></td>
+                                <td id="">{{ auth()->user()->pan_no }}</td>
                             </tr>
 
                             <tr>
                                 <td>PF UAN NO</td>
-                                <td id="mPFNumber"></td>
+                                <td id="">{{ auth()->user()->uan }}</td>
                             </tr>
 
                             <tr>
                                 <td>EMAIL ID</td>
-                                <td id="mEmail"></td>
+                                <td id="">{{ auth()->user()->email }}</td>
                             </tr>
 
                             <tr>
@@ -848,7 +848,7 @@
 
                                 <td>House Rent Allowance</td>
 
-                                <td class="text-end">0.00</td>
+                                <td class="text-end" id="houseAllowance">0.00</td>
 
                             </tr>
 
@@ -856,7 +856,7 @@
 
                                 <td>Conveyance Allowance</td>
 
-                                <td class="text-end">0.00</td>
+                                <td class="text-end" id="conveyanceAllowance">0.00</td>
 
                             </tr>
 
@@ -872,15 +872,15 @@
 
                                 <td>Medical Allowance</td>
 
-                                <td class="text-end">0.00</td>
+                                <td class="text-end"  id="medicalAllowance">0.00</td>
 
                             </tr>
 
                             <tr>
 
-                                <td>Travelling Allowance</td>
+                                <td>Telephone Allowance</td>
 
-                                <td class="text-end">0.00</td>
+                                <td class="text-end"  id="telephoneAllowance">0.00</td>
 
                             </tr>
 
@@ -888,7 +888,7 @@
 
                                 <td>CEA</td>
 
-                                <td class="text-end">0.00</td>
+                                <td class="text-end"  id="cea">0.00</td>
 
                             </tr>
 
@@ -1348,6 +1348,23 @@ $(document).on('click','.viewPayslip',function(){
                 numberFormat(p.basic)
             );
 
+            
+            $('#houseAllowance').text(
+                numberFormat(p.house_rent)
+            );
+            $('#conveyanceAllowance').text(
+                numberFormat(p.conveyance)
+            );
+            $('#medicalAllowance').text(
+                numberFormat(p.medical)
+            );
+            $('#cea').text(
+                numberFormat(p.cea)
+            );
+            $('#telephoneAllowance').text(
+                numberFormat(p.telephone)
+            );
+
             $('#mOtherAllowance').text(
                 numberFormat(p.other_allowance)
             );
@@ -1510,3 +1527,24 @@ $('#btnYearFilter').on('click', function () {
 });
 
 </script>
+
+
+{{-- DEPARTMENT
+LOCATION
+DESIGNATION
+DATE OF BIRTH
+DATE OF JOINING
+PAN NUMBER
+PF UAN NO
+EMAIL ID
+
+
+House Rent Allowance
+Conveyance Allowance
+Medical Allowance	0.00
+Travelling Allowance	0.00
+CEA	0.00
+Special Allowance	0.00
+Income Tax	0.00
+ESI	0.00
+Salary Advance Recovery	0.00 --}}

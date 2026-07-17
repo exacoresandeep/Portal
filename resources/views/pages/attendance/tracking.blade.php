@@ -5,13 +5,13 @@
             <h3 class="fw-bold mb-1">Attendance Tracking</h3>
         </div>
         <div class="d-flex justify-content-end mb-3">
-
+            @if(in_array(Auth::user()->department_id, [1, 2]))
                 <button class="btn btn-success"
                         id="exportBtn">
                     <i class="fas fa-file-excel"></i>
                     Export
                 </button>
-
+            @endif    
             </div>
     </div>
 
@@ -28,6 +28,7 @@
                     <label>To Date</label>
                     <input type="date" class="form-control" id="to_date">
                 </div>
+                @if(in_array(Auth::user()->department_id, [1, 2]))
 
                 <div class="col-md-2">
                     <label>Department</label>
@@ -42,7 +43,7 @@
 
                     </select>
                 </div>
-
+                @endif    
                 <div class="col-md-2">
                     <label>Status</label>
                     <select class="form-select" id="status">
@@ -116,8 +117,8 @@
                 searchable: false
             },
 
-            {data: 'emp_id', name: 'emp_id'},
             {data: 'date', name: 'date'},
+            {data: 'emp_id', name: 'emp_id'},
             {data: 'employee_name', name: 'employee_name'},
             {data: 'department', name: 'department'},
             {data: 'check_in', name: 'check_in'},

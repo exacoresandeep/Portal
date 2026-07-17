@@ -7,7 +7,7 @@ use App\Models\Project;
 use App\Models\ScheduleCalendar;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
-
+use Illuminate\Support\Facades\Auth;
 class CalendarController extends Controller
 {
     public function schedule()
@@ -31,8 +31,21 @@ class CalendarController extends Controller
     {
         if ($request->ajax()) {
 
-            $query = ScheduleCalendar::with('project')
+            if(in_array(Auth::user()->department_id, [1, 2]))
+            {
+                $query = ScheduleCalendar::with('project')
                 ->select('schedule_calendars.*');
+            }else{
+                $query = ScheduleCalendar::with('project')
+                    ->whereHas('project', function ($q) {
+
+                        $q->where('project_manager_id', auth()->id())
+                        ->orWhere('team_head_id', auth()->id())
+                        ->orWhereJsonContains('team_members', auth()->id());
+
+                    });
+
+            }
 
             return DataTables::of($query)
 
@@ -45,7 +58,8 @@ class CalendarController extends Controller
 
                 ->addColumn('action', function ($row) {
 
-                    return '
+                if(in_array(Auth::user()->department_id, [1, 2]))
+                { return '
                         <button
                             class="btn btn-sm btn-info viewBtn"
                             data-id="' . $row->id . '">
@@ -61,6 +75,19 @@ class CalendarController extends Controller
                             Delete
                         </button>
                     ';
+                    
+                }
+                else{
+                    return '
+                        <button
+                            class="btn btn-sm btn-info viewBtn"
+                            data-id="' . $row->id . '">
+                            View
+                        </button>
+                    ';
+
+                }
+                    
                 })
 
                 ->rawColumns(['action'])
@@ -155,62 +182,7 @@ class CalendarController extends Controller
             'message' => 'Holiday calendar created successfully.'
         ]);
     }
-    public function storeOld(Request $request)
-    {
-        $request->validate([
-            'year' => 'required',
-            'project_id' => 'required|exists:projects,id',
-            'holiday_date' => 'required|array|min:1',
-            'holiday_date.*' => 'required|date',
-            'description' => 'required|array|min:1',
-            'description.*' => 'required|string|max:255',
-        ]);
-
-        $holidays = [];
-
-        foreach ($request->holiday_date as $key => $date) {
-
-            // Validate selected year
-            if (date('Y', strtotime($date)) != $request->year) {
-
-                return response()->json([
-                    'status' => false,
-                    'message' => 'All holiday dates must belong to selected year.'
-                ], 422);
-            }
-
-            $holidays[] = [
-                'date' => $date,
-                'description' => $request->description[$key]
-            ];
-        }
-
-        $calendar = ScheduleCalendar::where('year', $request->year)
-            ->where('project_id', $request->project_id)
-            ->first();
-
-        if ($calendar) {
-
-            $calendar->update([
-                'year' => $request->year,
-                'project_id' => $request->project_id,
-                'holidays' => $holidays
-            ]);
-        } else {
-
-            ScheduleCalendar::create([
-                'year' => $request->year,
-                'project_id' => $request->project_id,
-                'holidays' => $holidays
-            ]);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Holiday calendar saved successfully.'
-        ]);
-    }
-
+    
     public function show($id)
     {
         $calendar = ScheduleCalendar::with('project')
@@ -249,12 +221,16 @@ class CalendarController extends Controller
 
     public function destroy($id)
     {
-        ScheduleCalendar::findOrFail($id)
-            ->delete();
+        if(in_array(Auth::user()->department_id, [1, 2]))
+        {
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Deleted successfully'
-        ]);
+            ScheduleCalendar::findOrFail($id)
+                ->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Deleted successfully'
+            ]);
+        }
     }
 }

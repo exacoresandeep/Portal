@@ -5,14 +5,13 @@
             <h3 class="fw-bold mb-1">Attendance Capture</h3>
         </div>
        <div>
+       
+        @if(in_array(Auth::user()->department_id, [1, 2]))
             <button class="btn btn-success" id="exportBtn">
                 <i class="bi bi-file-earmark-excel me-1"></i>
                 Export
             </button>
-            {{-- <button class="btn btn-primary">
-                <i class="bi bi-plus-lg me-1"></i>
-                Add Employee
-            </button>  --}}
+        @endif
         </div> 
     </div>
     <div class="pb-3 mb-3 border-bottom ">

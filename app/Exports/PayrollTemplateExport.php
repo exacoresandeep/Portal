@@ -13,7 +13,10 @@ class PayrollTemplateExport implements FromCollection, WithHeadings
         return Employee::where('status', 1)
             ->select(
                 'emp_id as employee_id',
-                'name as employee_name'
+                'name as employee_name',
+                'ifsc',
+                'account_no',
+                'bank_name'
             )
             ->get()
             ->map(function ($employee) {
@@ -52,9 +55,9 @@ class PayrollTemplateExport implements FromCollection, WithHeadings
                     '', // WFH
                     '', // Per Day Deduction
                     '', // Total Deduction 2
-                    '', // IFSC Code
-                    '', // Bank Account Number
-                    '', // Bank
+                    $employee->ifsc, // IFSC Code
+                    $employee->account_no, // Bank Account Number
+                    $employee->bank_name, // Bank
 
                 ];
             });
@@ -71,6 +74,11 @@ class PayrollTemplateExport implements FromCollection, WithHeadings
             'Gender',
             'Net Payment',
             'Basic',
+            'House Rent Allowance',
+            'Conveyance Allowance',
+            'Medical Allowance',
+            'Telephone Allowance',
+            'CEA',
             'Other Allowance',
             'Performance Bonus',
             'Project Allowance',

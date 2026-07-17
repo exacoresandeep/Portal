@@ -16,6 +16,7 @@ use App\Exports\AttendanceCaptureExport;
 use App\Exports\AttendanceSummaryExport;
 use App\Exports\AttendanceTrackingExport;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
@@ -293,16 +294,31 @@ class AttendanceController extends Controller
         $fromDate = Carbon::parse($request->from_date);
         $toDate   = Carbon::parse($request->to_date);
 
-        $employees = Employee::with('department')
-            ->where('status', 1)
-            ->when($request->department_id, function ($q) use ($request) {
+        
+        if(in_array(Auth::user()->department_id, [1, 2]))
+        {    $employees = Employee::with('department')
+                ->where('status', 1)
+                ->when($request->department_id, function ($q) use ($request) {
 
-                $q->where(
-                    'department_id',
-                    $request->department_id
-                );
-            })
-            ->get();
+                    $q->where(
+                        'department_id',
+                        $request->department_id
+                    );
+                })
+                ->get();
+        }else{
+            $employees = Employee::with('department')
+                ->where('status', 1)
+                ->where("id",auth()->id())
+                ->when($request->department_id, function ($q) use ($request) {
+
+                    $q->where(
+                        'department_id',
+                        $request->department_id
+                    );
+                })
+                ->get();
+        }
 
         $data = [];
 
