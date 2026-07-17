@@ -97,6 +97,9 @@ Route::prefix('attendance')->group(function () {
     
     Route::get('/regularization', [AttendanceController::class, 'regularization'])
     ->name('attendance.regularization');
+    Route::post('/regularization/store',
+    [AttendanceController::class, 'storeRegularization']
+)->name('attendance.regularization.store');
     Route::get('/regularizationList', [AttendanceController::class, 'regularizationList'])->name('attendance.regularization.list');
     Route::get('attendance-regularization-export',[AttendanceController::class, 'regularizationExport'])->name('attendance.regularization.export');
     Route::get('regularization/{id}',[AttendanceController::class,'getRegularization']);
@@ -129,11 +132,11 @@ Route::delete('/calendar/delete/{id}',[CalendarController::class,'destroy']);
 
 Route::get('/leave-requests', [LeaveController::class, 'index'])->name('leave.index');
 Route::get('/leave-requests/list', [LeaveController::class, 'leaveList'])->name('leave.list');
-
+Route::post('/leave/store',[LeaveController::class, 'store'])->name('leave.store');
 Route::post('/leave-requests/{id}/approve', [LeaveController::class, 'approve'])->name('leave.approve');
 Route::post('/leave-requests/{id}/reject', [LeaveController::class, 'reject'])->name('leave.reject');
 Route::get('/leave-requests-export', [LeaveController::class, 'exportLeaveRequests'])->name('leave.export');
-
+Route::get('/leave-summary', [LeaveController::class, 'leaveSummary'])->name('leave.summary');
 Route::get('/wfh-requests', [LeaveController::class, 'wfh'])->name('wfh.index');
 Route::get('/wfh-requests/list', [LeaveController::class, 'wfhList'])->name('wfh.list');
 

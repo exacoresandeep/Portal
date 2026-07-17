@@ -5,13 +5,13 @@
             <h3 class="fw-bold mb-1">Attendance Summary</h3>
         </div>
         <div class="d-flex justify-content-end mb-3">
-
+            @if(in_array(Auth::user()->department_id, [1, 2]))
                 <button class="btn btn-success"
                         id="exportBtn">
                     <i class="fas fa-file-excel"></i>
                     Export
                 </button>
-
+            @endif 
             </div>
     </div>
 

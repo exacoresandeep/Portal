@@ -25,7 +25,22 @@ class LeaveController extends Controller
 
     public function leaveList(Request $request)
     {
-        $query = Leave::with('employee');
+        $query = Leave::with('employee')
+                    ->when(
+                        !in_array(Auth::user()->department_id, [1, 2]),
+                        function ($q) {
+                            $q->where('employee_id', Auth::id());
+                        }
+                    )
+
+                    ->when(
+                        in_array(Auth::user()->department_id, [1, 2]) && $request->filled('department_id'),
+                        function ($q) use ($request) {
+                            $q->whereHas('employee', function ($emp) use ($request) {
+                                $emp->where('department_id', $request->department_id);
+                            });
+                        }
+                    );
 
         if ($request->filled('from_date')) {
             $query->whereDate('from_date', '>=', $request->from_date);
@@ -45,7 +60,8 @@ class LeaveController extends Controller
         if ($request->filled('manager_status')) {
             $query->where('manager_status', $request->manager_status);
         }
-        $query->where('leave_type', "!=", "WFH");
+        $query->where('leave_type', "!=", "WFH")->orderBy('id', 'desc');
+        
         return datatables()
             ->of($query)
 
@@ -94,32 +110,44 @@ class LeaveController extends Controller
                     </a>
                 ';
             })
-            ->addColumn('manager_status', function ($row) {
+            ->addColumn('manager_approval', function ($row) {
 
-                if ($row->manager_status == 'Approved') {
-                    return '<span class="badge bg-success">Approved</span>';
+                if (!$row->manager_approval) {
+                    return '-';
                 }
 
-                if ($row->manager_status == 'Rejected') {
-                    return '<span class="badge bg-danger">Rejected</span>';
-                }
+                $url = asset('storage/employees/leave_attachments/' . $row->manager_approval);
 
-                return '<span class="badge bg-warning text-dark">Pending</span>';
+                return '
+                    <a href="javascript:void(0)" class="btn btn-sm btn-warning me-1 view-image" data-image="' . $url . '" title="View">
+                        <i class="bi bi-eye"></i>
+                    </a>
+
+                    <a href="' . $url . '" download class="btn btn-sm btn-primary" title="Download">
+                        <i class="bi bi-download"></i>
+                    </a>
+                ';
             })
 
             ->addColumn('action', function ($row) {
 
-                if ($row->manager_status == 'Approved') {
+            
+                if ($row->status == 'Pending') {
+                    if(in_array(Auth::user()->department_id, [1, 2]))
+                    {
+                        return '
+                            <button class="btn btn-success btn-sm approveLeave" data-id="' . $row->id . '">
+                                Approve
+                            </button>
 
-                    return '
-                        <button class="btn btn-success btn-sm approveLeave" data-id="' . $row->id . '">
-                            Approve
-                        </button>
-
-                        <button class="btn btn-danger btn-sm rejectLeave" data-id="' . $row->id . '">
-                            Reject
-                        </button>
-                    ';
+                            <button class="btn btn-danger btn-sm rejectLeave" data-id="' . $row->id . '">
+                                Reject
+                            </button>
+                        ';
+                    }
+                    else{
+                        return '<span class="badge bg-warning">Pending</span>';
+                    }
                 }
 
                 if ($row->status == 'Approved') {
@@ -182,8 +210,8 @@ class LeaveController extends Controller
                 });
             })
 
-            ->rawColumns(['attachment', 'manager_status', 'action'])
-
+            ->rawColumns(['attachment', 'manager_approval', 'action'])
+            
             ->make(true);
     }
 
@@ -195,13 +223,35 @@ class LeaveController extends Controller
             'leave_type' => 'required|in:Sick,Casual,Earned,WFH,Maternity,LOP',
             'reason' => 'nullable|string',
             'attachment' => 'nullable|file|max:2048',
+            'manager_approval' => 'required|file|max:2048',
         ]);
-
-        $attachment = null;
+        $fileName = null;
+        $approvalfileName = null;
 
         if ($request->hasFile('attachment')) {
-            $attachment = $request->file('attachment')
-                ->store('leave_attachments', 'public');
+            $file = $request->file('attachment');
+            $fileName = Auth::user()->emp_id . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+           $file->storeAs(
+                'employees/leave_attachments',
+                $fileName,
+                'public'
+            );
+        }
+        if ($request->hasFile('manager_approval')) {
+
+            $approvalfile = $request->file('manager_approval');
+
+            $approvalfileName = 'manager_approval_' .
+                Auth::user()->emp_id . '_' .
+                time() . '.' .
+                $approvalfile->getClientOriginalExtension();
+
+            $approvalfile->storeAs(
+                'employees/leave_attachments',
+                $approvalfileName,
+                'public'
+            );
         }
 
         Leave::create([
@@ -210,7 +260,8 @@ class LeaveController extends Controller
             'to_date' => $request->to_date,
             'leave_type' => $request->leave_type,
             'reason' => $request->reason,
-            'attachment' => $attachment,
+            'attachment' => $fileName,
+            'manager_approval' => $approvalfileName,
         ]);
 
         return response()->json([
@@ -637,6 +688,73 @@ class LeaveController extends Controller
             ->make(true);
     }
 
+    public function leaveSummary()
+    {
+        $year = now()->year;
+        $employeeId = Auth::id();
+
+        $leaveCount = LeaveCount::where('employee_id', $employeeId)
+            ->where('year', $year)
+            ->first();
+
+        if (!$leaveCount) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Leave count not found.'
+            ]);
+        }
+
+        $totalLeave =
+            $leaveCount->sick_leaves +
+            $leaveCount->casual_leaves +
+            $leaveCount->earned_leaves;
+
+        $usedLeave = Leave::where('employee_id', $employeeId)
+            ->where('status', 'Approved')
+            ->whereYear('from_date', $year)
+            ->count();
+
+        $balanceLeave = $totalLeave - $usedLeave;
+
+        $sickTaken = Leave::where('employee_id', $employeeId)
+            ->where('leave_type', 'Sick')
+            ->where('status', 'Approved')
+            ->whereYear('from_date', $year)
+            ->count();
+
+        $casualTaken = Leave::where('employee_id', $employeeId)
+            ->where('leave_type', 'Casual')
+            ->where('status', 'Approved')
+            ->whereYear('from_date', $year)
+            ->count();
+
+        $earnedTaken = Leave::where('employee_id', $employeeId)
+            ->where('leave_type', 'Earned')
+            ->where('status', 'Approved')
+            ->whereYear('from_date', $year)
+            ->count();
+
+        return response()->json([
+            'total_leave' => $totalLeave,
+            'used_leave' => $usedLeave,
+            'balance_leave' => $balanceLeave,
+
+            'sick' => [
+                'balance' => $leaveCount->sick_leaves - $sickTaken,
+                'total' => $leaveCount->sick_leaves,
+            ],
+
+            'casual' => [
+                'balance' => $leaveCount->casual_leaves - $casualTaken,
+                'total' => $leaveCount->casual_leaves,
+            ],
+
+            'earned' => [
+                'balance' => $leaveCount->earned_leaves - $earnedTaken,
+                'total' => $leaveCount->earned_leaves,
+            ],
+        ]);
+    }
     public function exportLeaveCounts(Request $request)
     {
         $year = $request->year ?? date('Y');

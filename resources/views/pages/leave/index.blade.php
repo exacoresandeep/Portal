@@ -6,17 +6,113 @@
             <h3 class="fw-bold mb-1">Leave Requests</h3>
         </div>
        <div>
+        @if(in_array(Auth::user()->department_id, [1, 2]))
              <button class="btn btn-success" id="exportBtn">
                 <i class="bi bi-file-earmark-excel me-1"></i>
                 Export
             </button>
-           {{-- <button class="btn btn-primary">
+        @endif      
+           <button class="btn btn-primary" id="addLeaveBtn">
                 <i class="bi bi-plus-lg me-1"></i>
-                Add Employee
-            </button>  --}}
+                Apply Leave
+            </button>
         </div> 
 
     </div>
+    <div class="row mb-4">
+
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>
+                        <i class="bi bi-calendar-check-fill text-primary me-2"></i>
+                        Total Annual Leave
+                    </span>
+
+                    <span>
+                        <strong class="text-primary" id="total_leave">36</strong> Days
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>
+                        <i class="bi bi-calendar-minus-fill text-warning me-2"></i>
+                        Used Leave
+                    </span>
+
+                    <span>
+                        <strong class="text-warning" id="used_leave">16</strong> Days
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="bi bi-calendar-plus-fill text-success me-2"></i>
+                        Balance Leave
+                    </span>
+
+                    <span>
+                        <strong class="text-success" id="balance_leave">20</strong> Days
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span>
+                        <i class="bi bi-heart-pulse-fill text-success me-2"></i>
+                        Sick Leave
+                    </span>
+
+                    <span>
+                        <strong class="text-success" id="sick_balance">0</strong>/<span id="sick_total">0</span> Days
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span>
+                        <i class="bi bi-briefcase-fill text-warning me-2"></i>
+                        Casual Leave
+                    </span>
+
+                    <span>
+                        <strong class="text-success" id="casual_balance">0</strong>/<span id="casual_total">0</span> Days
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <span>
+                        <i class="bi bi-calendar-check-fill text-danger me-2"></i>
+                        Earned Leave
+                    </span>
+
+                    <span>
+                        <strong class="text-success" id="earned_balance">0</strong>/<span id="earned_total">0</span> Days
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<hr>
     <div class="pb-3 mb-3 border-bottom ">
         <div class="card-body">
 
@@ -42,15 +138,7 @@
                     </select>
                 </div>
 
-                <div class="col-md-2">
-                    <label class="form-label">Manager Status</label>
-                    <select id="manager_status" class="form-select">
-                        <option value="">All Manager Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
-                    </select>
-                </div>
+                
 
                 <div class="col-md-2">
                     <label class="form-label">Leave Type</label>
@@ -90,7 +178,7 @@
                 <th>Leave Type</th>
                 <th>Reason</th>
                 <th>Attachment</th>
-                <th>Manager Status</th>
+                <th>Manager Approval</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -116,15 +204,193 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="leaveModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
 
+            <form id="leaveForm" enctype="multipart/form-data">
+
+                @csrf
+
+                <div class="modal-header">
+                    <h5>Create Leave Request</h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <label>From Date</label>
+                            <input
+                                type="date"
+                                name="from_date"
+                                class="form-control"
+                                required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>To Date</label>
+                            <input
+                                type="date"
+                                name="to_date"
+                                class="form-control"
+                                required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Leave Type</label>
+
+                            <select
+                                name="leave_type"
+                                class="form-select"
+                                required>
+
+                                <option value="">Select</option>
+                                <option value="Sick">Sick</option>
+                                <option value="Casual">Casual</option>
+                                <option value="Earned">Earned</option>
+                                <option value="Maternity">Maternity</option>
+                                <option value="LOP">LOP</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label>Attachment</label>
+
+                            <input
+                                type="file"
+                                name="attachment"
+                                class="form-control">
+
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Manager Approval <span class="text-danger">*</span></label>
+                            <input
+                                type="file"
+                                name="manager_approval"
+                                class="form-control"
+                                required>
+                        </div>
+
+                        <div class="col-12">
+
+                            <label>Reason</label>
+
+                            <textarea
+                                class="form-control"
+                                name="reason"
+                                rows="4"></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button
+                        class="btn btn-success"
+                        type="submit">
+                        Submit
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
 <script>
+    $('#addLeaveBtn').click(function () {
+
+        $('#leaveForm')[0].reset();
+
+        $('#leaveModal').modal('show');
+
+    });
+    $('#leaveForm').submit(function(e){
+
+        e.preventDefault();
+
+        let formData = new FormData(this);
+
+        $.ajax({
+
+            url: "{{ route('leave.store') }}",
+
+            type: "POST",
+
+            data: formData,
+
+            processData: false,
+
+            contentType: false,
+
+            success:function(res){
+
+                $('#leaveModal').modal('hide');
+
+                Swal.fire(
+                    'Success',
+                    res.message,
+                    'success'
+                );
+
+                $('#leaveTable')
+                    .DataTable()
+                    .ajax
+                    .reload();
+
+            },
+
+            error:function(xhr){
+
+                let errors = xhr.responseJSON.errors;
+
+                let message = '';
+
+                $.each(errors,function(k,v){
+
+                    message += v[0] + '<br>';
+
+                });
+
+                Swal.fire({
+                    icon:'error',
+                    title:'Validation Error',
+                    html:message
+                });
+
+            }
+
+        });
+
+    });
     $('#exportBtn').click(function () {
 
     let params = $.param({
         from_date: $('#from_date').val(),
         to_date: $('#to_date').val(),
         status: $('#status').val(),
-        manager_status: $('#manager_status').val(),
         leave_type: $('#leave_type').val()
     });
 
@@ -166,7 +432,7 @@ var table = $('#leaveTable').DataTable({
             { data:'leave_type', name:'leave_type' },
             { data:'reason', name:'reason' },
             { data:'attachment', name:'attachment', orderable:false, searchable:false },
-             { data:'manager_status', name:'manager_status' ,orderable:false, searchable:false}, 
+            { data:'manager_approval', name:'manager_approval' ,orderable:false, searchable:false}, 
             { data:'action', name:'action', orderable:false, searchable:false }
         ]
 });
@@ -246,5 +512,40 @@ $(document).on('click','.rejectLeave',function(){
         }
     });
 });
+loadLeaveSummary();
 
+function loadLeaveSummary() {
+
+    $.ajax({
+
+        url: "{{ route('leave.summary') }}",
+
+        type: "GET",
+
+        success: function(res) {
+
+            $('#total_leave').text(res.total_leave);
+            $('#used_leave').text(res.used_leave);
+            $('#balance_leave').text(res.balance_leave);
+
+            $('#sick_balance').text(res.sick.balance);
+            $('#sick_total').text(res.sick.total);
+
+            $('#casual_balance').text(res.casual.balance);
+            $('#casual_total').text(res.casual.total);
+
+            $('#earned_balance').text(res.earned.balance);
+            $('#earned_total').text(res.earned.total);
+
+        },
+
+        error: function() {
+
+            console.log('Unable to load leave summary.');
+
+        }
+
+    });
+
+}
 </script>

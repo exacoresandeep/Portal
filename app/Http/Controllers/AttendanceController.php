@@ -473,10 +473,16 @@ class AttendanceController extends Controller
     }
     public function regularizationList(Request $request)
     {
+       
         $requests = RegularizationRequest::with([
             'employee.department'
         ])
-
+            ->when(
+                !in_array(Auth::user()->department_id, [1, 2]),
+                function ($query) {
+                    $query->where('employee_id', Auth::id());
+                }
+            )
             ->when(
                 $request->from_date,
                 function ($query) use ($request) {
@@ -492,7 +498,6 @@ class AttendanceController extends Controller
             ->when(
                 $request->to_date,
                 function ($query) use ($request) {
-
                     $query->whereDate(
                         'date',
                         '<=',
@@ -504,11 +509,9 @@ class AttendanceController extends Controller
             ->when(
                 $request->department_id,
                 function ($query) use ($request) {
-
                     $query->whereHas(
                         'employee',
                         function ($q) use ($request) {
-
                             $q->where(
                                 'department_id',
                                 $request->department_id
@@ -517,17 +520,17 @@ class AttendanceController extends Controller
                     );
                 }
             )
-
             ->when(
                 $request->status,
                 function ($query) use ($request) {
-
                     $query->where(
                         'status',
                         $request->status
                     );
                 }
-            );
+            )
+            ->orderBy('date', 'desc')        // Attendance date DESC
+            ->orderBy('created_at', 'desc');
 
         return DataTables::of($requests)
 
@@ -595,8 +598,8 @@ class AttendanceController extends Controller
                         . $row->status .
                         '</span>';
                 }
-
-
+                if(in_array(Auth::user()->department_id, [1, 2]))
+                {
 
                 return '
                     <button
@@ -610,6 +613,11 @@ class AttendanceController extends Controller
                         data-id="' . $row->id . '">
                         Reject
                     </button>';
+                }else{
+                    return '<span class="badge bg-warning">'
+                        . $row->status .
+                        '</span>';
+                }
             })
 
             ->filter(function ($query) use ($request) {
@@ -647,6 +655,29 @@ class AttendanceController extends Controller
             ])
 
             ->make(true);
+    }
+
+    public function storeRegularization(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'direction' => 'required|in:in,out',
+            'reason' => 'required|max:500',
+        ]);
+
+        RegularizationRequest::create([
+            'employee_id' => Auth::id(),
+            'date'        => $request->date,
+            'direction'   => $request->direction,
+            'reason'      => $request->reason,
+            'status'      => 'Pending',
+            'requested_on'=> now(),
+        ]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Regularization request submitted successfully.'
+        ]);
     }
 
     public function getRegularization($id)
@@ -765,6 +796,12 @@ class AttendanceController extends Controller
         $tableName = 'z_attendance_log_' . $month . '_' . $year;
 
         $employees = Employee::query()
+            ->when(
+                !in_array(Auth::user()->department_id, [1, 2]),
+                function ($query) {
+                    $query->where('id', Auth::id());
+                }
+            )
             ->where('status', 1);
 
         return DataTables::of($employees)

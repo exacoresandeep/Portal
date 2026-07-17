@@ -4,12 +4,17 @@ $commonMenus = [
 
     'dashboard',
     'employee-management',
-    // 'employees',
     'payslip',
     'time-attendance',
-    'attendance-capture',
     "calender-schedule",
-    'attendance-tracking'
+    'attendance-tracking',
+    'attendance-regularization',
+    'attendance-summary',
+
+    'leave-management',
+    'leave-request',
+    'wfh-request',
+    'leave-count',
     
 
 ];

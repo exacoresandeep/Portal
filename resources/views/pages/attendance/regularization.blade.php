@@ -10,15 +10,15 @@
         </div>
 
         <div>
-            {{-- <button
+            <button
                 type="button"
-                id="exportBtn"
+                id="addRequest"
                 class="btn btn-success">
 
                 <i class="fa fa-download me-1"></i>
-                Export
+                Create 
 
-            </button> --}}
+            </button>
         </div>
 
     </div>
@@ -52,6 +52,7 @@
                 class="form-control">
 
         </div>
+         @if(in_array(Auth::user()->department_id, [1, 2]))
 
         <div class="col-md-3">
 
@@ -81,7 +82,7 @@
             </select>
 
         </div>
-
+        @endif   
         <div class="col-md-2">
 
             <label class="form-label">
@@ -159,6 +160,105 @@
 
     </table>
 
+</div>
+
+
+<div class="modal fade" id="createRequestModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form id="createRequestForm">
+
+                @csrf
+
+                <div class="modal-header">
+                    <h5>Create Regularization Request</h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label>Date</label>
+
+                            <input
+                                type="date"
+                                name="date"
+                                class="form-control"
+                                required>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label>Punch Type</label>
+
+                            <select
+                                name="direction"
+                                class="form-select"
+                                required>
+
+                                <option value="">
+                                    Select
+                                </option>
+
+                                <option value="in">
+                                    Punch In
+                                </option>
+
+                                <option value="out">
+                                    Punch Out
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-12">
+
+                            <label>Reason</label>
+
+                            <textarea
+                                name="reason"
+                                rows="4"
+                                class="form-control"
+                                required></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                        type="button">
+                        Cancel
+                    </button>
+
+                    <button
+                        class="btn btn-success"
+                        type="submit">
+                        Submit Request
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
 </div>
 
 <!-- Approve Regularization Modal -->
@@ -328,6 +428,55 @@
 
 </div>
 <script>
+    $('#addRequest').click(function () {
+
+        $('#createRequestForm')[0].reset();
+
+        $('#createRequestModal').modal('show');
+
+    });
+    $('#createRequestForm').submit(function(e){
+
+    e.preventDefault();
+
+    $.ajax({
+
+        url: "{{ route('attendance.regularization.store') }}",
+
+        type: "POST",
+
+        data: $(this).serialize(),
+
+        success: function(res){
+
+            $('#createRequestModal').modal('hide');
+
+            Swal.fire(
+                'Success',
+                res.message,
+                'success'
+            );
+
+            $('#regularizationTable')
+                .DataTable()
+                .ajax
+                .reload();
+
+        },
+
+        error:function(xhr){
+
+            Swal.fire(
+                'Error',
+                xhr.responseJSON.message,
+                'error'
+            );
+
+        }
+
+    });
+
+});
     var table = $('#regularizationTable').DataTable({
 
     processing: true,
