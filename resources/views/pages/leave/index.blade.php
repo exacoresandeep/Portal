@@ -204,7 +204,7 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="leaveModal" tabindex="-1">
+{{-- <div class="modal fade" id="leaveModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
 
@@ -318,6 +318,157 @@
 
         </div>
     </div>
+</div> --}}
+<div class="modal fade" id="leaveModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form id="leaveForm" enctype="multipart/form-data">
+                @csrf
+
+                <div class="modal-header">
+                    <h5>Create Leave Request</h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <label>From Date <span class="text-danger">*</span></label>
+
+                            <input type="date"
+                                   name="from_date"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>To Date <span class="text-danger">*</span></label>
+
+                            <input type="date"
+                                   name="to_date"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label>Leave Category</label>
+
+                            <select name="leavecategory"
+                                    class="form-select">
+
+                                <option value="Full Day">Full Day</option>
+                                <option value="Half Day">Half Day</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3 sessionDiv" style="display:none;">
+
+                            <label>Leave Session</label>
+
+                            <select name="leavesession"
+                                    class="form-select">
+
+                                <option value="AM">AM</option>
+                                <option value="PM">PM</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label>Leave Count</label>
+
+                            <input type="text"
+                                   name="leavecount"
+                                   id="leavecount"
+                                   class="form-control"
+                                   readonly>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label>Leave Type</label>
+
+                            <select name="leave_type"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">Select</option>
+                                <option value="Sick">Sick</option>
+                                <option value="Casual">Casual</option>
+                                <option value="Earned">Earned</option>
+                                <option value="Maternity">Maternity</option>
+                                <option value="LOP">LOP</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label>Attachment</label>
+
+                            <input type="file"
+                                   name="attachment"
+                                   class="form-control">
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label>Manager Approval <span class="text-danger">*</span></label>
+
+                            <input type="file"
+                                   name="manager_approval"
+                                   class="form-control"
+                                   required>
+
+                        </div>
+
+                        <div class="col-12">
+
+                            <label>Reason</label>
+
+                            <textarea class="form-control"
+                                      name="reason"
+                                      rows="4"></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button class="btn btn-success"
+                            type="submit">
+                        Submit
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
 </div>
 <script>
     $('#addLeaveBtn').click(function () {
@@ -417,7 +568,6 @@ var table = $('#leaveTable').DataTable({
             d.to_date = $('#to_date').val();
             d.status = $('#status').val();
             d.leave_type = $('#leave_type').val();
-            d.manager_status = $('#manager_status').val(); 
         }
     },
 
@@ -542,6 +692,96 @@ function loadLeaveSummary() {
         error: function() {
 
             console.log('Unable to load leave summary.');
+
+        }
+
+    });
+
+}
+$('input[name="from_date"]').change(function () {
+
+    let from = $(this).val();
+
+    $('input[name="to_date"]')
+        .attr('min', from)
+        .val('');
+
+    $('#leavecount').val('');
+});
+
+
+$('select[name="leavecategory"]').change(function () {
+
+    if ($(this).val() == 'Half Day') {
+
+        $('.sessionDiv').show();
+
+        let from = $('input[name="from_date"]').val();
+
+        $('input[name="to_date"]')
+            .val(from)
+            .prop('readonly', true);
+
+        $('#leavecount').val('0.5');
+
+    } else {
+
+        $('.sessionDiv').hide();
+
+        $('input[name="to_date"]')
+            .prop('readonly', false);
+
+        $('#leavecount').val('');
+
+    }
+
+});
+
+
+$('input[name="to_date"]').change(function () {
+
+    calculateLeaveCount();
+
+});
+
+$('input[name="from_date"]').change(function () {
+
+    if ($('input[name="to_date"]').val()) {
+
+        calculateLeaveCount();
+
+    }
+
+});
+
+
+function calculateLeaveCount()
+{
+    if ($('select[name="leavecategory"]').val() == 'Half Day') {
+
+        $('#leavecount').val('0.5');
+        return;
+    }
+
+    $.ajax({
+
+        url: "{{ route('getleaveCount') }}",
+
+        type: "POST",
+
+        data: {
+
+            _token: $('meta[name="csrf-token"]').attr('content'),
+
+            from_date: $('input[name="from_date"]').val(),
+
+            to_date: $('input[name="to_date"]').val()
+
+        },
+
+        success: function (res) {
+
+            $('#leavecount').val(res.leavecount);
 
         }
 

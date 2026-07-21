@@ -19,6 +19,9 @@ class Leave extends Model
         'status',
         'action_date',
         'action_by',
+        'leavecount',
+        'leavecategory',
+        'leavesession',
     ];
 
     protected $casts = [

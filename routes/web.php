@@ -137,9 +137,11 @@ Route::post('/leave-requests/{id}/approve', [LeaveController::class, 'approve'])
 Route::post('/leave-requests/{id}/reject', [LeaveController::class, 'reject'])->name('leave.reject');
 Route::get('/leave-requests-export', [LeaveController::class, 'exportLeaveRequests'])->name('leave.export');
 Route::get('/leave-summary', [LeaveController::class, 'leaveSummary'])->name('leave.summary');
+Route::post('/getleaveCount', [LeaveController::class, 'getleaveCount'])->name('getleaveCount');
+Route::post('/calculateWFHCount', [LeaveController::class, 'calculateWFHCount'])->name('calculateWFHCount');
 Route::get('/wfh-requests', [LeaveController::class, 'wfh'])->name('wfh.index');
 Route::get('/wfh-requests/list', [LeaveController::class, 'wfhList'])->name('wfh.list');
-
+Route::post('/wfh/store',[LeaveController::class,'storeWFH'])->name('wfh.store');
 Route::post('/wfh-requests/{id}/approve', [LeaveController::class, 'wfhApprove'])->name('wfh.approve');
 Route::post('/wfh-requests/{id}/reject', [LeaveController::class, 'wfhReject'])->name('wfh.reject');
 Route::get('/wfh-requests-export',[LeaveController::class, 'exportWfhRequests'])->name('wfh.export');
@@ -147,7 +149,8 @@ Route::get('/wfh-requests-export',[LeaveController::class, 'exportWfhRequests'])
 Route::get('/leavecount', [LeaveController::class, 'leavecount'])->name('leavecount.index');
 Route::get('/leavecount/list', [LeaveController::class, 'leavecountList'])->name('leavecount.list');
 Route::get('/leave-count/export',[LeaveController::class, 'exportLeaveCounts'])->name('leavecount.export');
-
+Route::get('/leave-count/{id}', [LeaveController::class, 'viewLeaveCount']);
+Route::post('/leave-count/update', [LeaveController::class, 'updateLeaveCount']);
 
 Route::get('/assets-requests', [AssetRequestController::class, 'requests'])->name('assets.requests');
 Route::get('/assets-requests/list', [AssetRequestController::class, 'requestsList'])->name('assets-requests.list');

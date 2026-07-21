@@ -14,7 +14,13 @@ $commonMenus = [
     'leave-management',
     'leave-request',
     'wfh-request',
-    'leave-count',
+
+     'expense-management',
+
+    'project-management',
+    // 'all-projects',
+    'tasks-allocation',
+    'my-tasks',
     
 
 ];
@@ -134,7 +140,12 @@ return [
         // Employee
         4 => $commonMenus,
         5 => $commonMenus,
-        6 => $commonMenus,
+        6 => array_merge($commonMenus, [
+
+            'all-projects',
+
+        ]),
+        
         7 => $commonMenus,
         8 => $commonMenus,
 

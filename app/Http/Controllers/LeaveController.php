@@ -12,7 +12,9 @@ use App\Exports\LeaveCountExport;
 use App\Exports\LeaveRequestExport;
 use App\Exports\WfhRequestExport;
 use Maatwebsite\Excel\Facades\Excel;
-
+use App\Models\ScheduleCalendar;
+use App\Models\Project;
+use Carbon\Carbon;
 class LeaveController extends Controller
 {
     /**
@@ -88,8 +90,7 @@ class LeaveController extends Controller
             })
 
             ->addColumn('leave_count', function ($row) {
-                return \Carbon\Carbon::parse($row->from_date)
-                    ->diffInDays(\Carbon\Carbon::parse($row->to_date)) + 1;
+                return $row->leavecount;
             })
 
             ->addColumn('attachment', function ($row) {
@@ -222,6 +223,7 @@ class LeaveController extends Controller
             'to_date' => 'required|date|after_or_equal:from_date',
             'leave_type' => 'required|in:Sick,Casual,Earned,WFH,Maternity,LOP',
             'reason' => 'nullable|string',
+            'leavecount' => 'required',
             'attachment' => 'nullable|file|max:2048',
             'manager_approval' => 'required|file|max:2048',
         ]);
@@ -258,6 +260,7 @@ class LeaveController extends Controller
             'employee_id' => Auth::id(),
             'from_date' => $request->from_date,
             'to_date' => $request->to_date,
+            'leavecount' => $request->leavecount,
             'leave_type' => $request->leave_type,
             'reason' => $request->reason,
             'attachment' => $fileName,
@@ -329,7 +332,22 @@ class LeaveController extends Controller
 
     public function wfhList(Request $request)
     {
-        $query = Leave::with('employee.designation');
+        $query = Leave::with('employee.designation')->when(
+                        !in_array(Auth::user()->department_id, [1, 2]),
+                        function ($q) {
+                            $q->where('employee_id', Auth::id());
+                        }
+                    )
+
+                    ->when(
+                        in_array(Auth::user()->department_id, [1, 2]) && $request->filled('department_id'),
+                        function ($q) use ($request) {
+                            $q->whereHas('employee', function ($emp) use ($request) {
+                                $emp->where('department_id', $request->department_id);
+                            });
+                        }
+                    );
+
 
         if ($request->filled('from_date')) {
             $query->whereDate('from_date', '>=', $request->from_date);
@@ -350,9 +368,7 @@ class LeaveController extends Controller
                 $q->where('designation_id', $request->filter_designation);
             });
         }
-        if ($request->filled('manager_status')) {
-            $query->where('manager_status', $request->manager_status);
-        }
+        
         $query->where('leave_type', "WFH");
         return datatables()
             ->of($query)
@@ -381,31 +397,43 @@ class LeaveController extends Controller
             ->addColumn('designation', function ($row) {
                 return $row->employee?->designation?->name ?? '-';
             })
-            ->addColumn('manager_status', function ($row) {
+            ->addColumn('manager_approval', function ($row) {
 
-                if ($row->manager_status == 'Approved') {
-                    return '<span class="badge bg-success">Approved</span>';
+                if (!$row->manager_approval) {
+                    return '-';
                 }
 
-                if ($row->manager_status == 'Rejected') {
-                    return '<span class="badge bg-danger">Rejected</span>';
-                }
+                $url = asset('storage/employees/leave_attachments/' . $row->manager_approval);
 
-                return '<span class="badge bg-warning text-dark">Pending</span>';
+                return '
+                    <a href="javascript:void(0)" class="btn btn-sm btn-warning me-1 view-image" data-image="' . $url . '" title="View">
+                        <i class="bi bi-eye"></i>
+                    </a>
+
+                    <a href="' . $url . '" download class="btn btn-sm btn-primary" title="Download">
+                        <i class="bi bi-download"></i>
+                    </a>
+                ';
             })
             ->addColumn('action', function ($row) {
 
-                if ($row->manager_status == 'Approved') {
+            
+                if ($row->status == 'Pending') {
+                    if(in_array(Auth::user()->department_id, [1, 2]))
+                    {
+                        return '
+                            <button class="btn btn-success btn-sm approveLeave" data-id="' . $row->id . '">
+                                Approve
+                            </button>
 
-                    return '
-                        <button class="btn btn-success btn-sm approveLeave" data-id="' . $row->id . '">
-                            Approve
-                        </button>
-
-                        <button class="btn btn-danger btn-sm rejectLeave" data-id="' . $row->id . '">
-                            Reject
-                        </button>
-                    ';
+                            <button class="btn btn-danger btn-sm rejectLeave" data-id="' . $row->id . '">
+                                Reject
+                            </button>
+                        ';
+                    }
+                    else{
+                        return '<span class="badge bg-warning">Pending</span>';
+                    }
                 }
 
                 if ($row->status == 'Approved') {
@@ -472,41 +500,54 @@ class LeaveController extends Controller
                     $q->where('name', 'like', "%{$keyword}%");
                 });
             })
-            ->filterColumn('manager_status', function ($query, $keyword) {
-                $query->where('manager_status', 'like', "%{$keyword}%");
-            })
-            ->rawColumns(['manager_status', 'action'])
+            
+            ->rawColumns(['manager_approval', 'action'])
 
             ->make(true);
     }
 
-    public function wfhStore(Request $request)
+    public function storeWFH(Request $request)
     {
         $request->validate([
-            'from_date' => 'required|date',
-            'to_date' => 'required|date|after_or_equal:from_date',
-            'leave_type' => 'required|in:Sick,Casual,Earned,WFH,Maternity,LOP',
-            'reason' => 'nullable|string',
+            'from_date'=>'required|date',
+            'to_date'=>'required|date|after_or_equal:from_date',
+            'reason'=>'required',
+            'manager_approval'=>'required|file|max:2048'
         ]);
 
-        $attachment = null;
+        $approvalfileName = null;
+        if ($request->hasFile('manager_approval')) {
 
-        if ($request->hasFile('attachment')) {
-            $attachment = $request->file('attachment')
-                ->store('leave_attachments', 'public');
+            $approvalfile = $request->file('manager_approval');
+
+            $approvalfileName = 'manager_approval_' .
+                Auth::user()->emp_id . '_' .
+                time() . '.' .
+                $approvalfile->getClientOriginalExtension();
+
+            $approvalfile->storeAs(
+                'employees/leave_attachments',
+                $approvalfileName,
+                'public'
+            );
         }
-
+       
         Leave::create([
             'employee_id' => Auth::id(),
             'from_date' => $request->from_date,
             'to_date' => $request->to_date,
-            'leave_type' => $request->leave_type,
+            'leave_type' => 'WFH',
             'reason' => $request->reason,
+            'manager_approval' => $approvalfileName,
+            'status' => 'Pending',
         ]);
 
         return response()->json([
+
             'status' => true,
+
             'message' => 'WFH request submitted successfully.'
+
         ]);
     }
 
@@ -672,6 +713,19 @@ class LeaveController extends Controller
 
                 return $balance . ' / ' . $row->earned_leaves;
             })
+            ->addColumn('action', function ($row) {
+
+                return '
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-warning editLeaveCount"
+                        data-id="'.$row->id.'"
+                        data-year="'.$row->year.'"
+                        title="Edit Leave Count">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                ';
+            })
             ->filterColumn('employee_name', function ($query, $keyword) {
                 $query->whereHas('employee', function ($q) use ($keyword) {
                     $q->where('name', 'like', "%{$keyword}%");
@@ -684,10 +738,49 @@ class LeaveController extends Controller
                     $q->where('emp_id', 'like', "%{$keyword}%");
                 });
             })
-
+            ->rawColumns([
+                'action'
+            ])
             ->make(true);
     }
+    public function viewLeaveCount($id)
+    {
+        $leave = LeaveCount::with('employee')->findOrFail($id);
 
+        $total = $leave->sick_leaves +
+                $leave->casual_leaves +
+                $leave->earned_leaves;
+
+        $used = Leave::where('employee_id',$leave->employee_id)
+            ->whereYear('from_date',$leave->year)
+            ->where('status','Approved')
+            ->sum('leavecount');
+
+        return response()->json([
+
+            'id'=>$leave->id,
+
+            'employee_name'=>$leave->employee->name,
+
+            'employee_id'=>$leave->employee->emp_id,
+
+
+            'year'=>$leave->year,
+
+            'total_leave'=>$total,
+
+            'used_leave'=>$used,
+
+            'balance_leave'=>$total-$used,
+
+            'sick_leaves'=>$leave->sick_leaves,
+
+            'casual_leaves'=>$leave->casual_leaves,
+
+            'earned_leaves'=>$leave->earned_leaves
+
+        ]);
+    }
     public function leaveSummary()
     {
         $year = now()->year;
@@ -712,7 +805,7 @@ class LeaveController extends Controller
         $usedLeave = Leave::where('employee_id', $employeeId)
             ->where('status', 'Approved')
             ->whereYear('from_date', $year)
-            ->count();
+            ->sum('leavecount');
 
         $balanceLeave = $totalLeave - $usedLeave;
 
@@ -720,19 +813,19 @@ class LeaveController extends Controller
             ->where('leave_type', 'Sick')
             ->where('status', 'Approved')
             ->whereYear('from_date', $year)
-            ->count();
+           ->sum('leavecount');
 
         $casualTaken = Leave::where('employee_id', $employeeId)
             ->where('leave_type', 'Casual')
             ->where('status', 'Approved')
             ->whereYear('from_date', $year)
-            ->count();
+            ->sum('leavecount');
 
         $earnedTaken = Leave::where('employee_id', $employeeId)
             ->where('leave_type', 'Earned')
             ->where('status', 'Approved')
             ->whereYear('from_date', $year)
-            ->count();
+            ->sum('leavecount');
 
         return response()->json([
             'total_leave' => $totalLeave,
@@ -753,6 +846,160 @@ class LeaveController extends Controller
                 'balance' => $leaveCount->earned_leaves - $earnedTaken,
                 'total' => $leaveCount->earned_leaves,
             ],
+        ]);
+    }
+
+    public function getLeaveCount(Request $request)
+    {
+        $request->validate([
+            'from_date' => 'required|date',
+            'to_date'   => 'required|date|after_or_equal:from_date',
+        ]);
+
+        $employeeId = Auth::id();
+
+        $from = Carbon::parse($request->from_date);
+        $to = Carbon::parse($request->to_date);
+
+        // Inclusive day count
+        $totalDays = $from->diffInDays($to) + 1;
+
+        // Get employee projects
+        $projectIds = Project::where(function ($q) use ($employeeId) {
+
+            $q->where('project_manager_id', $employeeId)
+                ->orWhere('team_head_id', $employeeId)
+                ->orWhereJsonContains('team_members', (string) $employeeId);
+
+        })->pluck('id');
+
+        $holidayDates = [];
+
+        $calendars = ScheduleCalendar::whereIn('project_id', $projectIds)->get();
+
+        foreach ($calendars as $calendar) {
+
+            $holidays = $calendar->holidays ?? [];
+
+            if (!$holidays) {
+                continue;
+            }
+            // dd($holidays);
+
+            foreach ($holidays as $holiday) {
+
+                $date = Carbon::parse($holiday['date']);
+
+                if ($date->betweenIncluded($from, $to)) {
+
+                    $holidayDates[] = $date->toDateString();
+
+                }
+            }
+        }
+
+        // Remove duplicate holidays from multiple projects
+        $holidayCount = count(array_unique($holidayDates));
+
+        $leaveCount = max($totalDays - $holidayCount, 0);
+
+        return response()->json([
+            'leavecount' => $leaveCount,
+            'total_days' => $totalDays,
+            'holidays'   => $holidayCount,
+        ]);
+    }
+    public function updateLeaveCount(Request $request)
+    {
+        $request->validate([
+
+            'id'=>'required|exists:leave_counts,id',
+
+            'sick_leaves'=>'required|integer|min:0|max:12',
+
+            'casual_leaves'=>'required|integer|min:0|max:12',
+
+            'earned_leaves'=>'required|integer|min:0|max:12',
+
+        ]);
+
+        LeaveCount::where('id',$request->id)
+            ->update([
+
+                'sick_leaves'=>$request->sick_leaves,
+
+                'casual_leaves'=>$request->casual_leaves,
+
+                'earned_leaves'=>$request->earned_leaves,
+
+            ]);
+
+        return response()->json([
+
+            'status'=>true,
+
+            'message'=>'Leave count updated successfully.'
+
+        ]);
+    }
+    public function calculateWFHCount(Request $request)
+    {
+        $request->validate([
+            'from_date' => 'required|date',
+            'to_date'   => 'required|date|after_or_equal:from_date',
+        ]);
+
+        $employeeId = Auth::id();
+
+        $from = Carbon::parse($request->from_date);
+        $to = Carbon::parse($request->to_date);
+
+        // Inclusive day count
+        $totalDays = $from->diffInDays($to) + 1;
+
+        // Get employee projects
+        $projectIds = Project::where(function ($q) use ($employeeId) {
+
+            $q->where('project_manager_id', $employeeId)
+                ->orWhere('team_head_id', $employeeId)
+                ->orWhereJsonContains('team_members', (string) $employeeId);
+
+        })->pluck('id');
+
+        $holidayDates = [];
+
+        $calendars = ScheduleCalendar::whereIn('project_id', $projectIds)->get();
+
+        foreach ($calendars as $calendar) {
+
+            $holidays = $calendar->holidays ?? [];
+
+            if (!$holidays) {
+                continue;
+            }
+            // dd($holidays);
+
+            foreach ($holidays as $holiday) {
+
+                $date = Carbon::parse($holiday['date']);
+
+                if ($date->betweenIncluded($from, $to)) {
+
+                    $holidayDates[] = $date->toDateString();
+
+                }
+            }
+        }
+
+        // Remove duplicate holidays from multiple projects
+        $holidayCount = count(array_unique($holidayDates));
+
+        $wfhCount = max($totalDays - $holidayCount, 0);
+
+        return response()->json([
+            'wfhcount' => $wfhCount,
+            'total_days' => $totalDays,
+            'holidays'   => $holidayCount,
         ]);
     }
     public function exportLeaveCounts(Request $request)
