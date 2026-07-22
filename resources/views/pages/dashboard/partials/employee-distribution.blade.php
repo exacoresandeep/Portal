@@ -1,3 +1,9 @@
+@php
+    $departmentId = session('department_id');
+
+if($departmentId == 1 || $departmentId == 2){
+    
+@endphp
 <div class="col-lg-6 g-3">
     <div class="card shadow-sm rounded-4 h-100">
 
@@ -27,3 +33,41 @@
 
     </div>
 </div>
+
+@php
+}else {
+@endphp
+<div class="col-lg-6 g-3">
+    <div class="card rounded-4 h-100">
+
+        <div class="card-header d-flex justify-content-between align-items-center border-0">
+            <h6 class="mb-0">Projects</h6>
+
+           
+        </div>
+
+        <div class="p-3">
+
+            <table class="table table-striped table-hover align-middle w-100 data-table">
+
+                <thead>
+                    <tr>
+                        <th>Project Name</th>
+                        <th width="55%">Progress</th>
+                    </tr>
+                </thead>
+
+                <tbody id="employeeProjectsBody">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+</div>
+
+@php
+}
+@endphp

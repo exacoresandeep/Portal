@@ -744,7 +744,7 @@
 
                     </div>
 
-                    <div class="alert alert-success mt-3 mb-3">
+                    {{-- <div class="alert alert-success mt-3 mb-3">
 
                         Available capacity for the selected period is
                         <strong>25 hours</strong>.
@@ -754,7 +754,7 @@
                         <strong>5 hours</strong>
                         available.
 
-                    </div>
+                    </div> --}}
 
                     <div class="row g-3">
 

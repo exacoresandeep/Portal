@@ -24,10 +24,27 @@ class TaskController extends Controller
     {
         $employees=Employee::where("status","1")->orderBy('name')->get();
         $projects = Project::where("status","Active")
-        ->where(function ($query) {
-            $query->where('project_manager_id', auth()->id())
-                  ->orWhere('team_head_id', auth()->id());
-        })
+        ->when(
+        in_array(Auth::user()->department_id, [1, 2]),
+            function ($q) {
+                // HR/Admin -> show all active projects
+                return $q;
+            },
+            function ($q) {
+                // Other employees -> show only assigned projects
+                $userId = Auth::id();
+
+                $q->where(function ($query) use ($userId) {
+                    $query->where('project_manager_id', $userId)
+                        ->orWhere('team_head_id', $userId);
+                        // ->orWhereJsonContains('team_members', (string) $userId);
+                });
+            }
+        )
+        // ->where(function ($query) {
+        //     $query->where('project_manager_id', auth()->id())
+        //           ->orWhere('team_head_id', auth()->id());
+        // })
         ->orderBy('project_name')->get();
         return view('pages.task.allocation',
         compact('projects','employees'));

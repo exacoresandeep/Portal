@@ -1,3 +1,9 @@
+@php
+    $departmentId = session('department_id');
+
+if($departmentId == 1 || $departmentId == 2){
+    
+@endphp
 <div class="col-lg-6 g-3">
     <div class="card shadow-sm rounded-4 h-100">
 
@@ -19,3 +25,7 @@
 
     </div>
 </div>
+
+@php
+}
+@endphp

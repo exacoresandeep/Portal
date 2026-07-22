@@ -22,7 +22,17 @@
             </h5>
 
             <p class="text-muted mb-0">
-                Manage employees, projects, and approvals efficiently.
+                <?php
+                if(in_array(Auth::user()->department_id, [1, 2]))
+                {
+                echo "Manage employees, projects, and approvals efficiently.";
+                
+                }else
+                {   
+                    echo "Here’s what's happening with your work today.";
+                    
+                }
+                ?>
             </p>
 
         </div>
@@ -300,7 +310,7 @@
 
                         <div class="ms-3">
                             <small class="text-muted d-block">Total Tasks</small>
-                            <h5 class="mb-0 text-primary" id="totalTasks">0</h5>
+                            <h6 class="mb-0 text-primary" id="totalTasks">0</h6>
                         </div>
 
                     </div>
@@ -320,7 +330,7 @@
 
                         <div class="ms-3">
                             <small class="text-muted d-block">Task Completed</small>
-                            <h5 class="mb-0 text-success" id="completedTasks">0</h5>
+                            <h6 class="mb-0 text-success" id="completedTasks">0</h6>
                         </div>
 
                     </div>
@@ -340,7 +350,7 @@
 
                         <div class="ms-3">
                             <small class="text-muted d-block">Total Projects</small>
-                            <h5 class="mb-0 text-pink" id="totalProjects">0</h5>
+                            <h6 class="mb-0 text-pink" id="totalProjects">0</h6>
                         </div>
 
                     </div>
@@ -360,10 +370,10 @@
 
                         <div class="ms-3">
                             <small class="text-muted d-block">Leave Balance</small>
-                            <h5 class="mb-0 text-warning">
+                            <h6 class="mb-0 text-warning">
                                 <span id="leaveBalance">0</span>
                                 <small class="text-muted">Days</small>
-                            </h5>
+                            </h6>
                         </div>
 
                     </div>
@@ -383,10 +393,10 @@
 
                         <div class="ms-3">
                             <small class="text-muted d-block">Attendance</small>
-                            <h5 class="mb-0 text-info">
+                            <h6 class="mb-0 text-info">
                                 <span id="attendanceDays">0</span>
-                                <small class="text-muted">Days in this month</small>
-                            </h5>
+                                <small class="text-muted">Days in {{ now()->format('F') }}</small>
+                            </h6>
                         </div>
 
                     </div>

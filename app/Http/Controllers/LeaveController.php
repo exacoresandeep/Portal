@@ -15,6 +15,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Models\ScheduleCalendar;
 use App\Models\Project;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 class LeaveController extends Controller
 {
     /**
@@ -1002,6 +1004,7 @@ class LeaveController extends Controller
             'holidays'   => $holidayCount,
         ]);
     }
+
     public function exportLeaveCounts(Request $request)
     {
         $year = $request->year ?? date('Y');
@@ -1011,5 +1014,141 @@ class LeaveController extends Controller
             new LeaveCountExport($year, $departmentId),
             'leave-count-report.xlsx'
         );
+    }
+
+    public function employeeAttendanceSummary(Request $request)
+    {
+        $employee = Auth::user();
+
+        $month = $request->month
+            ? Carbon::parse($request->month . '-01')
+            : Carbon::now();
+
+        $start = $month->copy()->startOfMonth();
+        $end   = $month->copy()->endOfMonth();
+
+        $tableName = "z_attendance_log_{$month->month}_{$month->year}";
+
+        // Present Days
+        $present = 0;
+
+        if (Schema::hasTable($tableName)) {
+           $present = DB::table($tableName)
+            ->where('employee_id', $employee->id)
+            ->distinct(DB::raw('DATE(log_date)'))
+            ->count(DB::raw('DATE(log_date)'));
+        }
+
+        $leave = 0;
+        $wfh   = 0;
+
+        $leaves = Leave::where('employee_id', $employee->id)
+            ->where('status', 'Approved')
+            ->where(function ($q) use ($start, $end) {
+                $q->whereBetween('from_date', [$start, $end])
+                    ->orWhereBetween('to_date', [$start, $end])
+                    ->orWhere(function ($q2) use ($start, $end) {
+                        $q2->where('from_date', '<=', $start)
+                            ->where('to_date', '>=', $end);
+                    });
+            })
+            ->get();
+
+        foreach ($leaves as $item) {
+
+            $leaveStart = Carbon::parse($item->from_date)->startOfDay();
+            $leaveEnd   = Carbon::parse($item->to_date)->startOfDay();
+
+            $overlapStart = $leaveStart->greaterThan($start)
+                ? $leaveStart->copy()
+                : $start->copy()->startOfDay();
+
+            $overlapEnd = $leaveEnd->lessThan($end)
+                ? $leaveEnd->copy()
+                : $end->copy()->startOfDay();
+
+            if ($overlapStart->gt($overlapEnd)) {
+                continue;
+            }
+
+            // Leave within same month
+            if ($leaveStart->format('Y-m') == $leaveEnd->format('Y-m')) {
+
+                $days = $item->leavecount;
+
+            } else {
+
+                $days = $this->getEmployeeLeaveCount(
+                    $overlapStart,
+                    $overlapEnd
+                );
+            }
+
+            // Normalize floating point values
+            $days = round($days, 2);
+
+            if (fmod($days, 1) != 0.5) {
+                $days = round($days);
+            }
+
+            if ($item->leave_type == 'WFH') {
+                $wfh += $days;
+            } else {
+                $leave += $days;
+            }
+        }
+
+        return response()->json([
+            'present' => $present,
+            'leave'   => $leave,
+            'wfh'     => $wfh,
+            'total'   => $present,
+        ]);
+    }
+    public function getEmployeeLeaveCount(Carbon $from, Carbon $to)
+    {
+        $employeeId = Auth::id();
+
+        // Ignore time completely
+        $from = $from->copy()->startOfDay();
+        $to   = $to->copy()->startOfDay();
+
+        // Inclusive days
+        $totalDays = (int) $from->diffInDays($to) + 1;
+
+        // Employee projects
+        $projectIds = Project::where(function ($q) use ($employeeId) {
+
+            $q->where('project_manager_id', $employeeId)
+                ->orWhere('team_head_id', $employeeId)
+                ->orWhereJsonContains('team_members', (string) $employeeId);
+
+        })->pluck('id');
+
+        $holidayDates = [];
+
+        $calendars = ScheduleCalendar::whereIn('project_id', $projectIds)->get();
+
+        foreach ($calendars as $calendar) {
+
+            $holidays = $calendar->holidays ?? [];
+
+            if (empty($holidays)) {
+                continue;
+            }
+
+            foreach ($holidays as $holiday) {
+
+                $holidayDate = Carbon::parse($holiday['date'])->startOfDay();
+
+                if ($holidayDate->betweenIncluded($from, $to)) {
+                    $holidayDates[] = $holidayDate->toDateString();
+                }
+            }
+        }
+
+        $holidayCount = count(array_unique($holidayDates));
+
+        return max($totalDays - $holidayCount, 0);
     }
 }

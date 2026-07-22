@@ -12,6 +12,7 @@ use App\Models\LeaveCount;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\TaskUpdate;
 use App\Exports\EmployeeExport;
 use App\Exports\OnboardEmployeeExport;
@@ -1080,4 +1081,50 @@ class EmployeeController extends Controller
             'absent'  => $absentData,
         ]);
     }
+
+    public function employeeProjects()
+    {
+        $employee = Auth::user();
+
+        $projects = Project::where("status","Active")->where(function ($q) use ($employee) {
+
+            $q->where('project_manager_id', $employee->id)
+                ->orWhere('team_head_id', $employee->id)
+                ->orWhereJsonContains('team_members', (string)$employee->id);
+
+        })->orderBy('project_name')->get();
+
+        $data = [];
+
+        foreach ($projects as $project) {
+
+            $totalTasks = Task::where('project_id', $project->id)->count();
+
+            if ($totalTasks == 0) {
+
+                $completedTasks = 0;
+                $progress = 0;
+
+            } else {
+
+                $completedTasks = Task::where('project_id', $project->id)
+                    ->whereHas('latestUpdate', function ($q) {
+                        $q->where('status', 'Completed');
+                    })
+                    ->count();
+
+                $progress = round(($completedTasks / $totalTasks) * 100);
+            }
+
+            $data[] = [
+                'project_name' => $project->project_name,
+                'progress'     => $progress,
+                'completed'    => $completedTasks,
+                'total'        => $totalTasks,
+            ];
+        }
+
+        return response()->json($data);
+    }
+    
 }

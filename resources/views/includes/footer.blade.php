@@ -96,6 +96,8 @@ function loadPage(pageUrl) {
                 
             @else
                 loademployeeDashboardStats();
+                loadAttendanceSummary();
+                loadEmployeeProjects();
             @endif
             loadMyTasks();
             loadAttendance();
@@ -1389,10 +1391,165 @@ function formatDate(date){
     return d.toLocaleDateString('en-GB');
 }
 
+let empattendanceChart = null;
+function loadAttendanceSummary() {
+
+    $.get("{{ route('dashboard.employeeAttendanceSummary') }}", {
+        month: $('#attendanceMonth').val()
+    }, function (res) {
+        $('#presentCount').text(res.present);
+        $('#leaveCount').text(res.leave);
+        $('#wfhCount').text(res.wfh);
+        $('#workingDays').text(res.total);
+        $('#workingDays').text(res.total);
+
+        const ctx = document.getElementById('attendanceDonutChart');
+
+        if (empattendanceChart) {
+            empattendanceChart.destroy();
+        }
+
+        empattendanceChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present','Leave','WFH'],
+                datasets: [{
+                    data: [
+                        res.present,
+                        res.leave,
+                        res.wfh
+                    ],
+                    backgroundColor: [
+                        '#16a34a',
+                        '#f59e0b',
+                        '#0d6efd'
+                    ],
+                    borderWidth:0
+                }]
+            },
+            options: {
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        display:false
+                    }
+                }
+            },
+            plugins: [{
+                id:'centerText',
+                afterDraw(chart){
+
+                    let width = chart.width;
+                    let height = chart.height;
+                    let ctx = chart.ctx;
+
+                    ctx.restore();
+
+                    ctx.font='bold 30px Arial';
+                    ctx.fillStyle='#2563eb';
+                    ctx.textAlign='center';
+                    ctx.fillText(
+                        res.total,
+                        width/2,
+                        height/2-5
+                    );
+
+                    ctx.font='16px Arial';
+                    ctx.fillStyle='#666';
+
+                    ctx.fillText(
+                        'Working Days',
+                        width/2,
+                        height/2+22
+                    );
+
+                    ctx.save();
+                }
+            }]
+        });
+
+    });
+
+}
+
+
+$(document).on("change","#attendanceMonth",function(){
+    loadAttendanceSummary();
+});
+
 $(document).on('click', '#viewAllMyTasks', function (e) {
     e.preventDefault();
     $('#menuMyTasks').trigger('click');
 });
+function loadEmployeeProjects() {
+
+    $.get("{{ route('dashboard.employee.projects') }}", function (response) {
+
+        let html = '';
+
+        if(response.length == 0){
+
+            html = `
+                <tr>
+                    <td colspan="2" class="text-center py-4">
+                        No Projects Assigned
+                    </td>
+                </tr>
+            `;
+
+            $('#employeeProjectsBody').html(html);
+            return;
+        }
+
+        $.each(response,function(i,row){
+
+            let color='bg-success';
+
+            if(row.progress < 30){
+                color='bg-danger';
+            }else if(row.progress < 60){
+                color='bg-warning';
+            }else if(row.progress < 90){
+                color='bg-primary';
+            }
+
+            html += `
+            <tr>
+
+                <td>${row.project_name}</td>
+
+                <td>
+
+                    <div class="d-flex justify-content-between mb-1">
+
+                        <small>${row.progress}%</small> <small class="text-muted">
+                        Tasks: ${row.completed} / ${row.total} 
+                    </small>
+
+                    </div>
+
+                    <div class="progress" style="height:6px;">
+
+                        <div class="progress-bar ${color}"
+                            style="width:${row.progress}%">
+                        </div>
+
+                    </div>
+
+                    
+
+                </td>
+
+            </tr>`;
+        });
+
+        $('#employeeProjectsBody').html(html);
+
+    });
+
+}
+
+
 </script>
     <!--end::Script-->
   </body>
