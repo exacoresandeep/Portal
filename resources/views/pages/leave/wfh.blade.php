@@ -264,9 +264,19 @@ $(document).on('click', '.view-image', function () {
 });
 
 
-$('input[name="from_date"]').change(function(){
+$('input[name="from_date"]').change(function () {
+
+    let from = $(this).val();
+
+    if (!from) return;
+
+    let year = from.split('-')[0];
+
     $('input[name="to_date"]')
-        .attr('min',$(this).val());
+        .attr('min', from)
+        .attr('max', year + '-12-31')
+        .val('');
+
     $('#wfhcount').val('');
 });
 

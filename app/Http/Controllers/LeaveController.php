@@ -149,7 +149,9 @@ class LeaveController extends Controller
                         ';
                     }
                     else{
-                        return '<span class="badge bg-warning">Pending</span>';
+                        return '<span class="badge bg-warning">Pending</span> <button class="btn btn-danger btn-sm deleteLeave" data-id="' . $row->id . '">
+                                Remove
+                            </button>';
                     }
                 }
 
@@ -216,6 +218,28 @@ class LeaveController extends Controller
             ->rawColumns(['attachment', 'manager_approval', 'action'])
             
             ->make(true);
+    }
+
+    public function delete(Request $request)
+    {
+        $leave = Leave::where('id', $request->id)
+            ->where('employee_id', Auth::id())
+            ->where('status', 'Pending')
+            ->first();
+
+        if (!$leave) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Leave request not found or cannot be removed.'
+            ]);
+        }
+
+        $leave->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Leave request removed successfully.'
+        ]);
     }
 
     public function store(Request $request)

@@ -702,14 +702,83 @@ $('input[name="from_date"]').change(function () {
 
     let from = $(this).val();
 
+    if (!from) return;
+
+    let year = from.split('-')[0];
+
     $('input[name="to_date"]')
         .attr('min', from)
+        .attr('max', year + '-12-31')
         .val('');
 
     $('#leavecount').val('');
 });
 
+$(document).on('click', '.deleteLeave', function () {
 
+    let btn = $(this);
+    let id = btn.data('id');
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This leave request will be removed permanently.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Remove',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+
+            $.ajax({
+                url: "{{ route('leave.delete') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    id: id
+                },
+                success: function (response) {
+
+                    if (response.status) {
+
+                        $('#leaveTable').DataTable().ajax.reload(null, false);
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Removed!',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                    } else {
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message
+                        });
+
+                    }
+                },
+                error: function () {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong.'
+                    });
+
+                }
+            });
+
+        }
+
+    });
+
+});
 $('select[name="leavecategory"]').change(function () {
 
     if ($(this).val() == 'Half Day') {

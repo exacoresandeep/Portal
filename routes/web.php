@@ -135,7 +135,8 @@ Route::post('/calendar/store',[CalendarController::class,'store'])->name('calend
 Route::get('/calendar/edit/{id}',[CalendarController::class,'edit']);
 Route::post('/calendar/update/{id}',[CalendarController::class,'update']);
 Route::delete('/calendar/delete/{id}',[CalendarController::class,'destroy']);
-
+Route::post('/leave/delete', [LeaveController::class, 'delete'])
+    ->name('leave.delete');
 Route::get('/leave-requests', [LeaveController::class, 'index'])->name('leave.index');
 Route::get('/leave-requests/list', [LeaveController::class, 'leaveList'])->name('leave.list');
 Route::post('/leave/store',[LeaveController::class, 'store'])->name('leave.store');

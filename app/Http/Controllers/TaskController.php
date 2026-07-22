@@ -42,8 +42,8 @@ class TaskController extends Controller
             }
         )
         // ->where(function ($query) {
-        //     $query->where('project_manager_id', auth()->id())
-        //           ->orWhere('team_head_id', auth()->id());
+        //     $query->where('project_manager_id', Auth::id())
+        //           ->orWhere('team_head_id', Auth::id());
         // })
         ->orderBy('project_name')->get();
         return view('pages.task.allocation',
@@ -72,11 +72,28 @@ class TaskController extends Controller
                 'latestUpdate.employee',
                 'latestUpdate.assignedBy'
             ])
+            // ->whereHas('project', function ($q) {
+            //     $q->where(function ($sub) {
+            //         $sub->where('team_head_id', Auth::id())
+            //             ->orWhere('project_manager_id', Auth::id());
+            //     });
+            // })
             ->whereHas('project', function ($q) {
-                $q->where(function ($sub) {
-                    $sub->where('team_head_id', auth()->id())
-                        ->orWhere('project_manager_id', auth()->id());
-                });
+
+                $q->where('status', 'Active');
+
+                if (!in_array(auth()->user()->department_id, [1, 2])) {
+
+                    $q->where(function ($sub) {
+
+                        $sub->where('team_head_id', Auth::id())
+                            ->orWhere('project_manager_id', Auth::id())
+                            ->orWhereJsonContains('team_members', (string) Auth::id());
+
+                    });
+
+                }
+
             })
              ->when($request->project_id, function ($q) use ($request) {
 
@@ -296,7 +313,7 @@ class TaskController extends Controller
                 'task_name'       => $request->task_name,
 
                 'employee_id'     => $request->assigned_to,
-                'assigned_by'     => auth()->id(),
+                'assigned_by'     => Auth::id(),
                 'priority'        => $request->priority,
 
                 'start_date'      => $request->start_date,
@@ -385,7 +402,7 @@ class TaskController extends Controller
 
             $update->task_id = $request->task_id;
             $update->task_name = $lastUpdate->task_name;
-            $update->employee_id = auth()->id(); 
+            $update->employee_id = Auth::id(); 
             $update->assigned_by = $lastUpdate->assigned_by;
             $update->priority = $lastUpdate->priority;
             $update->start_date = $lastUpdate->start_date;
@@ -399,7 +416,7 @@ class TaskController extends Controller
             $update->dependencies = $request->challenge;
             $update->work_summary = $request->work_summary;
 
-            // $update->created_by = auth()->id();
+            // $update->created_by = Auth::id();
 
             $update->save();
 
@@ -539,7 +556,7 @@ class TaskController extends Controller
 
                 ->whereHas('latestUpdate', function ($q) {
 
-                    $q->where('employee_id', auth()->id());
+                    $q->where('employee_id', Auth::id());
 
                 })
 
@@ -808,8 +825,8 @@ class TaskController extends Controller
         $employees=Employee::where("status","1")->orderBy('name')->get();
         $projects = Project::where("status","Active")
         ->where(function ($query) {
-            $query->where('project_manager_id', auth()->id())
-                  ->orWhere('team_head_id', auth()->id());
+            $query->where('project_manager_id', Auth::id())
+                  ->orWhere('team_head_id', Auth::id());
         })
         ->orderBy('project_name')->get();
         return view('pages.task.resource-utilization',
