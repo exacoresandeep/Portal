@@ -72,97 +72,32 @@ $adminMenus = array_merge($commonMenus, [
 return [
 
     'page' => [
-
-        // 1 => [
-
-        //     'dashboard',
-
-        //     'employee-management',
-        //     'employee-onboard',
-        //     'employees',
-        //     'employee-offboard',
-        //     'payroll',
-        //     'payslip',
-
-        //     'asset-management',
-        //     'assets-requests',
-        //     'assigned-assets',
-
-        //     'time-attendance',
-        //     'attendance-capture',
-        //     'calender-schedule',
-        //     'attendance-tracking',
-        //     'attendance-regularization',
-        //     'attendance-summary',
-
-        //     'leave-management',
-        //     'leave-request',
-        //     'wfh-request',
-        //     'leave-count',
-
-        //     'expense-management',
-
-        //     'project-management',
-        //     'all-projects',
-        //     'tasks-allocation',
-        //     'my-tasks',
-        //     'tasks-utilization',
-
-        //     'performance-tracking',
-        //     'evaluation-forms',
-        //     'evaluation-scheduling',
-        //     'evaluation-report',
-        //     'pip',
-
-        //     'learning-developing',
-        //     'training-phase',
-        //     'training-assign',
-
-        // ],
-
-        // Super Admin
+        // HR
         1 => $adminMenus,
-
-        // HR Admin
+        // Admin
         2 => $adminMenus,
-
-        // Project Manager
+        // Technical
         3 => array_merge($commonMenus, [
-
-            'project-management',
-            'all-projects',
-            'tasks-allocation',
-            'my-tasks',
-            'tasks-utilization',
-
         ]),
 
-        // Employee
+        // Finance
         4 => $commonMenus,
+        //SCM
         5 => $commonMenus,
+        //Management
         6 => array_merge($commonMenus, [
-
             'all-projects',
-
         ]),
-        
+        //Digital
         7 => $commonMenus,
+        //Sales
         8 => $commonMenus,
-
-        // Attendance Manager
+        // Marketing
         9 => array_merge($commonMenus, [
-
-            'time-attendance',
-            'attendance-regularization',
-            'attendance-summary',
-
         ]),
-
-        // Others
+        // Accounts
         10 => $commonMenus,
+        //IT
         11 => $commonMenus,
-
     ],
-
-
 ];

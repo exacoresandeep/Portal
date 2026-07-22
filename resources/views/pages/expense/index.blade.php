@@ -18,6 +18,10 @@
                 class="btn btn-success">
                    <i class="bi bi-file-earmark-excel me-1"></i> Export
                 </a>
+            <button class="btn btn-primary" id="addExpenseBtn">
+                <i class="bi bi-plus-lg me-1"></i>
+                Create Expense
+            </button>
         </div> 
 
     </div> 
@@ -94,8 +98,213 @@
         </thead>
 
     </table>
-</div>     
+</div>  
+
+
+<div class="modal fade" id="expenseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <form id="expenseForm" enctype="multipart/form-data">
+
+                @csrf
+
+                <div class="modal-header border-0">
+                    <div>
+                        <h4 class="fw-bold mb-0">
+                            Create Expense Request
+                        </h4>
+
+                        <small class="text-muted">
+                            Submit your expense request for approval
+                        </small>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <hr>
+
+                    <h6 class="fw-bold mb-3">
+                        Expense Information
+                    </h6>
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                Expense Date
+                            </label>
+
+                            <input
+                                type="date"
+                                name="expense_date"
+                                class="form-control"
+                                max="{{ date('Y-m-d') }}"
+                                required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                Amount
+                            </label>
+
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="1"
+                                name="amount"
+                                class="form-control"
+                                placeholder="Enter Amount"
+                                required>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">
+                                Purpose
+                            </label>
+
+                            <textarea
+                                name="purpose"
+                                rows="3"
+                                class="form-control"
+                                placeholder="Expense purpose"
+                                required></textarea>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                Expense Bill
+                            </label>
+
+                            <input
+                                type="file"
+                                name="document"
+                                class="form-control"
+                                required>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-0">
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+                        Submit
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="fileModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Attachment Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <iframe id="previewFrame"
+                        width="100%"
+                        height="600"
+                        frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
+$('#addExpenseBtn').click(function () {
+
+    $('#expenseForm')[0].reset();
+
+    $('#expenseModal').modal('show');
+
+});
+
+
+$('#expenseForm').submit(function(e){
+
+    e.preventDefault();
+
+    let formData = new FormData(this);
+
+    $.ajax({
+
+        url:"{{ route('expense.store') }}",
+
+        type:"POST",
+
+        data:formData,
+
+        processData:false,
+
+        contentType:false,
+
+        success:function(res){
+
+            $('#expenseModal').modal('hide');
+
+            Swal.fire(
+                'Success',
+                res.message,
+                'success'
+            );
+
+            table.ajax.reload(null,false);
+
+        },
+
+        error:function(xhr){
+
+            let errors = xhr.responseJSON.errors;
+
+            let message='';
+
+            $.each(errors,function(k,v){
+
+                message+=v[0]+'<br>';
+
+            });
+
+            Swal.fire(
+                'Validation Error',
+                message,
+                'error'
+            );
+
+        }
+
+    });
+
+});
+$(document).on('click', '.view-image', function () {
+
+    $('#previewFrame').attr('src', $(this).data('image'));
+
+    let modal = new bootstrap.Modal(document.getElementById('fileModal'));
+    modal.show();
+});
 var table = $('#expenseTable').DataTable({
 
     processing: true,

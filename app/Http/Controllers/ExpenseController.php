@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Expense;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
 class ExpenseController extends Controller
@@ -19,7 +22,12 @@ class ExpenseController extends Controller
     {
         $data = Expense::with([
             'employee.department'
-        ]);
+        ])->when(
+            !in_array(Auth::user()->department_id, [1, 2]),
+            function ($q) {
+                $q->where('employee_id', Auth::id());
+            }
+        )->orderBy('id', 'desc');
 
         if ($request->filled('year')) {
 
@@ -152,6 +160,46 @@ class ExpenseController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Expense ' . $request->status . ' successfully'
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'expense_date'=>'required|date',
+            'amount'=>'required|numeric|min:1',
+            'purpose'=>'required|string',
+            'document'=>'required|mimes:jpg,jpeg,png,pdf|max:4096'
+        ]);
+
+        $document = null;
+        if($request->hasFile('document')){
+            $file = $request->file('document');
+            $document =
+                'EXP_'.
+                Auth::id().'_'.
+                now()->format('YmdHis').'.'.
+                $file->getClientOriginalExtension();
+
+            $file->storeAs(
+                'employees/expense_attachments',
+                $document,
+                'public'
+            );
+        }
+
+        Expense::create([
+            'employee_id'=>Auth::id(),
+            'expense_date'=>$request->expense_date,
+            'amount'=>$request->amount,
+            'purpose'=>$request->purpose,
+            'document'=>$document,
+            'status'=>'pending'
+        ]);
+
+        return response()->json([
+            'status'=>true,
+            'message'=>'Expense Request Submitted Successfully.'
         ]);
     }
 }
