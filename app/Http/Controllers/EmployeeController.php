@@ -1090,7 +1090,10 @@ class EmployeeController extends Controller
 
             $q->where('project_manager_id', $employee->id)
                 ->orWhere('team_head_id', $employee->id)
-                ->orWhereJsonContains('team_members', (string)$employee->id);
+                ->orWhereRaw(
+                            "JSON_CONTAINS_PATH(team_members, 'one', ?)",
+                            ['$."' . auth()->id() . '"']
+                        );
 
         })->orderBy('project_name')->get();
 
