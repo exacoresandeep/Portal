@@ -5,7 +5,7 @@
             <h3 class="fw-bold mb-1">Work Schedule Configuration</h3>
         </div>
         <div class="d-flex justify-content-end mb-3">
-
+        @if(in_array(Auth::user()->department_id, [1, 2]))
             <button
                 id="openAddHolidayModal"
                 class="btn btn-primary"
@@ -13,7 +13,7 @@
                 data-bs-target="#addHolidayModal">
                 Add Holiday
             </button>
-
+        @endif   
         </div>
     </div>    
 
