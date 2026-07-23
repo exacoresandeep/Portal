@@ -903,7 +903,11 @@ class LeaveController extends Controller
 
             $q->where('project_manager_id', $employeeId)
                 ->orWhere('team_head_id', $employeeId)
-                ->orWhereJsonContains('team_members', (string) $employeeId);
+                ->orWhereRaw(
+                            "JSON_CONTAINS_PATH(team_members, 'one', ?)",
+                            ['$."' . $employeeId . '"']
+                        );
+
 
         })->pluck('id');
 
@@ -996,7 +1000,10 @@ class LeaveController extends Controller
 
             $q->where('project_manager_id', $employeeId)
                 ->orWhere('team_head_id', $employeeId)
-                ->orWhereJsonContains('team_members', (string) $employeeId);
+                ->orWhereRaw(
+                            "JSON_CONTAINS_PATH(team_members, 'one', ?)",
+                            ['$."' . $employeeId . '"']
+                        );
 
         })->pluck('id');
 
@@ -1153,8 +1160,10 @@ class LeaveController extends Controller
 
             $q->where('project_manager_id', $employeeId)
                 ->orWhere('team_head_id', $employeeId)
-                ->orWhereJsonContains('team_members', (string) $employeeId);
-
+                ->orWhereRaw(
+                            "JSON_CONTAINS_PATH(team_members, 'one', ?)",
+                            ['$."' . $employeeId . '"']
+                        );
         })->pluck('id');
 
         $holidayDates = [];
