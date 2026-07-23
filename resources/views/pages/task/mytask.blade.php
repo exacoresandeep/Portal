@@ -798,8 +798,13 @@ $(document).on('click', '.viewBtn', function () {
     });
 
 });
-$(document).on('click', '#updateTaskBtn', function () {
-console.log('Button clicked');
+$(document)
+    .off('click', '#updateTaskBtn')
+    .on('click', '#updateTaskBtn', function (e) {
+
+        e.preventDefault();
+
+        console.log('clicked');
     $.ajax({
 
         url: "{{ route('tasks.update') }}",
