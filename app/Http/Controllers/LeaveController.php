@@ -146,6 +146,9 @@ class LeaveController extends Controller
                             <button class="btn btn-danger btn-sm rejectLeave" data-id="' . $row->id . '">
                                 Reject
                             </button>
+                            <button class="btn btn-danger btn-sm deleteLeave" data-id="' . $row->id . '">
+                                Remove
+                            </button>
                         ';
                     }
                     else{
@@ -455,10 +458,15 @@ class LeaveController extends Controller
                             <button class="btn btn-danger btn-sm rejectLeave" data-id="' . $row->id . '">
                                 Reject
                             </button>
+                            <button class="btn btn-danger btn-sm deleteLeave" data-id="' . $row->id . '">
+                                Remove
+                            </button>
                         ';
                     }
                     else{
-                        return '<span class="badge bg-warning">Pending</span>';
+                        return '<span class="badge bg-warning">Pending</span><button class="btn btn-danger btn-sm deleteLeave" data-id="' . $row->id . '">
+                                Remove
+                            </button>';
                     }
                 }
 
