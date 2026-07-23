@@ -177,6 +177,7 @@ Route::get('/expenses', [ExpenseController::class, 'index'])->name('expense.inde
 Route::get('/expenses/list',[ExpenseController::class,'list'])->name('expenses.list');
 Route::post('/expense/status',[ExpenseController::class,'changeStatus'])->name('expense.status');
 Route::post('/expense/store',[ExpenseController::class,'store'])->name('expense.store');
+Route::post('/expense/delete',[ExpenseController::class,'delete'])->name('expense.delete');
 
 Route::get('/evaluation-forms',[EvaluationController::class,'index'])->name('evaluation.forms');
 Route::get('/evaluation-forms/list',[EvaluationController::class,'list'])->name('evaluation.forms.list');

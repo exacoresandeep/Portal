@@ -18,6 +18,28 @@ class ExpenseController extends Controller
     }
 
 
+    public function delete(Request $request)
+    {
+        $expense = Expense::where('id', $request->id)
+            ->where('employee_id', Auth::id())
+            ->where('status', 'Pending')
+            ->first();
+
+        if (!$expense) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Expense request not found or cannot be removed.'
+            ]);
+        }
+
+        $expense->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Expense request removed successfully.'
+        ]);
+    }
+
     public function list(Request $request)
     {
         $data = Expense::with([
@@ -109,7 +131,8 @@ class ExpenseController extends Controller
             ->addColumn('action', function ($row) {
 
                 if ($row->status == 'pending') {
-
+                     if(in_array(Auth::user()->department_id, [1, 2]))
+                    {
                     return '
                         <button
                             class="btn btn-success btn-sm approveBtn"
@@ -122,7 +145,16 @@ class ExpenseController extends Controller
                             data-id="' . $row->id . '">
                             Reject
                         </button>
+                        <button class="btn btn-danger btn-sm deleteExpense" data-id="' . $row->id . '">
+                            Remove
+                        </button>
                     ';
+                    }
+                    else{
+                         return '<button class="btn btn-danger btn-sm deleteExpense" data-id="' . $row->id . '">
+                                Remove
+                            </button>';
+                    }
                 }
 
                 return '-';

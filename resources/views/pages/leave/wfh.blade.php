@@ -50,7 +50,7 @@
                         <option value="Rejected">Rejected</option>
                     </select>
                 </div>
-
+                 @if(in_array(Auth::user()->department_id, [1, 2]))
                  <div class="col-lg-2 col-md-3 col-sm-6">
                     <label class="form-label">Designation</label>
 
@@ -68,6 +68,7 @@
 
                     </select>
                 </div>
+                 @endif   
 
                 <div class="col-md-2">
                     <button id="searchBtn" class="btn btn-primary">

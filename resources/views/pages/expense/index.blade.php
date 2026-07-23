@@ -241,7 +241,71 @@ $('#addExpenseBtn').click(function () {
     $('#expenseModal').modal('show');
 
 });
+$(document).on('click', '.deleteExpense', function () {
 
+    let btn = $(this);
+    let id = btn.data('id');
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This Expense request will be removed permanently.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Remove',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+
+            $.ajax({
+                url: "{{ route('expense.delete') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    id: id
+                },
+                success: function (response) {
+
+                    if (response.status) {
+
+                        $('#expenseTable').DataTable().ajax.reload(null, false);
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Removed!',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                    } else {
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message
+                        });
+
+                    }
+                },
+                error: function () {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong.'
+                    });
+
+                }
+            });
+
+        }
+
+    });
+
+});
 
 $('#expenseForm').submit(function(e){
 

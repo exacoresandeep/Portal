@@ -41,7 +41,10 @@ class CalendarController extends Controller
 
                         $q->where('project_manager_id', auth()->id())
                         ->orWhere('team_head_id', auth()->id())
-                        ->orWhereJsonContains('team_members', auth()->id());
+                        ->orWhereRaw(
+                            "JSON_CONTAINS_PATH(team_members, 'one', ?)",
+                            ['$."' . auth()->id() . '"']
+                        );
 
                     });
 
