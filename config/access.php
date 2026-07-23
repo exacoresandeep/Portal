@@ -1,7 +1,6 @@
 <?php
 
 $commonMenus = [
-
     'dashboard',
     'employee-management',
     'payslip',
@@ -10,22 +9,17 @@ $commonMenus = [
     'attendance-tracking',
     'attendance-regularization',
     'attendance-summary',
-
     'leave-management',
     'leave-request',
     'wfh-request',
-
-     'expense-management',
-
+    'expense-management',
     'project-management',
-    // 'all-projects',
     'tasks-allocation',
     'my-tasks',
     
 
 ];
 $adminMenus = array_merge($commonMenus, [
-
     'dashboard',
     'employee-management',
     'employee-onboard',

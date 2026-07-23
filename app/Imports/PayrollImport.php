@@ -33,9 +33,10 @@ class PayrollImport implements
             if (empty($row['employee_id'])) {
                 continue;
             }
+           
 
-            $employeeId = Employee::where("emp_id",trim($row['employee_id']))->value(id);
-            
+            $employee = Employee::where("emp_id",$row['employee_id'])->first();
+            $employeeId=$employee->id;
             $data = [
 
                 'employee_name'          => $row['employee_name'] ?? null,

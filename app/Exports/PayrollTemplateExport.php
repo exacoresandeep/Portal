@@ -31,6 +31,11 @@ class PayrollTemplateExport implements FromCollection, WithHeadings
                     '', // Gender
                     '', // Net Payment
                     '', // Basic
+                    '', //House Rent Allowance',
+                    '', //Conveyance Allowance',
+                    '', //Medical Allowance',
+                    '', //Telephone Allowance',
+                    '', //CEA',
                     '', // Other Allowance
                     '', // Performance Bonus
                     '', // Project Allowance
