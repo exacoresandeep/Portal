@@ -799,7 +799,7 @@ $(document).on('click', '.viewBtn', function () {
 
 });
 $(document).on('click', '#updateTaskBtn', function () {
-
+console.log('Button clicked');
     $.ajax({
 
         url: "{{ route('tasks.update') }}",
