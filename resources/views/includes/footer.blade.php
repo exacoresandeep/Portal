@@ -1587,8 +1587,8 @@ $(function () {
     // Don't show again today
     let today = new Date().toISOString().slice(0,10);
 
-    if(localStorage.getItem('celebration') == today)
-        return;
+    // if(localStorage.getItem('celebration') == today)
+    //     return;
 
     $.get('/employee/celebration', function(res){
 
