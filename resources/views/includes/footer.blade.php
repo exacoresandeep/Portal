@@ -1,4 +1,37 @@
- <footer class="app-footer">
+ <div class="modal fade" id="celebrationModal" tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content text-center border-0 shadow-lg">
+
+            <div class="modal-body p-5">
+
+                <img id="empPhoto"
+                     class="rounded-circle mb-3"
+                     width="130"
+                     height="130">
+
+                <h2 id="modalTitle"></h2>
+
+                <h5 id="empName"></h5>
+
+                <p id="modalMessage"></p>
+
+                <h4 id="yearsText"></h4>
+
+                <button class="btn btn-primary mt-3"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<footer class="app-footer">
         <!--begin::To the end-->
         <div class="float-end d-none d-sm-inline">2026</div>
         <!--end::To the end-->
@@ -1549,8 +1582,93 @@ function loadEmployeeProjects() {
 
 }
 
+$(function () {
+
+    // Don't show again today
+    let today = new Date().toISOString().slice(0,10);
+
+    if(localStorage.getItem('celebration') == today)
+        return;
+
+    $.get('/employee/celebration', function(res){
+
+        if(!res.status)
+            return;
+
+        $("#empPhoto").attr("src",res.photo);
+        $("#modalTitle").html(res.title);
+        $("#empName").html(res.name);
+        $("#modalMessage").html(res.message);
+
+        if(res.type=="anniversary")
+        {
+            $("#yearsText").html("🏆 "+res.years+" Years");
+        }
+        else
+        {
+            $("#yearsText").html("");
+        }
+
+        $("#celebrationModal").modal('show');
+
+        
+
+        localStorage.setItem('celebration',today);
+
+    });
+
+});
+$('#celebrationModal').on('shown.bs.modal', function () {
+
+    const modal = document.querySelector("#celebrationModal .modal-content");
+
+    party.confetti(modal, {
+        count: party.variation.range(150, 250),
+        spread: 120,
+        speed: party.variation.range(500, 900),
+        size: party.variation.range(0.8, 1.5),
+    });
+
+});
+
+function celebrationBlast(){
+
+    // Left cannon
+    confetti({
+        particleCount:180,
+        angle:60,
+        spread:90,
+        origin:{x:0,y:0.8}
+    });
+
+    // Right cannon
+    confetti({
+        particleCount:180,
+        angle:120,
+        spread:90,
+        origin:{x:1,y:0.8}
+    });
+
+    // Top rain
+    setTimeout(function(){
+
+        confetti({
+            particleCount:250,
+            spread:360,
+            origin:{x:0.5,y:0},
+            gravity:0.8,
+            scalar:1.4
+        });
+
+    },400);
+
+}
+$('#celebrationModal').on('shown.bs.modal', function () {
+    celebrationBlast();
+});
 
 </script>
+
     <!--end::Script-->
   </body>
   <!--end::Body-->

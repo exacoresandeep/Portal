@@ -264,6 +264,9 @@ Route::prefix('payslip')->name('payslip.')->group(function () {
     '/template/download/{id}',[PayslipController::class,'downloadTemplate'])->name('template.download');
     Route::get('/summary',[PayslipController::class,'summary'])->name('summary');
 });
+// routes/web.php
+
+Route::get('/employee/celebration', [EmployeeController::class, 'employeeCelebration']);
 
 Route::prefix('tasks')->group(function(){
     Route::get('/utilization',[TaskController::class,'utilization'])->name('tasks.utilization.index');

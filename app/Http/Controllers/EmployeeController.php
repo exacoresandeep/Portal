@@ -1129,5 +1129,57 @@ class EmployeeController extends Controller
 
         return response()->json($data);
     }
+
+
+    public function employeeCelebration()
+    {
+        
+        $employee = Auth::user();
+
+        $today = Carbon::today();
+
+        $response = [
+            'status' => false,
+            'type' => '',
+            'title' => '',
+            'message' => '',
+            'photo' => asset('storage/employees/photos/'.$employee->photo),
+            'name' => $employee->emp_name,
+            'years' => 0
+        ];
+
+        // Birthday
+        if (!empty($employee->dob)) {
+
+            if (Carbon::parse($employee->dob)->format('m-d') == $today->format('m-d')) {
+
+                $response['status'] = true;
+                $response['type'] = 'birthday';
+                $response['title'] = '🎂 Happy Birthday!';
+                $response['message'] = 'Wishing you happiness, good health and a wonderful year ahead.';
+
+                return response()->json($response);
+            }
+        }
+
+        // Work Anniversary
+        if (!empty($employee->joining_date)) {
+
+            if (Carbon::parse($employee->joining_date)->format('m-d') == $today->format('m-d')) {
+
+                $years = Carbon::parse($employee->joining_date)->diffInYears($today);
+
+                $response['status'] = true;
+                $response['type'] = 'anniversary';
+                $response['years'] = $years;
+                $response['title'] = '🎉 Happy Work Anniversary!';
+                $response['message'] = "Congratulations on completing {$years} years with our organization.";
+
+                return response()->json($response);
+            }
+        }
+
+        return response()->json($response);
+    }
     
 }
