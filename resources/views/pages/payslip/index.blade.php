@@ -1210,9 +1210,14 @@ function loadSummary(){
 
                 .html('₹ '+numberFormat(res.total_deduction));
 
-            $('#workingDays')
-
-                .html(res.project_days_available+'/'+res.days_in_month);
+            $('#workingDays').html(
+                (res.project_days_available != null
+                    ? parseFloat(Number(res.project_days_available).toFixed(2))
+                    : '-') + '/' +
+                (res.days_in_month != null
+                    ? parseFloat(Number(res.days_in_month).toFixed(2))
+                    : '-')
+            );
 
             $('#netSalary')
 
@@ -1332,10 +1337,11 @@ $(document).on('click','.viewPayslip',function(){
                 p.days_in_month
             );
 
-            $('#mPresentDays').text(
-                p.project_days_available
+           $('#mPresentDays').text(
+                p.project_days_available != null
+                    ? parseFloat(Number(p.project_days_available).toFixed(2)).toString()
+                    : '-'
             );
-
             $('#mWFH').text(
                 p.wfh ?? '-'
             );

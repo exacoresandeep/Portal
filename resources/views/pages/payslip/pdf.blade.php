@@ -239,7 +239,11 @@
                     </tr>
                     <tr>
                         <td>DAYS PRESENT</td>
-                        <td>{{ $payroll->project_days_available ?? '-' }}</td>
+                        <td>
+                            {{ isset($payroll->project_days_available)
+                                ? rtrim(rtrim(number_format((float) $payroll->project_days_available, 2, '.', ''), '0'), '.')
+                                : '-' }}
+                        </td>
                     </tr>
                     <tr>
                         <td>WFH DAYS</td>
