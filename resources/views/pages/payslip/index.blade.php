@@ -1212,7 +1212,7 @@ function loadSummary(){
 
             $('#workingDays')
 
-                .html(res.present_days+'/'+res.days_in_month);
+                .html(res.project_days_available+'/'+res.days_in_month);
 
             $('#netSalary')
 
@@ -1333,7 +1333,7 @@ $(document).on('click','.viewPayslip',function(){
             );
 
             $('#mPresentDays').text(
-                p.present_days
+                p.project_days_available
             );
 
             $('#mWFH').text(

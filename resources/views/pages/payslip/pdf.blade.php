@@ -239,7 +239,7 @@
                     </tr>
                     <tr>
                         <td>DAYS PRESENT</td>
-                        <td>{{ $payroll->present_days ?? '-' }}</td>
+                        <td>{{ $payroll->project_days_available ?? '-' }}</td>
                     </tr>
                     <tr>
                         <td>WFH DAYS</td>
