@@ -46,7 +46,6 @@ class PayslipController extends Controller
     public function list(Request $request)
     {
         $employeeId = Auth::user()->id;
-        // dd($employeeId);
         $query = Payroll::where('employee_id', $employeeId)
 
             ->when($request->year, function ($q) use ($request) {
@@ -82,7 +81,7 @@ class PayslipController extends Controller
 
             })
 
-            ->addColumn('deduction', function ($row) {
+            ->addColumn('total_deduction', function ($row) {
 
                 return number_format(
                     $row->total_deduction,

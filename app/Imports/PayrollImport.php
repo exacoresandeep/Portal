@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
-
+use Illuminate\Support\Facades\Log;
 class PayrollImport implements
     ToCollection,
     WithHeadingRow,
@@ -28,7 +28,14 @@ class PayrollImport implements
 
     public function collection(Collection $rows)
     {
-        foreach ($rows as $row) {
+        foreach ($rows as $index => $row) {
+             Log::info('Payroll Excel Import', [
+            'collection_index' => $index,
+            'srno' => $row['srno'] ?? null,
+            'name' => $row['name'] ?? null,
+            'net_payment' => $row['net_payment'] ?? null,
+            'net_salary' => $row['net_salary'] ?? null,
+        ]);
 
             /*
             |--------------------------------------------------------------------------
@@ -243,3 +250,4 @@ class PayrollImport implements
             : 0;
     }
 }
+
