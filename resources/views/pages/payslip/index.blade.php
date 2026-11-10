@@ -1137,7 +1137,7 @@ var payrollTable = $('#payrollTable').DataTable({
             data: 'gross'
         },
         {
-            data: 'deduction'
+            data: 'total_deduction'
         },
         {
             data: 'net'
